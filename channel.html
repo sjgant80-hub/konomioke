@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>好みオケ KONOMIOKE — Channel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root {
   --bg: #06060c;
@@ -14,6 +15,8 @@
   --text-dim: #6a6a80;
   --gold: #d4af37;
   --gold-glow: rgba(212, 175, 55, 0.3);
+  --r0: #ff2244; --r1: #ff8800; --r2: #ffcc00; --r3: #00ff88;
+  --r4: #00ccff; --r5: #4466ff; --r6: #aa00ff;
   --font: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
 }
 
@@ -28,239 +31,246 @@ html, body {
   overflow-y: auto;
 }
 
-header {
-  text-align: center;
-  padding: 2rem 1rem 1rem;
-}
+/* ── BROWSE VIEW ─────────────────────────────────────── */
 
+#browse-view { transition: opacity 0.5s; }
+#browse-view.hidden { opacity: 0; pointer-events: none; position: absolute; }
+
+header { text-align: center; padding: 2rem 1rem 1rem; }
 header h1 {
-  font-size: 1.6rem;
-  color: var(--gold);
-  text-shadow: 0 0 20px var(--gold-glow);
-  letter-spacing: 0.15em;
+  font-size: 1.6rem; color: var(--gold);
+  text-shadow: 0 0 20px var(--gold-glow); letter-spacing: 0.15em;
 }
+header p { color: var(--text-dim); margin-top: 0.4rem; font-size: 0.85rem; }
 
-header p {
-  color: var(--text-dim);
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-}
-
-nav {
-  text-align: center;
-  padding: 1rem;
-}
-
+nav { text-align: center; padding: 1rem; }
 nav a {
-  color: var(--gold);
-  text-decoration: none;
-  font-size: 0.85rem;
-  border: 1px solid var(--border);
-  padding: 0.4rem 1.2rem;
-  border-radius: 4px;
-  transition: background 0.2s;
+  color: var(--gold); text-decoration: none; font-size: 0.85rem;
+  border: 1px solid var(--border); padding: 0.4rem 1.2rem;
+  border-radius: 4px; transition: background 0.2s;
 }
-
-nav a:hover {
-  background: rgba(212, 175, 55, 0.1);
-}
+nav a:hover { background: rgba(212, 175, 55, 0.1); }
 
 .status-bar {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.6rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75rem;
-  color: var(--text-dim);
+  max-width: 1200px; margin: 0 auto; padding: 0.6rem 1rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.75rem; color: var(--text-dim);
 }
+.status-bar .count { color: var(--gold); font-weight: bold; }
 
-.status-bar .count {
-  color: var(--gold);
-  font-weight: bold;
-}
-
-.channel-embed {
-  max-width: 1200px;
-  margin: 0.5rem auto 1.5rem;
-  padding: 0 1rem;
-}
-
-.channel-embed h2 {
-  font-size: 1rem;
-  color: var(--text);
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
-}
+.channel-embed { max-width: 1200px; margin: 0.5rem auto 1.5rem; padding: 0 1rem; }
 
 .video-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.2rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.2rem;
 }
 
 .video-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: border-color 0.2s;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
 }
-
-.video-card:hover {
-  border-color: var(--gold);
-}
+.video-card:hover { border-color: var(--gold); transform: translateY(-2px); }
 
 .video-card .thumb-wrap {
-  position: relative;
-  cursor: pointer;
-  aspect-ratio: 16 / 9;
-  background: #000;
+  position: relative; aspect-ratio: 16 / 9; background: #000;
 }
-
 .video-card .thumb-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
-
 .video-card .thumb-wrap .play-btn {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.35);
-  transition: background 0.2s;
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.35); transition: background 0.2s;
 }
-
-.video-card .thumb-wrap:hover .play-btn {
-  background: rgba(0,0,0,0.15);
-}
-
-.video-card .thumb-wrap .play-btn svg {
-  width: 54px;
-  height: 54px;
-  opacity: 0.85;
-}
-
-.video-card iframe {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: block;
-  border: none;
-}
+.video-card:hover .thumb-wrap .play-btn { background: rgba(0,0,0,0.15); }
+.video-card .thumb-wrap .play-btn svg { width: 54px; height: 54px; opacity: 0.85; }
 
 .video-card .caption {
-  padding: 0.6rem 0.8rem;
-  font-size: 0.8rem;
-  color: var(--text);
-  line-height: 1.3;
+  padding: 0.6rem 0.8rem; font-size: 0.8rem; color: var(--text); line-height: 1.3;
 }
-
 .video-card .meta {
-  padding: 0 0.8rem 0.6rem;
-  font-size: 0.65rem;
-  color: var(--text-dim);
-}
-
-.channel-link {
-  text-align: center;
-  margin: 2rem 0;
-}
-
-.channel-link a {
-  display: inline-block;
-  color: var(--bg);
-  background: var(--gold);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: bold;
-  padding: 0.7rem 2rem;
-  border-radius: 6px;
-  letter-spacing: 0.05em;
-  transition: opacity 0.2s;
-}
-
-.channel-link a:hover {
-  opacity: 0.85;
+  padding: 0 0.8rem 0.6rem; font-size: 0.65rem; color: var(--text-dim);
 }
 
 .loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-dim);
-  font-size: 0.85rem;
+  text-align: center; padding: 3rem; color: var(--text-dim); font-size: 0.85rem;
 }
-
 .loading .spinner {
-  display: inline-block;
-  width: 24px; height: 24px;
-  border: 2px solid var(--border);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 0.8rem;
+  display: inline-block; width: 24px; height: 24px;
+  border: 2px solid var(--border); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 0.8rem;
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.error-msg {
-  text-align: center;
-  padding: 2rem;
-  color: #ff6666;
-  font-size: 0.85rem;
+.channel-link { text-align: center; margin: 2rem 0; }
+.channel-link a {
+  display: inline-block; color: var(--bg); background: var(--gold);
+  text-decoration: none; font-size: 0.9rem; font-weight: bold;
+  padding: 0.7rem 2rem; border-radius: 6px; letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+}
+.channel-link a:hover { opacity: 0.85; }
+
+/* ── ORB PLAYER VIEW ─────────────────────────────────── */
+
+#orb-view {
+  position: fixed; inset: 0; z-index: 100;
+  display: none; flex-direction: column;
+  background: var(--bg);
+}
+#orb-view.active { display: flex; }
+
+#orb-canvas { position: absolute; inset: 0; z-index: 0; }
+
+.orb-hud { position: relative; z-index: 1; pointer-events: none; }
+.orb-hud > * { pointer-events: auto; }
+
+.orb-top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.5rem;
+}
+.orb-top-bar .back-btn {
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--gold); padding: 0.4rem 1rem; border-radius: 4px;
+  cursor: pointer; font-family: var(--font); font-size: 0.8rem;
+}
+.orb-top-bar .back-btn:hover { background: rgba(212,175,55,0.1); }
+.orb-top-bar .track-title {
+  color: var(--gold); font-size: 0.9rem; text-align: center; flex: 1;
+  text-shadow: 0 0 12px var(--gold-glow);
 }
 
+.orb-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 1;
+  pointer-events: auto;
+}
+
+.ring-bars {
+  display: flex; justify-content: center; gap: 6px;
+  padding: 0 1.5rem 0.5rem;
+}
+.ring-bar {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ring-bar .bar-track {
+  width: 18px; height: 80px; background: rgba(255,255,255,0.04);
+  border-radius: 3px; position: relative; overflow: hidden;
+}
+.ring-bar .bar-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  border-radius: 3px; transition: height 0.08s;
+}
+.ring-bar .bar-label {
+  font-size: 0.55rem; color: var(--text-dim); text-transform: uppercase;
+}
+.ring-bar .ring-name {
+  font-size: 0.45rem; color: var(--text-dim); opacity: 0.7;
+}
+
+.metrics-row {
+  display: flex; justify-content: center; gap: 1.5rem;
+  padding: 0.6rem; font-size: 0.7rem;
+}
+.metric { text-align: center; }
+.metric .val { color: var(--gold); font-size: 1rem; font-weight: bold; }
+.metric .lbl { color: var(--text-dim); font-size: 0.6rem; margin-top: 2px; }
+
+.video-pip {
+  position: absolute; bottom: 160px; right: 1.5rem; z-index: 2;
+  width: 280px; aspect-ratio: 16/9; border-radius: 8px;
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6); background: #000;
+}
+.video-pip iframe { width: 100%; height: 100%; border: none; }
+
+.freq-readout {
+  text-align: center; padding: 0.3rem;
+  font-size: 0.65rem; color: var(--text-dim);
+}
+.freq-readout span { color: var(--gold); }
+
 footer {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: var(--text-dim);
-  font-size: 0.7rem;
-  border-top: 1px solid var(--border);
-  margin-top: 2rem;
+  text-align: center; padding: 2rem 1rem; color: var(--text-dim);
+  font-size: 0.7rem; border-top: 1px solid var(--border); margin-top: 2rem;
 }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>好みオケ KONOMIOKE</h1>
-  <p>Thomas The Solar Crypto Engine — All Videos</p>
-</header>
+<!-- ═══════ BROWSE VIEW ═══════ -->
+<div id="browse-view">
+  <header>
+    <h1>好みオケ KONOMIOKE</h1>
+    <p>Thomas The Solar Crypto Engine — All Videos</p>
+  </header>
 
-<nav>
-  <a href="index.html">Back to Karaoke</a>
-</nav>
+  <nav>
+    <a href="index.html">Back to Karaoke</a>
+  </nav>
 
-<div class="status-bar">
-  <span id="status-text">Searching for videos...</span>
-  <span><span class="count" id="video-count">0</span> videos loaded</span>
-</div>
-
-<div class="channel-embed">
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <div>Fetching all videos from @ThomasTheSolarCryptoEngine...</div>
+  <div class="status-bar">
+    <span id="status-text">Searching for videos...</span>
+    <span><span class="count" id="video-count">0</span> videos loaded</span>
   </div>
-  <div id="error" class="error-msg" style="display:none"></div>
-  <div class="video-grid" id="video-grid"></div>
+
+  <div class="channel-embed">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div>Fetching all videos from @ThomasTheSolarCryptoEngine...</div>
+    </div>
+    <div class="video-grid" id="video-grid"></div>
+  </div>
+
+  <div class="channel-link">
+    <a href="https://www.youtube.com/@ThomasTheSolarCryptoEngine" target="_blank" rel="noopener">
+      Visit Full Channel on YouTube
+    </a>
+  </div>
+
+  <footer>好みオケ KONOMIOKE — P2P Therapeutic Karaoke</footer>
 </div>
 
-<div class="channel-link">
-  <a href="https://www.youtube.com/@ThomasTheSolarCryptoEngine" target="_blank" rel="noopener">
-    Visit Full Channel on YouTube
-  </a>
-</div>
+<!-- ═══════ ORB PLAYER VIEW ═══════ -->
+<div id="orb-view">
+  <canvas id="orb-canvas"></canvas>
 
-<footer>
-  好みオケ KONOMIOKE — P2P Therapeutic Karaoke
-</footer>
+  <div class="orb-hud">
+    <div class="orb-top-bar">
+      <button class="back-btn" id="back-btn">&#x2190; Back</button>
+      <div class="track-title" id="orb-title">—</div>
+      <div style="width:80px"></div>
+    </div>
+  </div>
+
+  <div class="video-pip" id="video-pip"></div>
+
+  <div class="orb-bottom">
+    <div class="freq-readout" id="freq-readout">
+      F0: <span>—</span> Hz &nbsp; Note: <span>—</span>
+    </div>
+    <div class="ring-bars" id="ring-bars">
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r0)"></div></div><div class="bar-label">R0</div><div class="ring-name">diaphragm</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r1)"></div></div><div class="bar-label">R1</div><div class="ring-name">larynx</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r2)"></div></div><div class="bar-label">R2</div><div class="ring-name">breath</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r3)"></div></div><div class="bar-label">R3</div><div class="ring-name">thoracic</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r4)"></div></div><div class="bar-label">R4</div><div class="ring-name">nasal</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r5)"></div></div><div class="bar-label">R5</div><div class="ring-name">oral</div></div>
+      <div class="ring-bar"><div class="bar-track"><div class="bar-fill" style="background:var(--r6)"></div></div><div class="bar-label">R6</div><div class="ring-name">silence</div></div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric"><div class="val" id="m-vagal">0.00</div><div class="lbl">Vagal Tone</div></div>
+      <div class="metric"><div class="val" id="m-coherence">0.00</div><div class="lbl">Coherence</div></div>
+      <div class="metric"><div class="val" id="m-mode">silent</div><div class="lbl">Mode</div></div>
+      <div class="metric"><div class="val" id="m-psi">0.00</div><div class="lbl">Psi</div></div>
+    </div>
+  </div>
+</div>
 
 <script>
+/* ═══════════════════════════════════════════════════════════
+   KONOMIOKE CHANNEL — Browse + Orb Player
+   ═══════════════════════════════════════════════════════════ */
+
 const CHANNEL_HANDLE = 'ThomasTheSolarCryptoEngine';
 const CHANNEL_URL = `https://www.youtube.com/@${CHANNEL_HANDLE}`;
 const PROXIES = [
@@ -268,35 +278,524 @@ const PROXIES = [
   url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
 ];
 
+// ─────────────────────────────────────────────────────────
+// DOM refs
+// ─────────────────────────────────────────────────────────
+
+const browseView = document.getElementById('browse-view');
+const orbView = document.getElementById('orb-view');
 const grid = document.getElementById('video-grid');
 const loading = document.getElementById('loading');
-const errorEl = document.getElementById('error');
 const statusText = document.getElementById('status-text');
 const videoCountEl = document.getElementById('video-count');
+const orbTitle = document.getElementById('orb-title');
+const videoPip = document.getElementById('video-pip');
+const backBtn = document.getElementById('back-btn');
+const ringBars = document.querySelectorAll('#ring-bars .bar-fill');
+const freqReadout = document.getElementById('freq-readout');
 
 const seenIds = new Set();
-const allVideos = []; // { id, title, published }
+const allVideos = [];
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+// ─────────────────────────────────────────────────────────
+// AUDIO FABRIC — 7-ring frequency analysis engine
+// Measures: amplitude, pitch, fricatives, thoracic, nasal,
+// oral formants, and silence — drives the orb + drones
+// ─────────────────────────────────────────────────────────
+
+const fabric = {
+  ctx: null,
+  analyser: null,
+  fftSize: 2048,
+  rings: new Float32Array(7),
+  smoothRings: new Float32Array(7),
+  compositeRings: new Float32Array(7),
+  coherence: 0,
+  vagalTone: 0,
+  mode: 'silent',
+  exhaleRatio: 0,
+  psiLevel: 0,
+  _freqData: null,
+  _timeData: null,
+  _silenceFrames: 0,
+  _sustainedFrames: 0,
+  _breathHistory: [],
+  _PHI: (1 + Math.sqrt(5)) / 2,
+  droneOscs: [],
+  droneGains: [],
+  masterDroneGain: null,
+
+  boot() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
+    this.analyser = this.ctx.createAnalyser();
+    this.analyser.fftSize = this.fftSize;
+    this.analyser.smoothingTimeConstant = 0.8;
+    this._freqData = new Float32Array(this.analyser.frequencyBinCount);
+    this._timeData = new Float32Array(this.analyser.fftSize);
+
+    // Drones: primes × 55Hz, responding to each ring
+    const primes = [2, 3, 5, 7, 11, 13, 17];
+    this.masterDroneGain = this.ctx.createGain();
+    this.masterDroneGain.gain.value = 0.03;
+    this.masterDroneGain.connect(this.ctx.destination);
+
+    for (let i = 0; i < 7; i++) {
+      const osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = primes[i] * 55;
+      const gain = this.ctx.createGain();
+      gain.gain.value = 0;
+      osc.connect(gain);
+      gain.connect(this.masterDroneGain);
+      osc.start();
+      this.droneOscs.push(osc);
+      this.droneGains.push(gain);
+    }
+  },
+
+  connectSource(sourceNode) {
+    sourceNode.connect(this.analyser);
+  },
+
+  analyze() {
+    if (!this.analyser) return;
+    this.analyser.getFloatFrequencyData(this._freqData);
+    this.analyser.getFloatTimeDomainData(this._timeData);
+
+    // R0: Diaphragm — amplitude envelope
+    this.rings[0] = this._calcAmplitude(this._timeData);
+    // R1: Larynx — F0 pitch tracking
+    const f0 = this._detectPitch(this._timeData);
+    this.rings[1] = f0 > 0 ? Math.min(1, f0 / 800) : 0;
+    // R2: Breath gate — fricative / high-freq energy
+    this.rings[2] = this._calcFricativeEnergy(this._freqData);
+    // R3: Thoracic — low formant (100-400Hz)
+    this.rings[3] = this._calcBandEnergy(this._freqData, 100, 400);
+    // R4: Nasopharyngeal — mid formant (800-2500Hz)
+    this.rings[4] = this._calcBandEnergy(this._freqData, 800, 2500);
+    // R5: Oral — high formant (2500-4000Hz)
+    this.rings[5] = this._calcBandEnergy(this._freqData, 2500, 4000);
+    // R6: Observer — silence tracking
+    this.rings[6] = this._calcSilence(this.rings[0]);
+
+    // Smooth
+    for (let i = 0; i < 7; i++) {
+      this.smoothRings[i] += (this.rings[i] - this.smoothRings[i]) * 0.3;
+      this.compositeRings[i] = this.smoothRings[i];
+    }
+
+    // Drive drones from ring activity
+    for (let i = 0; i < 7; i++) {
+      this.droneGains[i].gain.setTargetAtTime(
+        this.smoothRings[i] * 0.5, this.ctx.currentTime, 0.05
+      );
+    }
+
+    this._calcMetrics();
+  },
+
+  getF0() { return this._detectPitch(this._timeData); },
+
+  _calcAmplitude(td) {
+    let sum = 0;
+    for (let i = 0; i < td.length; i++) sum += td[i] * td[i];
+    return Math.min(1, Math.sqrt(sum / td.length) * 4);
+  },
+
+  _detectPitch(td) {
+    const SIZE = td.length, MAX = Math.floor(SIZE / 2);
+    let bestOff = -1, bestCorr = 0, found = false;
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) rms += td[i] * td[i];
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.01) return -1;
+    for (let off = 40; off < MAX; off++) {
+      let corr = 0;
+      for (let i = 0; i < MAX; i++) corr += Math.abs(td[i] - td[i + off]);
+      corr = 1 - (corr / MAX);
+      if (corr > 0.9 && corr > bestCorr) { bestCorr = corr; bestOff = off; found = true; }
+      else if (found && corr < bestCorr * 0.8) break;
+    }
+    return (bestCorr > 0.01 && bestOff > 0) ? this.ctx.sampleRate / bestOff : -1;
+  },
+
+  _calcFricativeEnergy(fd) {
+    const binSz = this.ctx.sampleRate / this.fftSize;
+    const start = Math.floor(4000 / binSz);
+    let sum = 0, cnt = 0;
+    for (let i = start; i < fd.length; i++) { sum += Math.pow(10, fd[i] / 20); cnt++; }
+    return cnt > 0 ? Math.min(1, (sum / cnt) * 10) : 0;
+  },
+
+  _calcBandEnergy(fd, loHz, hiHz) {
+    const binSz = this.ctx.sampleRate / this.fftSize;
+    const lo = Math.floor(loHz / binSz), hi = Math.min(Math.floor(hiHz / binSz), fd.length - 1);
+    let sum = 0, cnt = 0;
+    for (let i = lo; i <= hi; i++) { sum += Math.pow(10, fd[i] / 20); cnt++; }
+    return cnt > 0 ? Math.min(1, (sum / cnt) * 8) : 0;
+  },
+
+  _calcSilence(amp) {
+    if (amp < 0.02) this._silenceFrames = Math.min(120, this._silenceFrames + 1);
+    else this._silenceFrames = Math.max(0, this._silenceFrames - 2);
+    return Math.min(1, this._silenceFrames / 60);
+  },
+
+  _calcMetrics() {
+    const w = [0.2, 0.25, 0.1, 0.15, 0.1, 0.1, 0.1];
+    this.vagalTone = 0;
+    for (let i = 0; i < 7; i++) this.vagalTone += this.compositeRings[i] * w[i];
+
+    if (this.compositeRings[6] > 0.5) {
+      this.mode = 'silent';
+    } else if (this.compositeRings[0] > 0.3 && this.compositeRings[1] > 0.2) {
+      this._sustainedFrames++;
+      this.mode = this._sustainedFrames > 30 ? 'sustained' : 'pulsed';
+    } else {
+      this._sustainedFrames = Math.max(0, this._sustainedFrames - 1);
+      this.mode = 'pulsed';
+    }
+
+    let phiSum = 0;
+    for (let i = 0; i < 6; i++) {
+      const a = this.compositeRings[i], b = this.compositeRings[i + 1];
+      if (a > 0.01 && b > 0.01) {
+        const ratio = Math.max(a, b) / Math.min(a, b);
+        phiSum += 1 - Math.abs(ratio - this._PHI) / this._PHI;
+      }
+    }
+    this.coherence = Math.max(0, Math.min(1, phiSum / 6));
+
+    this._breathHistory.push(this.compositeRings[0]);
+    if (this._breathHistory.length > 120) this._breathHistory.shift();
+    if (this._breathHistory.length > 20) {
+      let ef = 0, tot = 0;
+      for (let i = 1; i < this._breathHistory.length; i++) {
+        if (this._breathHistory[i] < this._breathHistory[i - 1]) ef++;
+        tot++;
+      }
+      this.exhaleRatio = tot > 0 ? ef / tot : 0;
+    }
+
+    this.psiLevel = this.vagalTone * this.coherence;
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// VIZ ENGINE — Three.js orb + 7 toroidal particle rings
+// ─────────────────────────────────────────────────────────
+
+const viz = {
+  scene: null, camera: null, renderer: null, canvas: null,
+  orbMesh: null, _orbMaterial: null,
+  ringParticles: [], fieldLines: [],
+  _time: 0, _ringColors: null, _goldColor: null,
+
+  boot() {
+    this.canvas = document.getElementById('orb-canvas');
+    if (!this.canvas || typeof THREE === 'undefined') return;
+
+    this._ringColors = [
+      new THREE.Color(0xff2244), new THREE.Color(0xff8800), new THREE.Color(0xffcc00),
+      new THREE.Color(0x00ff88), new THREE.Color(0x00ccff), new THREE.Color(0x4466ff),
+      new THREE.Color(0xaa00ff)
+    ];
+    this._goldColor = new THREE.Color(0xd4af37);
+
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x06060c);
+    this.scene.fog = new THREE.FogExp2(0x06060c, 0.015);
+
+    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera.position.set(0, 0, 50);
+
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    this._buildOrb();
+    this._buildRingParticles();
+    this._buildFieldLines();
+
+    this.scene.add(new THREE.AmbientLight(0x222244, 0.5));
+    this.scene.add(new THREE.PointLight(0xd4af37, 0.5, 100));
+
+    window.addEventListener('resize', () => {
+      if (!this.camera || !this.renderer) return;
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  },
+
+  _buildOrb() {
+    const geo = new THREE.SphereGeometry(6, 64, 64);
+    this._orbMaterial = new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false,
+      uniforms: {
+        time: { value: 0 }, vagalTone: { value: 0 }, coherence: { value: 0 },
+        ringValues: { value: [0,0,0,0,0,0,0] },
+        ringColors: { value: this._ringColors.map(c => c.clone()) }
+      },
+      vertexShader: `
+        varying vec3 vNormal; varying vec3 vPosition; varying vec2 vUv;
+        uniform float time; uniform float vagalTone;
+        void main() {
+          vNormal = normalize(normalMatrix * normal); vPosition = position; vUv = uv;
+          float breath = sin(time * 1.5 * (0.5 + vagalTone)) * 0.15 + 1.0;
+          vec3 pos = position * breath;
+          float noise = sin(position.x * 3.0 + time) * sin(position.y * 3.0 + time * 0.7) * 0.2 * vagalTone;
+          pos += normal * noise;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time; uniform float vagalTone; uniform float coherence;
+        uniform float ringValues[7]; uniform vec3 ringColors[7];
+        varying vec3 vNormal; varying vec3 vPosition; varying vec2 vUv;
+        void main() {
+          float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0,0,1))), 2.5);
+          vec3 color = vec3(0.02, 0.02, 0.04);
+          for (int i = 0; i < 7; i++) color += ringColors[i] * ringValues[i] * 0.15;
+          vec3 gold = vec3(0.83, 0.69, 0.22);
+          color = mix(color, gold, coherence * coherence * 0.6);
+          float pulse = 0.6 + 0.4 * sin(time * 2.0 * (0.3 + vagalTone));
+          float pattern = sin(vUv.x * 20.0 + time * 2.0) * sin(vUv.y * 20.0 + time * 1.5);
+          color += vec3(0.03) * pattern * vagalTone;
+          float alpha = fresnel * pulse * 0.5 + 0.05;
+          gl_FragColor = vec4(color * pulse * 1.5, alpha);
+        }
+      `
+    });
+    this.orbMesh = new THREE.Mesh(geo, this._orbMaterial);
+    this.scene.add(this.orbMesh);
+  },
+
+  _buildRingParticles() {
+    const PER = 1400;
+    for (let r = 0; r < 7; r++) {
+      const radius = 8 + r * 2.5, tube = 1.0 + r * 0.3;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(PER * 3);
+      const cols = new Float32Array(PER * 3);
+      const phases = new Float32Array(PER);
+      const c = this._ringColors[r];
+
+      for (let i = 0; i < PER; i++) {
+        const u = (i / PER) * Math.PI * 2;
+        const v = Math.random() * Math.PI * 2;
+        pos[i*3]   = (radius + tube * Math.cos(v)) * Math.cos(u);
+        pos[i*3+1] = (radius + tube * Math.cos(v)) * Math.sin(u);
+        pos[i*3+2] = tube * Math.sin(v);
+        cols[i*3] = c.r; cols[i*3+1] = c.g; cols[i*3+2] = c.b;
+        phases[i] = Math.random() * Math.PI * 2;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+
+      const mat = new THREE.PointsMaterial({
+        size: 0.2, vertexColors: true, transparent: true, opacity: 0.6,
+        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+      });
+      const pts = new THREE.Points(geo, mat);
+      this.scene.add(pts);
+      this.ringParticles.push({ points: pts, geometry: geo, origPos: pos.slice(), phases, count: PER });
+    }
+  },
+
+  _buildFieldLines() {
+    for (let i = 0; i < 12; i++) {
+      const pts = [], angle = (i / 12) * Math.PI * 2;
+      for (let t = 0; t <= 1; t += 0.05) {
+        const r = 8 + t * 17.5, y = Math.sin(t * Math.PI) * 8;
+        pts.push(new THREE.Vector3(r * Math.cos(angle + t*0.5), y, r * Math.sin(angle + t*0.5)));
+      }
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = new THREE.LineBasicMaterial({
+        color: 0x1a1a2e, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending
+      });
+      const line = new THREE.Line(geo, mat);
+      this.scene.add(line);
+      this.fieldLines.push({ line, material: mat });
+    }
+  },
+
+  update(dt) {
+    if (!this.renderer) return;
+    this._time += dt;
+    const comp = fabric.compositeRings;
+    const coh = fabric.coherence;
+    const vt = fabric.vagalTone;
+
+    // Orb shader
+    if (this._orbMaterial) {
+      this._orbMaterial.uniforms.time.value = this._time;
+      this._orbMaterial.uniforms.vagalTone.value = vt;
+      this._orbMaterial.uniforms.coherence.value = coh;
+      for (let i = 0; i < 7; i++) this._orbMaterial.uniforms.ringValues.value[i] = comp[i];
+    }
+
+    // Ring particles
+    for (let r = 0; r < this.ringParticles.length; r++) {
+      const rp = this.ringParticles[r];
+      const act = comp[r];
+      const pa = rp.geometry.attributes.position;
+      for (let i = 0; i < rp.count; i++) {
+        const ph = rp.phases[i], wobble = act * 1.5;
+        pa.array[i*3]   = rp.origPos[i*3]   * (1 + act*0.1) + Math.sin(ph + this._time*1.3) * wobble;
+        pa.array[i*3+1] = rp.origPos[i*3+1] * (1 + act*0.1) + Math.cos(ph + this._time*0.9) * wobble;
+        pa.array[i*3+2] = rp.origPos[i*3+2] + Math.sin(ph + this._time*1.1) * wobble;
+      }
+      pa.needsUpdate = true;
+      rp.points.material.opacity = 0.15 + act * 0.7;
+    }
+
+    // Field lines
+    for (const fl of this.fieldLines) {
+      fl.material.opacity = 0.05 + vt * 0.15;
+      if (coh > 0.618) fl.material.color.lerp(this._goldColor, 0.05);
+      else fl.material.color.set(0x1a1a2e);
+    }
+
+    // Camera sway
+    this.camera.position.x = Math.sin(this._time * 0.1) * 3;
+    this.camera.position.y = Math.cos(this._time * 0.07) * 2;
+    this.camera.lookAt(0, 0, 0);
+
+    this.renderer.render(this.scene, this.camera);
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// NOTE NAME HELPER
+// ─────────────────────────────────────────────────────────
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function freqToNote(hz) {
+  if (hz <= 0) return { note: '—', octave: '', cents: 0 };
+  const midi = 12 * Math.log2(hz / 440) + 69;
+  const rounded = Math.round(midi);
+  const cents = Math.round((midi - rounded) * 100);
+  return { note: NOTE_NAMES[rounded % 12], octave: Math.floor(rounded / 12) - 1, cents };
 }
 
-function updateCount() {
-  videoCountEl.textContent = allVideos.length;
+// ─────────────────────────────────────────────────────────
+// ORB PLAYER — enter/exit + audio capture + render loop
+// ─────────────────────────────────────────────────────────
+
+let animFrame = null;
+let audioBooted = false;
+let captureStream = null;
+
+function enterOrb(videoId, title) {
+  if (!audioBooted) {
+    fabric.boot();
+    viz.boot();
+    audioBooted = true;
+  }
+  if (fabric.ctx.state === 'suspended') fabric.ctx.resume();
+
+  orbTitle.textContent = title;
+
+  // Embed YouTube as PiP — video plays while orb responds
+  videoPip.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&enablejsapi=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+
+  // Capture audio to feed the 7-ring analyser
+  startAudioCapture();
+
+  browseView.classList.add('hidden');
+  orbView.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min((now - last) / 1000, 0.1);
+    last = now;
+    fabric.analyze();
+    viz.update(dt);
+    updateHUD();
+    animFrame = requestAnimationFrame(loop);
+  }
+  animFrame = requestAnimationFrame(loop);
 }
 
-// Render a single video card (thumbnail that activates embed on click)
+function exitOrb() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  videoPip.innerHTML = '';
+  orbView.classList.remove('active');
+  browseView.classList.remove('hidden');
+  document.body.style.overflow = '';
+  // Stop capture stream tracks
+  if (captureStream) {
+    captureStream.getTracks().forEach(t => t.stop());
+    captureStream = null;
+  }
+}
+
+async function startAudioCapture() {
+  // Stop any existing capture
+  if (captureStream) {
+    captureStream.getTracks().forEach(t => t.stop());
+    captureStream = null;
+  }
+  try {
+    // Try getDisplayMedia for system/tab audio (captures YouTube directly)
+    // Falls back to getUserMedia (mic picks up room sound including speakers)
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: false });
+    } catch {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+      });
+    }
+    captureStream = stream;
+    const source = fabric.ctx.createMediaStreamSource(stream);
+    fabric.connectSource(source);
+  } catch (err) {
+    console.warn('Audio capture unavailable — orb responds to silence patterns:', err.message);
+  }
+}
+
+function updateHUD() {
+  // Ring bars
+  for (let i = 0; i < 7; i++) {
+    ringBars[i].style.height = (fabric.smoothRings[i] * 100) + '%';
+  }
+  // Metrics
+  document.getElementById('m-vagal').textContent = fabric.vagalTone.toFixed(2);
+  document.getElementById('m-coherence').textContent = fabric.coherence.toFixed(2);
+  document.getElementById('m-mode').textContent = fabric.mode;
+  document.getElementById('m-psi').textContent = fabric.psiLevel.toFixed(2);
+  // Frequency
+  const f0 = fabric.getF0();
+  const { note, octave, cents } = freqToNote(f0);
+  const spans = freqReadout.querySelectorAll('span');
+  spans[0].textContent = f0 > 0 ? f0.toFixed(1) : '—';
+  spans[1].textContent = f0 > 0 ? `${note}${octave} (${cents > 0 ? '+' : ''}${cents}c)` : '—';
+}
+
+backBtn.addEventListener('click', exitOrb);
+
+// ─────────────────────────────────────────────────────────
+// VIDEO BROWSER — fetch all channel videos
+// ─────────────────────────────────────────────────────────
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function updateCount() { videoCountEl.textContent = allVideos.length; }
+
 function renderCard(video) {
   const card = document.createElement('div');
   card.className = 'video-card';
-
-  const thumbUrl = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
-
   card.innerHTML = `
-    <div class="thumb-wrap" data-vid="${escapeHtml(video.id)}">
-      <img src="${thumbUrl}" alt="" loading="lazy">
+    <div class="thumb-wrap">
+      <img src="https://i.ytimg.com/vi/${video.id}/hqdefault.jpg" alt="" loading="lazy">
       <div class="play-btn">
         <svg viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="white"/></svg>
       </div>
@@ -304,21 +803,10 @@ function renderCard(video) {
     <div class="caption">${escapeHtml(video.title)}</div>
     ${video.published ? `<div class="meta">${escapeHtml(video.published)}</div>` : ''}
   `;
-
-  // Click thumbnail to load actual embed
-  card.querySelector('.thumb-wrap').addEventListener('click', () => {
-    const wrap = card.querySelector('.thumb-wrap');
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
-    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-    iframe.allowFullscreen = true;
-    wrap.replaceWith(iframe);
-  });
-
+  card.addEventListener('click', () => enterOrb(video.id, video.title));
   grid.appendChild(card);
 }
 
-// Add videos to list, dedup, render new ones
 function addVideos(videos) {
   for (const v of videos) {
     if (seenIds.has(v.id)) continue;
@@ -329,7 +817,6 @@ function addVideos(videos) {
   updateCount();
 }
 
-// Fetch through CORS proxy with fallback
 async function proxyFetch(url, timeout = 12000) {
   for (const makeProxy of PROXIES) {
     try {
@@ -340,163 +827,72 @@ async function proxyFetch(url, timeout = 12000) {
   throw new Error('All proxies failed');
 }
 
-// Strategy 1: RSS feed (gives newest 15)
-async function fetchRSS() {
-  statusText.textContent = 'Trying RSS feed...';
-
-  // First we need channel ID — fetch channel page to find it
-  const html = await proxyFetch(`${CHANNEL_URL}/videos`);
-
-  // Extract channel ID from page
-  const cidMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]+)"/);
-  const channelId = cidMatch ? cidMatch[1] : null;
-
-  if (channelId) {
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-    try {
-      const rssText = await proxyFetch(rssUrl);
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(rssText, 'application/xml');
-      const entries = xml.querySelectorAll('entry');
-      const videos = [];
-      entries.forEach(entry => {
-        const id = entry.querySelector('videoId')?.textContent;
-        const title = entry.querySelector('title')?.textContent || 'Untitled';
-        const published = entry.querySelector('published')?.textContent?.slice(0, 10) || '';
-        if (id) videos.push({ id, title, published });
-      });
-      if (videos.length > 0) addVideos(videos);
-    } catch {}
-  }
-
-  return html; // return page HTML for strategy 2
-}
-
-// Strategy 2: Scrape channel page HTML for all video IDs
-function scrapePageVideos(html) {
-  statusText.textContent = 'Scanning channel page for videos...';
-
-  const videos = [];
-
-  // YouTube embeds video data as JSON in the page — look for ytInitialData
-  const dataMatch = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
-  if (dataMatch) {
-    try {
-      const data = JSON.parse(dataMatch[1]);
-      crawlForVideos(data, videos);
-    } catch {}
-  }
-
-  // Also grab any videoId patterns from raw HTML as fallback
-  const idPattern = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
-  let match;
-  while ((match = idPattern.exec(html)) !== null) {
-    const id = match[1];
-    if (!videos.find(v => v.id === id)) {
-      // Try to find the title nearby
-      const titlePattern = new RegExp(`"videoId":"${id}"[^}]*"title":\\{"runs":\\[\\{"text":"([^"]+)"`, 's');
-      const titleMatch = html.match(titlePattern);
-      const title = titleMatch ? titleMatch[1] : id;
-      videos.push({ id, title, published: '' });
-    }
-  }
-
-  if (videos.length > 0) addVideos(videos);
-  return videos.length;
-}
-
-// Recursively walk ytInitialData JSON to find all video renderers
 function crawlForVideos(obj, results) {
   if (!obj || typeof obj !== 'object') return;
-
-  // gridVideoRenderer and richItemRenderer contain video entries
   if (obj.videoId && typeof obj.videoId === 'string' && obj.videoId.length === 11) {
-    const title = obj.title?.runs?.[0]?.text
-      || obj.title?.simpleText
-      || obj.headline?.runs?.[0]?.text
-      || obj.videoId;
+    const title = obj.title?.runs?.[0]?.text || obj.title?.simpleText || obj.headline?.runs?.[0]?.text || obj.videoId;
     const published = obj.publishedTimeText?.simpleText || '';
-    if (!results.find(v => v.id === obj.videoId)) {
-      results.push({ id: obj.videoId, title, published });
-    }
+    if (!results.find(v => v.id === obj.videoId)) results.push({ id: obj.videoId, title, published });
   }
-
-  if (Array.isArray(obj)) {
-    for (const item of obj) crawlForVideos(item, results);
-  } else {
-    for (const key of Object.keys(obj)) {
-      crawlForVideos(obj[key], results);
-    }
-  }
+  if (Array.isArray(obj)) { for (const item of obj) crawlForVideos(item, results); }
+  else { for (const key of Object.keys(obj)) crawlForVideos(obj[key], results); }
 }
 
-// Strategy 3: Try continuation tokens to load more pages
-async function fetchContinuations(html) {
-  // Look for continuation tokens in the initial page data
-  const tokenPattern = /"continuation":"([a-zA-Z0-9%_-]+)"/g;
-  const tokens = new Set();
-  let m;
-  while ((m = tokenPattern.exec(html)) !== null) tokens.add(m[1]);
-
-  for (const token of tokens) {
-    statusText.textContent = `Loading more videos (${allVideos.length} found so far)...`;
-    try {
-      const contUrl = `https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8`;
-      const body = JSON.stringify({
-        context: { client: { clientName: 'WEB', clientVersion: '2.20240101' } },
-        continuation: token,
-      });
-
-      const contText = await proxyFetch(contUrl + '&rawbody=' + encodeURIComponent(body));
-      const contData = JSON.parse(contText);
-      const before = allVideos.length;
-      const vids = [];
-      crawlForVideos(contData, vids);
-      if (vids.length > 0) addVideos(vids);
-      // If we didn't find new videos, stop
-      if (allVideos.length === before) break;
-    } catch {
-      break;
-    }
-  }
-}
-
-// Main loader
 async function loadAllVideos() {
   try {
-    // Step 1+2: RSS + page scrape
-    const html = await fetchRSS();
-    scrapePageVideos(html);
+    statusText.textContent = 'Fetching channel page...';
+    const html = await proxyFetch(`${CHANNEL_URL}/videos`);
 
-    // Step 3: Try continuations for channels with many videos
-    if (allVideos.length > 0) {
-      await fetchContinuations(html);
+    // RSS feed
+    const cidMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]+)"/);
+    if (cidMatch) {
+      try {
+        statusText.textContent = 'Loading RSS feed...';
+        const rssText = await proxyFetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${cidMatch[1]}`);
+        const xml = new DOMParser().parseFromString(rssText, 'application/xml');
+        const entries = xml.querySelectorAll('entry');
+        const vids = [];
+        entries.forEach(e => {
+          const id = e.querySelector('videoId')?.textContent;
+          const title = e.querySelector('title')?.textContent || 'Untitled';
+          const pub = e.querySelector('published')?.textContent?.slice(0, 10) || '';
+          if (id) vids.push({ id, title, published: pub });
+        });
+        if (vids.length > 0) addVideos(vids);
+      } catch {}
     }
 
-    loading.style.display = 'none';
-
-    if (allVideos.length === 0) {
-      errorEl.style.display = 'block';
-      errorEl.textContent = 'Could not find videos. The channel page may have changed format.';
-    } else {
-      statusText.textContent = `All done — ${allVideos.length} videos loaded`;
+    // Page scrape — ytInitialData JSON
+    statusText.textContent = 'Scanning page for all videos...';
+    const dataMatch = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
+    if (dataMatch) {
+      try {
+        const vids = [];
+        crawlForVideos(JSON.parse(dataMatch[1]), vids);
+        if (vids.length > 0) addVideos(vids);
+      } catch {}
     }
 
-  } catch (err) {
-    loading.style.display = 'none';
+    // Regex fallback
+    const idPat = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+    let m; const extras = [];
+    while ((m = idPat.exec(html)) !== null) {
+      if (!seenIds.has(m[1])) extras.push({ id: m[1], title: m[1], published: '' });
+    }
+    if (extras.length > 0) addVideos(extras);
 
-    // Last resort: just show some known embed methods
-    errorEl.style.display = 'block';
-    errorEl.innerHTML = `
-      Could not auto-fetch videos (CORS proxy issue).<br>
-      <a href="${CHANNEL_URL}" target="_blank" style="color:var(--gold)">Open channel on YouTube</a>
-    `;
-    statusText.textContent = 'Failed to load — try the direct link below';
+    loading.style.display = 'none';
+    statusText.textContent = allVideos.length > 0
+      ? `Done — ${allVideos.length} videos. Click any to enter the orb.`
+      : 'No videos found — try the direct link below.';
+
+  } catch {
+    loading.style.display = 'none';
+    statusText.textContent = 'Could not fetch channel — use the link below';
   }
 }
 
 loadAllVideos();
 </script>
-
 </body>
 </html>
