@@ -1340,9 +1340,13 @@ class KonomiMesh {
 
   async connectSignal() {
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.ws?.close();
+        reject(new Error('Signaling connection timed out'));
+      }, 4000);
       this.ws = new WebSocket(this.signalUrl);
-      this.ws.onopen = () => resolve();
-      this.ws.onerror = (e) => reject(new Error('Signaling connection failed'));
+      this.ws.onopen = () => { clearTimeout(timeout); resolve(); };
+      this.ws.onerror = () => { clearTimeout(timeout); reject(new Error('Signaling connection failed')); };
       this.ws.onclose = () => { /* reconnect logic could go here */ };
       this.ws.onmessage = (e) => this._onSignalMessage(JSON.parse(e.data));
     });
@@ -2711,14 +2715,21 @@ class KonomiApp {
       try {
         await this.fabric.resume();
         const signalUrl = $('#signal-url').value.trim();
+        let connected = false;
         if (signalUrl) {
-          this.mesh.signalUrl = signalUrl;
-          await this.mesh.connectSignal();
-          const code = await this.mesh.createRoom();
-          await this._getMicrophone();
-          this._enterStage(code);
-        } else {
-          // Solo mode — no signaling server (GitHub Pages)
+          try {
+            this.mesh.signalUrl = signalUrl;
+            await this.mesh.connectSignal();
+            const code = await this.mesh.createRoom();
+            connected = true;
+            await this._getMicrophone();
+            this._enterStage(code);
+          } catch {
+            console.warn('Signal server unreachable, entering solo mode');
+          }
+        }
+        if (!connected) {
+          // Solo mode
           const code = await this.identity.createRoomCode();
           this.mesh.roomCode = code;
           this.mesh.isHost = true;
@@ -2736,7 +2747,7 @@ class KonomiApp {
       if (!code) return;
       const signalUrl = $('#signal-url').value.trim();
       if (!signalUrl) {
-        alert('Enter a signaling server URL to join a room with peers.');
+        alert('A signaling server URL is needed to join a room with peers.\nLeave blank and use CREATE ROOM for solo mode.');
         return;
       }
       try {
