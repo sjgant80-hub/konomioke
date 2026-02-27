@@ -1276,6 +1276,7 @@ class KonomiIdentity {
 
 // ─────────────────────────────────────────────────────────
 // CRDT Queue — Conflict-free queue for song ordering
+// NOTE: Canonical testable copy in lib/crdt-queue.js — keep in sync
 // ─────────────────────────────────────────────────────────
 
 class CRDTQueue {
@@ -1707,6 +1708,7 @@ class AudioFabricEngine {
     this._calcMetrics();
   }
 
+  // DSP functions below have testable copies in lib/dsp.js — keep in sync
   _calcAmplitude(timeData) {
     let sum = 0;
     for (let i = 0; i < timeData.length; i++) sum += timeData[i] * timeData[i];
@@ -2065,7 +2067,7 @@ class TrackEngine {
     });
   }
 
-  // Parse LRC lyrics
+  // Parse LRC lyrics — testable copy in lib/lrc-parser.js
   parseLRC(text) {
     const lines = text.split('\n');
     this.lyrics = [];
