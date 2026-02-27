@@ -1,0 +1,15 @@
+{
+  "name": "konomioke",
+  "version": "1.0.0",
+  "description": "好みオケ — Peer-to-Peer Therapeutic Karaoke",
+  "main": "signaling/server.js",
+  "scripts": {
+    "signal": "node signaling/server.js",
+    "start": "node signaling/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "keywords": ["karaoke", "p2p", "webrtc", "vagal", "audio-fabric", "therapeutic"],
+  "license": "MIT"
+}
