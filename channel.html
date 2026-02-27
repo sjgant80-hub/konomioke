@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好みオケ KONOMIOKE — Channel</title>
+<style>
+:root {
+  --bg: #06060c;
+  --surface: #0d0d18;
+  --panel: rgba(12, 12, 24, 0.85);
+  --border: rgba(255, 255, 255, 0.06);
+  --text: #d8d8e4;
+  --text-dim: #6a6a80;
+  --gold: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --font: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+}
+
+header h1 {
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold-glow);
+  letter-spacing: 0.15em;
+}
+
+header p {
+  color: var(--text-dim);
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+
+nav {
+  text-align: center;
+  padding: 1rem;
+}
+
+nav a {
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+nav a:hover {
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.channel-embed {
+  max-width: 1000px;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.channel-embed h2 {
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.2rem;
+}
+
+.video-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.video-card:hover {
+  border-color: var(--gold);
+}
+
+.video-card iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  border: none;
+}
+
+.video-card .caption {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.channel-link {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.channel-link a {
+  display: inline-block;
+  color: var(--bg);
+  background: var(--gold);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 0.7rem 2rem;
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+  transition: opacity 0.2s;
+}
+
+.channel-link a:hover {
+  opacity: 0.85;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>好みオケ KONOMIOKE</h1>
+  <p>Thomas The Solar Crypto Engine — Channel</p>
+</header>
+
+<nav>
+  <a href="index.html">Back to Karaoke</a>
+</nav>
+
+<div class="channel-embed">
+  <h2>Latest Videos</h2>
+  <div class="loading" id="loading">Loading videos from channel...</div>
+  <div class="video-grid" id="video-grid"></div>
+</div>
+
+<div class="channel-link">
+  <a href="https://www.youtube.com/@ThomasTheSolarCryptoEngine" target="_blank" rel="noopener">
+    Visit Full Channel on YouTube
+  </a>
+</div>
+
+<footer>
+  好みオケ KONOMIOKE — P2P Therapeutic Karaoke
+</footer>
+
+<script>
+const CHANNEL_HANDLE = 'ThomasTheSolarCryptoEngine';
+const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=`;
+
+// YouTube doesn't allow direct RSS fetch from browser due to CORS,
+// so we use two strategies:
+// 1. Try fetching via a public CORS proxy to get real video IDs
+// 2. Fall back to embedding the channel page directly
+
+async function loadVideos() {
+  const grid = document.getElementById('video-grid');
+  const loading = document.getElementById('loading');
+
+  try {
+    // Attempt: fetch channel RSS via public CORS-friendly proxy
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+      `https://www.youtube.com/feeds/videos.xml?user=${CHANNEL_HANDLE}`
+    )}`;
+
+    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+
+    if (!res.ok) throw new Error('proxy fetch failed');
+
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'application/xml');
+    const entries = xml.querySelectorAll('entry');
+
+    if (entries.length === 0) throw new Error('no entries');
+
+    loading.style.display = 'none';
+
+    entries.forEach((entry, i) => {
+      if (i >= 8) return; // show up to 8 videos
+      const videoId = entry.querySelector('videoId')?.textContent;
+      const title = entry.querySelector('title')?.textContent || 'Untitled';
+
+      if (!videoId) return;
+
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      card.innerHTML = `
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+        <div class="caption">${escapeHtml(title)}</div>
+      `;
+      grid.appendChild(card);
+    });
+
+  } catch (err) {
+    // Fallback: embed channel page directly
+    loading.style.display = 'none';
+
+    const card = document.createElement('div');
+    card.className = 'video-card';
+    card.style.gridColumn = '1 / -1';
+    card.innerHTML = `
+      <iframe
+        src="https://www.youtube-nocookie.com/embed?listType=search&list=%40${encodeURIComponent(CHANNEL_HANDLE)}"
+        style="width:100%; height: 500px;"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+      <div class="caption">@${CHANNEL_HANDLE} — showing search results embed</div>
+    `;
+    grid.appendChild(card);
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+loadVideos();
+</script>
+
+</body>
+</html>
