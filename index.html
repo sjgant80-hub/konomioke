@@ -1129,7 +1129,7 @@ class KonomiIdentity {
   async boot() {
     await this._openDB();
     const stored = await this._loadKey();
-    if (stored) {
+    if (stored && stored.publicKeyHex) {
       this.keyPair = stored.keyPair;
       this.publicKeyHex = stored.publicKeyHex;
     } else {
@@ -1143,6 +1143,14 @@ class KonomiIdentity {
   }
 
   async _generateKey() {
+    if (!crypto.subtle) {
+      // Insecure context fallback — random identity, no real signing
+      const rand = new Uint8Array(32);
+      crypto.getRandomValues(rand);
+      this.publicKeyHex = bufToHex(rand);
+      this.keyPair = null;
+      return;
+    }
     try {
       this.keyPair = await crypto.subtle.generateKey('Ed25519', true, ['sign', 'verify']);
       const raw = await crypto.subtle.exportKey('raw', this.keyPair.publicKey);
@@ -1158,6 +1166,7 @@ class KonomiIdentity {
   }
 
   async sign(data) {
+    if (!this.keyPair) return new ArrayBuffer(0);
     const encoded = typeof data === 'string' ? new TextEncoder().encode(data) : data;
     try {
       return await crypto.subtle.sign('Ed25519', this.keyPair.privateKey, encoded);
@@ -1169,9 +1178,16 @@ class KonomiIdentity {
   }
 
   async createRoomCode() {
-    const data = new TextEncoder().encode(this.publicKeyHex + Date.now().toString());
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return bufToHex(hash).slice(0, 8).toUpperCase();
+    const seed = this.publicKeyHex + Date.now().toString();
+    if (crypto.subtle) {
+      const data = new TextEncoder().encode(seed);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return bufToHex(hash).slice(0, 8).toUpperCase();
+    }
+    // Fallback: use random bytes
+    const rand = new Uint8Array(4);
+    crypto.getRandomValues(rand);
+    return bufToHex(rand).toUpperCase();
   }
 
   async setDisplayName(name) {
@@ -1214,6 +1230,11 @@ class KonomiIdentity {
   }
 
   async _saveKey() {
+    if (!this.keyPair) {
+      // Insecure context — persist only the random hex
+      await this._dbPut('keystore', 'identity', { publicKeyHex: this.publicKeyHex });
+      return;
+    }
     const privJwk = await crypto.subtle.exportKey('jwk', this.keyPair.privateKey);
     const pubJwk = await crypto.subtle.exportKey('jwk', this.keyPair.publicKey);
     await this._dbPut('keystore', 'identity', { privJwk, pubJwk, publicKeyHex: this.publicKeyHex });
@@ -1222,6 +1243,10 @@ class KonomiIdentity {
   async _loadKey() {
     const stored = await this._dbGet('keystore', 'identity');
     if (!stored) return null;
+    if (!stored.privJwk) {
+      // Insecure context stored identity
+      return { keyPair: null, publicKeyHex: stored.publicKeyHex };
+    }
     try {
       // Try Ed25519 first
       const privateKey = await crypto.subtle.importKey('jwk', stored.privJwk, 'Ed25519', true, ['sign']);
@@ -1979,8 +2004,15 @@ class TrackEngine {
     const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
 
     // Generate hash for the track
-    const hashBuf = await crypto.subtle.digest('SHA-256', arrayBuffer);
-    const hash = bufToHex(hashBuf).slice(0, 16);
+    let hash;
+    if (crypto.subtle) {
+      const hashBuf = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      hash = bufToHex(hashBuf).slice(0, 16);
+    } else {
+      const rand = new Uint8Array(8);
+      crypto.getRandomValues(rand);
+      hash = bufToHex(rand);
+    }
 
     const entry = this.queue.add({
       hash,
