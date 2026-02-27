@@ -2102,6 +2102,10 @@ class TrackEngine {
     } else if (queueEntry._mediaElement) {
       // MediaElement-based playback (MP4 etc.)
       this.audioBuffer = null;
+      if (this._mediaSourceNode) {
+        this._mediaSourceNode.disconnect();
+        this._mediaSourceNode = null;
+      }
       this._mediaElement = queueEntry._mediaElement;
       this.duration = this._mediaElement.duration;
       this._startMediaPlayback(0);
@@ -2950,7 +2954,7 @@ class KonomiApp {
 
     // Playback controls
     $('#btn-play-pause').onclick = () => {
-      if (this.tracks.audioBuffer) {
+      if (this.tracks.audioBuffer || this.tracks._mediaElement) {
         this.tracks.togglePlay();
       } else {
         // If no track loaded, try first in queue
