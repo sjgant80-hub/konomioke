@@ -906,8 +906,12 @@ html, body {
 
     <div class="lobby-signal">
       <label>Signal:</label>
-      <input id="signal-url" value="ws://localhost:3000" />
+      <input id="signal-url" value="" placeholder="ws://your-server:3000" />
     </div>
+    <p style="font-size:0.55rem;color:var(--text-dim);margin-top:0.6rem;line-height:1.4">
+      Leave signal blank to sing solo. For P2P rooms, run<br>
+      <code style="color:var(--r4)">npm start</code> and enter your signaling server URL.
+    </p>
   </div>
 </div>
 
@@ -2622,8 +2626,7 @@ class KonomiApp {
 
   async _bootMesh() {
     this.mesh = new KonomiMesh(this.identity);
-    const signalUrl = $('#signal-url').value || 'ws://localhost:3000';
-    await this.mesh.boot(signalUrl);
+    await this.mesh.boot('');
   }
 
   async _bootFabric() {
@@ -2675,12 +2678,21 @@ class KonomiApp {
     $('#btn-create-room').onclick = async () => {
       try {
         await this.fabric.resume();
-        const signalUrl = $('#signal-url').value || 'ws://localhost:3000';
-        this.mesh.signalUrl = signalUrl;
-        await this.mesh.connectSignal();
-        const code = await this.mesh.createRoom();
-        await this._getMicrophone();
-        this._enterStage(code);
+        const signalUrl = $('#signal-url').value.trim();
+        if (signalUrl) {
+          this.mesh.signalUrl = signalUrl;
+          await this.mesh.connectSignal();
+          const code = await this.mesh.createRoom();
+          await this._getMicrophone();
+          this._enterStage(code);
+        } else {
+          // Solo mode — no signaling server (GitHub Pages)
+          const code = await this.identity.createRoomCode();
+          this.mesh.roomCode = code;
+          this.mesh.isHost = true;
+          await this._getMicrophone();
+          this._enterStage(code);
+        }
       } catch (err) {
         alert('Failed to create room: ' + err.message);
       }
@@ -2690,9 +2702,13 @@ class KonomiApp {
     const joinFn = async () => {
       const code = $('#join-code').value.trim().toUpperCase();
       if (!code) return;
+      const signalUrl = $('#signal-url').value.trim();
+      if (!signalUrl) {
+        alert('Enter a signaling server URL to join a room with peers.');
+        return;
+      }
       try {
         await this.fabric.resume();
-        const signalUrl = $('#signal-url').value || 'ws://localhost:3000';
         this.mesh.signalUrl = signalUrl;
         await this.mesh.connectSignal();
         await this.mesh.joinRoom(code);
@@ -3090,7 +3106,7 @@ class KonomiApp {
   // ── SERVICE WORKER ─────────────────────────────────────
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
   }
 

@@ -5,8 +5,9 @@
 
 const CACHE_NAME = 'konomioke-v1';
 const PRECACHE_URLS = [
-  '/',
-  '/index.html',
+  './',
+  './index.html',
+  './sw.js',
 ];
 
 self.addEventListener('install', (event) => {
