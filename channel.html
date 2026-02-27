@@ -25,6 +25,7 @@ html, body {
   color: var(--text);
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
+  overflow-y: auto;
 }
 
 header {
@@ -64,9 +65,25 @@ nav a:hover {
   background: rgba(212, 175, 55, 0.1);
 }
 
+.status-bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.6rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.status-bar .count {
+  color: var(--gold);
+  font-weight: bold;
+}
+
 .channel-embed {
-  max-width: 1000px;
-  margin: 1.5rem auto;
+  max-width: 1200px;
+  margin: 0.5rem auto 1.5rem;
   padding: 0 1rem;
 }
 
@@ -80,7 +97,7 @@ nav a:hover {
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.2rem;
 }
 
@@ -96,6 +113,40 @@ nav a:hover {
   border-color: var(--gold);
 }
 
+.video-card .thumb-wrap {
+  position: relative;
+  cursor: pointer;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video-card .thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.video-card .thumb-wrap .play-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  transition: background 0.2s;
+}
+
+.video-card .thumb-wrap:hover .play-btn {
+  background: rgba(0,0,0,0.15);
+}
+
+.video-card .thumb-wrap .play-btn svg {
+  width: 54px;
+  height: 54px;
+  opacity: 0.85;
+}
+
 .video-card iframe {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -105,7 +156,14 @@ nav a:hover {
 
 .video-card .caption {
   padding: 0.6rem 0.8rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.video-card .meta {
+  padding: 0 0.8rem 0.6rem;
+  font-size: 0.65rem;
   color: var(--text-dim);
 }
 
@@ -138,6 +196,25 @@ nav a:hover {
   font-size: 0.85rem;
 }
 
+.loading .spinner {
+  display: inline-block;
+  width: 24px; height: 24px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 0.8rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-msg {
+  text-align: center;
+  padding: 2rem;
+  color: #ff6666;
+  font-size: 0.85rem;
+}
+
 footer {
   text-align: center;
   padding: 2rem 1rem;
@@ -152,16 +229,24 @@ footer {
 
 <header>
   <h1>好みオケ KONOMIOKE</h1>
-  <p>Thomas The Solar Crypto Engine — Channel</p>
+  <p>Thomas The Solar Crypto Engine — All Videos</p>
 </header>
 
 <nav>
   <a href="index.html">Back to Karaoke</a>
 </nav>
 
+<div class="status-bar">
+  <span id="status-text">Searching for videos...</span>
+  <span><span class="count" id="video-count">0</span> videos loaded</span>
+</div>
+
 <div class="channel-embed">
-  <h2>Latest Videos</h2>
-  <div class="loading" id="loading">Loading videos from channel...</div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Fetching all videos from @ThomasTheSolarCryptoEngine...</div>
+  </div>
+  <div id="error" class="error-msg" style="display:none"></div>
   <div class="video-grid" id="video-grid"></div>
 </div>
 
@@ -177,76 +262,20 @@ footer {
 
 <script>
 const CHANNEL_HANDLE = 'ThomasTheSolarCryptoEngine';
-const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=`;
+const CHANNEL_URL = `https://www.youtube.com/@${CHANNEL_HANDLE}`;
+const PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
-// YouTube doesn't allow direct RSS fetch from browser due to CORS,
-// so we use two strategies:
-// 1. Try fetching via a public CORS proxy to get real video IDs
-// 2. Fall back to embedding the channel page directly
+const grid = document.getElementById('video-grid');
+const loading = document.getElementById('loading');
+const errorEl = document.getElementById('error');
+const statusText = document.getElementById('status-text');
+const videoCountEl = document.getElementById('video-count');
 
-async function loadVideos() {
-  const grid = document.getElementById('video-grid');
-  const loading = document.getElementById('loading');
-
-  try {
-    // Attempt: fetch channel RSS via public CORS-friendly proxy
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-      `https://www.youtube.com/feeds/videos.xml?user=${CHANNEL_HANDLE}`
-    )}`;
-
-    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-
-    if (!res.ok) throw new Error('proxy fetch failed');
-
-    const text = await res.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'application/xml');
-    const entries = xml.querySelectorAll('entry');
-
-    if (entries.length === 0) throw new Error('no entries');
-
-    loading.style.display = 'none';
-
-    entries.forEach((entry, i) => {
-      if (i >= 8) return; // show up to 8 videos
-      const videoId = entry.querySelector('videoId')?.textContent;
-      const title = entry.querySelector('title')?.textContent || 'Untitled';
-
-      if (!videoId) return;
-
-      const card = document.createElement('div');
-      card.className = 'video-card';
-      card.innerHTML = `
-        <iframe
-          src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-          loading="lazy"
-        ></iframe>
-        <div class="caption">${escapeHtml(title)}</div>
-      `;
-      grid.appendChild(card);
-    });
-
-  } catch (err) {
-    // Fallback: embed channel page directly
-    loading.style.display = 'none';
-
-    const card = document.createElement('div');
-    card.className = 'video-card';
-    card.style.gridColumn = '1 / -1';
-    card.innerHTML = `
-      <iframe
-        src="https://www.youtube-nocookie.com/embed?listType=search&list=%40${encodeURIComponent(CHANNEL_HANDLE)}"
-        style="width:100%; height: 500px;"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-      ></iframe>
-      <div class="caption">@${CHANNEL_HANDLE} — showing search results embed</div>
-    `;
-    grid.appendChild(card);
-  }
-}
+const seenIds = new Set();
+const allVideos = []; // { id, title, published }
 
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -254,7 +283,219 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-loadVideos();
+function updateCount() {
+  videoCountEl.textContent = allVideos.length;
+}
+
+// Render a single video card (thumbnail that activates embed on click)
+function renderCard(video) {
+  const card = document.createElement('div');
+  card.className = 'video-card';
+
+  const thumbUrl = `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`;
+
+  card.innerHTML = `
+    <div class="thumb-wrap" data-vid="${escapeHtml(video.id)}">
+      <img src="${thumbUrl}" alt="" loading="lazy">
+      <div class="play-btn">
+        <svg viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="white"/></svg>
+      </div>
+    </div>
+    <div class="caption">${escapeHtml(video.title)}</div>
+    ${video.published ? `<div class="meta">${escapeHtml(video.published)}</div>` : ''}
+  `;
+
+  // Click thumbnail to load actual embed
+  card.querySelector('.thumb-wrap').addEventListener('click', () => {
+    const wrap = card.querySelector('.thumb-wrap');
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.id)}?autoplay=1`;
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+    iframe.allowFullscreen = true;
+    wrap.replaceWith(iframe);
+  });
+
+  grid.appendChild(card);
+}
+
+// Add videos to list, dedup, render new ones
+function addVideos(videos) {
+  for (const v of videos) {
+    if (seenIds.has(v.id)) continue;
+    seenIds.add(v.id);
+    allVideos.push(v);
+    renderCard(v);
+  }
+  updateCount();
+}
+
+// Fetch through CORS proxy with fallback
+async function proxyFetch(url, timeout = 12000) {
+  for (const makeProxy of PROXIES) {
+    try {
+      const res = await fetch(makeProxy(url), { signal: AbortSignal.timeout(timeout) });
+      if (res.ok) return await res.text();
+    } catch {}
+  }
+  throw new Error('All proxies failed');
+}
+
+// Strategy 1: RSS feed (gives newest 15)
+async function fetchRSS() {
+  statusText.textContent = 'Trying RSS feed...';
+
+  // First we need channel ID — fetch channel page to find it
+  const html = await proxyFetch(`${CHANNEL_URL}/videos`);
+
+  // Extract channel ID from page
+  const cidMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]+)"/);
+  const channelId = cidMatch ? cidMatch[1] : null;
+
+  if (channelId) {
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+    try {
+      const rssText = await proxyFetch(rssUrl);
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(rssText, 'application/xml');
+      const entries = xml.querySelectorAll('entry');
+      const videos = [];
+      entries.forEach(entry => {
+        const id = entry.querySelector('videoId')?.textContent;
+        const title = entry.querySelector('title')?.textContent || 'Untitled';
+        const published = entry.querySelector('published')?.textContent?.slice(0, 10) || '';
+        if (id) videos.push({ id, title, published });
+      });
+      if (videos.length > 0) addVideos(videos);
+    } catch {}
+  }
+
+  return html; // return page HTML for strategy 2
+}
+
+// Strategy 2: Scrape channel page HTML for all video IDs
+function scrapePageVideos(html) {
+  statusText.textContent = 'Scanning channel page for videos...';
+
+  const videos = [];
+
+  // YouTube embeds video data as JSON in the page — look for ytInitialData
+  const dataMatch = html.match(/var ytInitialData\s*=\s*(\{.+?\});\s*<\/script>/s);
+  if (dataMatch) {
+    try {
+      const data = JSON.parse(dataMatch[1]);
+      crawlForVideos(data, videos);
+    } catch {}
+  }
+
+  // Also grab any videoId patterns from raw HTML as fallback
+  const idPattern = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+  let match;
+  while ((match = idPattern.exec(html)) !== null) {
+    const id = match[1];
+    if (!videos.find(v => v.id === id)) {
+      // Try to find the title nearby
+      const titlePattern = new RegExp(`"videoId":"${id}"[^}]*"title":\\{"runs":\\[\\{"text":"([^"]+)"`, 's');
+      const titleMatch = html.match(titlePattern);
+      const title = titleMatch ? titleMatch[1] : id;
+      videos.push({ id, title, published: '' });
+    }
+  }
+
+  if (videos.length > 0) addVideos(videos);
+  return videos.length;
+}
+
+// Recursively walk ytInitialData JSON to find all video renderers
+function crawlForVideos(obj, results) {
+  if (!obj || typeof obj !== 'object') return;
+
+  // gridVideoRenderer and richItemRenderer contain video entries
+  if (obj.videoId && typeof obj.videoId === 'string' && obj.videoId.length === 11) {
+    const title = obj.title?.runs?.[0]?.text
+      || obj.title?.simpleText
+      || obj.headline?.runs?.[0]?.text
+      || obj.videoId;
+    const published = obj.publishedTimeText?.simpleText || '';
+    if (!results.find(v => v.id === obj.videoId)) {
+      results.push({ id: obj.videoId, title, published });
+    }
+  }
+
+  if (Array.isArray(obj)) {
+    for (const item of obj) crawlForVideos(item, results);
+  } else {
+    for (const key of Object.keys(obj)) {
+      crawlForVideos(obj[key], results);
+    }
+  }
+}
+
+// Strategy 3: Try continuation tokens to load more pages
+async function fetchContinuations(html) {
+  // Look for continuation tokens in the initial page data
+  const tokenPattern = /"continuation":"([a-zA-Z0-9%_-]+)"/g;
+  const tokens = new Set();
+  let m;
+  while ((m = tokenPattern.exec(html)) !== null) tokens.add(m[1]);
+
+  for (const token of tokens) {
+    statusText.textContent = `Loading more videos (${allVideos.length} found so far)...`;
+    try {
+      const contUrl = `https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8`;
+      const body = JSON.stringify({
+        context: { client: { clientName: 'WEB', clientVersion: '2.20240101' } },
+        continuation: token,
+      });
+
+      const contText = await proxyFetch(contUrl + '&rawbody=' + encodeURIComponent(body));
+      const contData = JSON.parse(contText);
+      const before = allVideos.length;
+      const vids = [];
+      crawlForVideos(contData, vids);
+      if (vids.length > 0) addVideos(vids);
+      // If we didn't find new videos, stop
+      if (allVideos.length === before) break;
+    } catch {
+      break;
+    }
+  }
+}
+
+// Main loader
+async function loadAllVideos() {
+  try {
+    // Step 1+2: RSS + page scrape
+    const html = await fetchRSS();
+    scrapePageVideos(html);
+
+    // Step 3: Try continuations for channels with many videos
+    if (allVideos.length > 0) {
+      await fetchContinuations(html);
+    }
+
+    loading.style.display = 'none';
+
+    if (allVideos.length === 0) {
+      errorEl.style.display = 'block';
+      errorEl.textContent = 'Could not find videos. The channel page may have changed format.';
+    } else {
+      statusText.textContent = `All done — ${allVideos.length} videos loaded`;
+    }
+
+  } catch (err) {
+    loading.style.display = 'none';
+
+    // Last resort: just show some known embed methods
+    errorEl.style.display = 'block';
+    errorEl.innerHTML = `
+      Could not auto-fetch videos (CORS proxy issue).<br>
+      <a href="${CHANNEL_URL}" target="_blank" style="color:var(--gold)">Open channel on YouTube</a>
+    `;
+    statusText.textContent = 'Failed to load — try the direct link below';
+  }
+}
+
+loadAllVideos();
 </script>
 
 </body>
