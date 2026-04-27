@@ -1,0 +1,9 @@
+{
+  "_udt": "TrackConfig",
+  "supported_decode": ["mp3", "wav", "ogg", "flac"],
+  "supported_element": ["mp4", "mkv", "webm", "m4a"],
+  "lrc_format": "[MM:SS.CC]text",
+  "queue_type": "CRDT",
+  "max_queue": 50,
+  "lyrics_display_lines": 3
+}

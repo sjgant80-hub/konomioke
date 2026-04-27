@@ -1,13 +1,29 @@
 {
  "_comment": "KONOMIOKE TAG.DB",
- "_built": "2026-04-27T20:24:45.035Z",
+ "_built": "2026-04-27T23:43:20.095Z",
  "udt_types": {
+  "AppConfig": {
+   "desc": "AppConfig",
+   "count": 1
+  },
+  "AudioConfig": {
+   "desc": "AudioConfig",
+   "count": 1
+  },
+  "IdentityConfig": {
+   "desc": "IdentityConfig",
+   "count": 1
+  },
   "MeshConfig": {
    "desc": "MeshConfig",
    "count": 1
   },
   "VoiceMiningConfig": {
    "desc": "VoiceMiningConfig",
+   "count": 1
+  },
+  "ModuleRegistry": {
+   "desc": "ModuleRegistry",
    "count": 1
   },
   "PhaseManifest": {
@@ -22,13 +38,29 @@
    "desc": "VagalRingConfig",
    "count": 1
   },
+  "TrackConfig": {
+   "desc": "TrackConfig",
+   "count": 1
+  },
+  "ViewRegistry": {
+   "desc": "ViewRegistry",
+   "count": 1
+  },
   "VizConfig": {
    "desc": "VizConfig",
    "count": 1
   },
+  "VocalConfig": {
+   "desc": "VocalConfig",
+   "count": 1
+  },
+  "Config": {
+   "desc": "Config",
+   "count": 1
+  },
   "Phase": {
    "desc": "Konomioke prime phase module",
-   "count": 9
+   "count": 10
   },
   "Lib": {
    "desc": "Library module",
@@ -36,6 +68,105 @@
   }
  },
  "tags": {
+  "app": {
+   "udt": "AppConfig",
+   "settings_defaults": {
+    "pitch": true,
+    "harmony": false,
+    "drones": true,
+    "viz": true,
+    "aec": false
+   },
+   "boot_phases": [
+    {
+     "prime": 2,
+     "label": "IDENTITY + ROOMS"
+    },
+    {
+     "prime": 3,
+     "label": "P2P MESH"
+    },
+    {
+     "prime": 5,
+     "label": "AUDIO FABRIC"
+    },
+    {
+     "prime": 7,
+     "label": "VOCAL PROCESSING"
+    },
+    {
+     "prime": 11,
+     "label": "TRACK + LYRICS"
+    },
+    {
+     "prime": 13,
+     "label": "VISUALIZATION"
+    },
+    {
+     "prime": 17,
+     "label": "LAUNCHER"
+    }
+   ],
+   "auto_enter": true,
+   "auto_enter_mode": "solo"
+  },
+  "audio": {
+   "udt": "AudioConfig",
+   "fft_size": 2048,
+   "smoothing": 0.8,
+   "sample_rate": 44100,
+   "drone_base_hz": 55,
+   "drone_gain": 0.03,
+   "drone_primes": [
+    2,
+    3,
+    5,
+    7,
+    11,
+    13,
+    17
+   ],
+   "drone_freqs": [
+    110,
+    165,
+    275,
+    385,
+    605,
+    715,
+    935
+   ],
+   "mic_constraints": {
+    "echoCancellation": false,
+    "noiseSuppression": true,
+    "autoGainControl": true
+   },
+   "vagal_weights": [
+    0.2,
+    0.25,
+    0.1,
+    0.15,
+    0.1,
+    0.1,
+    0.1
+   ],
+   "silence_threshold": 0.01,
+   "silence_frames": 60
+  },
+  "identity": {
+   "udt": "IdentityConfig",
+   "key_algo": "Ed25519",
+   "fallback_algo": "ECDSA-P256",
+   "db_name": "konomioke",
+   "db_version": 2,
+   "stores": [
+    "keystore",
+    "meta",
+    "tracks",
+    "sessions"
+   ],
+   "default_name": "Singer",
+   "room_code_length": 8
+  },
   "mesh": {
    "udt": "MeshConfig",
    "signaling": {
@@ -106,6 +237,151 @@
    "proof_format": "PoVW|coherence=N|vagal=N|psi=N|mode=S|exhale=N|rings=N,N,N,N,N,N,N",
    "phi": 0.6180339887498949,
    "anchor": "BSV"
+  },
+  "modules": {
+   "udt": "ModuleRegistry",
+   "modules": [
+    {
+     "id": "utils",
+     "file": "js/utils.js",
+     "lines": 41,
+     "phase": 0,
+     "desc": "helpers, constants, ring colors"
+    },
+    {
+     "id": "identity",
+     "file": "js/identity.js",
+     "lines": 156,
+     "phase": 2,
+     "desc": "KonomiIdentity class"
+    },
+    {
+     "id": "crdt-queue",
+     "file": "js/crdt-queue.js",
+     "lines": 36,
+     "phase": 11,
+     "desc": "CRDTQueue class"
+    },
+    {
+     "id": "mesh",
+     "file": "js/mesh.js",
+     "lines": 227,
+     "phase": 3,
+     "desc": "KonomiMesh WebRTC class"
+    },
+    {
+     "id": "fabric-setup",
+     "file": "js/fabric-setup.js",
+     "lines": 150,
+     "phase": 5,
+     "desc": "AudioFabricEngine init + drones"
+    },
+    {
+     "id": "fabric-analyze",
+     "file": "js/fabric-analyze.js",
+     "lines": 154,
+     "phase": 5,
+     "desc": "7-ring analysis loop"
+    },
+    {
+     "id": "vocal",
+     "file": "js/vocal.js",
+     "lines": 122,
+     "phase": 7,
+     "desc": "VocalProcessor mix + harmony"
+    },
+    {
+     "id": "tracks-queue",
+     "file": "js/tracks-queue.js",
+     "lines": 150,
+     "phase": 11,
+     "desc": "TrackEngine queue + loading"
+    },
+    {
+     "id": "tracks-play",
+     "file": "js/tracks-play.js",
+     "lines": 153,
+     "phase": 11,
+     "desc": "Playback + LRC lyrics"
+    },
+    {
+     "id": "viz-scene",
+     "file": "js/viz-scene.js",
+     "lines": 74,
+     "phase": 13,
+     "desc": "Three.js scene + camera"
+    },
+    {
+     "id": "viz-orb",
+     "file": "js/viz-orb.js",
+     "lines": 78,
+     "phase": 13,
+     "desc": "Central orb shader"
+    },
+    {
+     "id": "viz-rings",
+     "file": "js/viz-rings.js",
+     "lines": 133,
+     "phase": 13,
+     "desc": "Toroidal ring particles"
+    },
+    {
+     "id": "viz-render",
+     "file": "js/viz-render.js",
+     "lines": 113,
+     "phase": 13,
+     "desc": "Render loop + peer clusters"
+    },
+    {
+     "id": "app-core",
+     "file": "js/app-core.js",
+     "lines": 169,
+     "phase": 17,
+     "desc": "KonomiApp constructor + boot"
+    },
+    {
+     "id": "app-lobby",
+     "file": "js/app-lobby.js",
+     "lines": 122,
+     "phase": 17,
+     "desc": "Lobby events + auto-enter"
+    },
+    {
+     "id": "app-stage",
+     "file": "js/app-stage.js",
+     "lines": 61,
+     "phase": 17,
+     "desc": "Stage UI events"
+    },
+    {
+     "id": "app-events",
+     "file": "js/app-events.js",
+     "lines": 101,
+     "phase": 17,
+     "desc": "Track + chat events"
+    },
+    {
+     "id": "app-mesh",
+     "file": "js/app-mesh.js",
+     "lines": 68,
+     "phase": 17,
+     "desc": "Mesh callbacks"
+    },
+    {
+     "id": "app-loop",
+     "file": "js/app-loop.js",
+     "lines": 81,
+     "phase": 17,
+     "desc": "Main analysis + render loop"
+    },
+    {
+     "id": "boot",
+     "file": "js/boot.js",
+     "lines": 23,
+     "phase": 17,
+     "desc": "Ignition + KCC mining patch"
+    }
+   ]
   },
   "phases": {
    "udt": "PhaseManifest",
@@ -272,6 +548,97 @@
    "fft_size": 2048,
    "smoothing": 0.8
   },
+  "tracks": {
+   "udt": "TrackConfig",
+   "supported_decode": [
+    "mp3",
+    "wav",
+    "ogg",
+    "flac"
+   ],
+   "supported_element": [
+    "mp4",
+    "mkv",
+    "webm",
+    "m4a"
+   ],
+   "lrc_format": "[MM:SS.CC]text",
+   "queue_type": "CRDT",
+   "max_queue": 50,
+   "lyrics_display_lines": 3
+  },
+  "views": {
+   "udt": "ViewRegistry",
+   "views": [
+    {
+     "id": "canvas",
+     "file": "ui/html-canvas.html",
+     "slot": "body",
+     "type": "canvas",
+     "desc": "Three.js orb canvas"
+    },
+    {
+     "id": "boot",
+     "file": "ui/html-boot.html",
+     "slot": "body",
+     "type": "screen",
+     "desc": "7-phase boot progress"
+    },
+    {
+     "id": "lobby",
+     "file": "ui/html-lobby.html",
+     "slot": "body",
+     "type": "screen",
+     "desc": "Room create/join + identity"
+    },
+    {
+     "id": "stage",
+     "file": "ui/html-stage.html",
+     "slot": "body",
+     "type": "screen",
+     "desc": "Main stage: queue, peers, lyrics, controls"
+    },
+    {
+     "id": "modals",
+     "file": "ui/html-modals.html",
+     "slot": "overlay",
+     "type": "modal",
+     "desc": "Settings + LRC import modals"
+    }
+   ],
+   "styles": [
+    {
+     "id": "base",
+     "file": "ui/css-base.css",
+     "section": "root vars, body, canvas"
+    },
+    {
+     "id": "boot",
+     "file": "ui/css-boot.css",
+     "section": "boot screen, phase dots"
+    },
+    {
+     "id": "lobby",
+     "file": "ui/css-lobby.css",
+     "section": "lobby card, identity, actions"
+    },
+    {
+     "id": "stage",
+     "file": "ui/css-stage.css",
+     "section": "stage overlay, queue, peers, lyrics"
+    },
+    {
+     "id": "modals",
+     "file": "ui/css-modals.css",
+     "section": "settings + LRC modals"
+    },
+    {
+     "id": "chat",
+     "file": "ui/css-chat.css",
+     "section": "chat overlay + messages"
+    }
+   ]
+  },
   "viz": {
    "udt": "VizConfig",
    "orb": {
@@ -306,12 +673,108 @@
     "distance": 25
    }
   },
+  "vocal": {
+   "udt": "VocalConfig",
+   "harmony_interval": 1.25,
+   "harmony_interval_name": "major_third",
+   "mix_defaults": {
+    "self": 0.8,
+    "track": 0.7,
+    "others": 0.6,
+    "harmony": 0.15,
+    "master": 0.85
+   },
+   "note_names": [
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B"
+   ],
+   "pitch_a4_hz": 440
+  },
+  "_types": {
+   "udt": "Config",
+   "_comment": "UDT type definitions for konomioke",
+   "types": {
+    "PhaseManifest": {
+     "desc": "7-prime boot phase manifest",
+     "fields": "phases[]"
+    },
+    "VagalRingConfig": {
+     "desc": "7 vagal ring frequency/analysis configs",
+     "fields": "rings[], drone_base_hz, coherence_target"
+    },
+    "VoiceMiningConfig": {
+     "desc": "PoVW mining thresholds and rewards",
+     "fields": "rewards[], min_coherence, mine_interval_ms"
+    },
+    "MeshConfig": {
+     "desc": "WebRTC/signaling configuration",
+     "fields": "ice_servers[], data_channel, signaling"
+    },
+    "VizConfig": {
+     "desc": "Three.js orb/ring/singer visualization params",
+     "fields": "orb, rings, singers, field_lines, camera"
+    },
+    "PlatformConfig": {
+     "desc": "App branding and endpoints",
+     "fields": "name, api, domain, token"
+    },
+    "IdentityConfig": {
+     "desc": "Crypto identity and IndexedDB config",
+     "fields": "key_algo, db_name, stores[]"
+    },
+    "AudioConfig": {
+     "desc": "Web Audio API and drone settings",
+     "fields": "fft_size, drone_freqs[], vagal_weights[]"
+    },
+    "VocalConfig": {
+     "desc": "Harmony and mix settings",
+     "fields": "harmony_interval, mix_defaults, note_names[]"
+    },
+    "TrackConfig": {
+     "desc": "Audio file formats and queue settings",
+     "fields": "supported_decode[], lrc_format"
+    },
+    "AppConfig": {
+     "desc": "Boot sequence and default settings",
+     "fields": "settings_defaults, boot_phases[], auto_enter"
+    },
+    "ViewTemplate": {
+     "desc": "UI HTML template fragment",
+     "fields": "file, slot, type"
+    },
+    "StyleSheet": {
+     "desc": "CSS file for a specific UI section",
+     "fields": "file, section"
+    },
+    "JSModule": {
+     "desc": "JavaScript source module",
+     "fields": "file, lines, class, phase"
+    }
+   }
+  },
   "phase:crdt-queue": {
    "udt": "Phase",
    "file": "phases/crdt-queue.js",
    "lines": 40,
    "size": 1304,
    "hasExport": true
+  },
+  "phase:globals": {
+   "udt": "Phase",
+   "file": "phases/globals.js",
+   "lines": 42,
+   "size": 2046,
+   "hasExport": false
   },
   "phase:p11-tracks": {
    "udt": "Phase",

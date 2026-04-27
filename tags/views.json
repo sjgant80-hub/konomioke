@@ -1,0 +1,18 @@
+{
+  "_udt": "ViewRegistry",
+  "views": [
+    { "id": "canvas",  "file": "ui/html-canvas.html",  "slot": "body",   "type": "canvas",  "desc": "Three.js orb canvas" },
+    { "id": "boot",    "file": "ui/html-boot.html",    "slot": "body",   "type": "screen",  "desc": "7-phase boot progress" },
+    { "id": "lobby",   "file": "ui/html-lobby.html",   "slot": "body",   "type": "screen",  "desc": "Room create/join + identity" },
+    { "id": "stage",   "file": "ui/html-stage.html",   "slot": "body",   "type": "screen",  "desc": "Main stage: queue, peers, lyrics, controls" },
+    { "id": "modals",  "file": "ui/html-modals.html",  "slot": "overlay","type": "modal",   "desc": "Settings + LRC import modals" }
+  ],
+  "styles": [
+    { "id": "base",    "file": "ui/css-base.css",    "section": "root vars, body, canvas" },
+    { "id": "boot",    "file": "ui/css-boot.css",    "section": "boot screen, phase dots" },
+    { "id": "lobby",   "file": "ui/css-lobby.css",   "section": "lobby card, identity, actions" },
+    { "id": "stage",   "file": "ui/css-stage.css",   "section": "stage overlay, queue, peers, lyrics" },
+    { "id": "modals",  "file": "ui/css-modals.css",  "section": "settings + LRC modals" },
+    { "id": "chat",    "file": "ui/css-chat.css",    "section": "chat overlay + messages" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "_udt": "ModuleRegistry",
+  "modules": [
+    { "id": "utils",           "file": "js/utils.js",           "lines": 41,  "phase": 0,  "desc": "helpers, constants, ring colors" },
+    { "id": "identity",        "file": "js/identity.js",        "lines": 156, "phase": 2,  "desc": "KonomiIdentity class" },
+    { "id": "crdt-queue",      "file": "js/crdt-queue.js",      "lines": 36,  "phase": 11, "desc": "CRDTQueue class" },
+    { "id": "mesh",            "file": "js/mesh.js",            "lines": 227, "phase": 3,  "desc": "KonomiMesh WebRTC class" },
+    { "id": "fabric-setup",    "file": "js/fabric-setup.js",    "lines": 150, "phase": 5,  "desc": "AudioFabricEngine init + drones" },
+    { "id": "fabric-analyze",  "file": "js/fabric-analyze.js",  "lines": 154, "phase": 5,  "desc": "7-ring analysis loop" },
+    { "id": "vocal",           "file": "js/vocal.js",           "lines": 122, "phase": 7,  "desc": "VocalProcessor mix + harmony" },
+    { "id": "tracks-queue",    "file": "js/tracks-queue.js",    "lines": 150, "phase": 11, "desc": "TrackEngine queue + loading" },
+    { "id": "tracks-play",     "file": "js/tracks-play.js",     "lines": 153, "phase": 11, "desc": "Playback + LRC lyrics" },
+    { "id": "viz-scene",       "file": "js/viz-scene.js",       "lines": 74,  "phase": 13, "desc": "Three.js scene + camera" },
+    { "id": "viz-orb",         "file": "js/viz-orb.js",         "lines": 78,  "phase": 13, "desc": "Central orb shader" },
+    { "id": "viz-rings",       "file": "js/viz-rings.js",       "lines": 133, "phase": 13, "desc": "Toroidal ring particles" },
+    { "id": "viz-render",      "file": "js/viz-render.js",      "lines": 113, "phase": 13, "desc": "Render loop + peer clusters" },
+    { "id": "app-core",        "file": "js/app-core.js",        "lines": 169, "phase": 17, "desc": "KonomiApp constructor + boot" },
+    { "id": "app-lobby",       "file": "js/app-lobby.js",       "lines": 122, "phase": 17, "desc": "Lobby events + auto-enter" },
+    { "id": "app-stage",       "file": "js/app-stage.js",       "lines": 61,  "phase": 17, "desc": "Stage UI events" },
+    { "id": "app-events",      "file": "js/app-events.js",      "lines": 101, "phase": 17, "desc": "Track + chat events" },
+    { "id": "app-mesh",        "file": "js/app-mesh.js",        "lines": 68,  "phase": 17, "desc": "Mesh callbacks" },
+    { "id": "app-loop",        "file": "js/app-loop.js",        "lines": 81,  "phase": 17, "desc": "Main analysis + render loop" },
+    { "id": "boot",            "file": "js/boot.js",            "lines": 23,  "phase": 17, "desc": "Ignition + KCC mining patch" }
+  ]
+}

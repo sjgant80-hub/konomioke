@@ -1,0 +1,21 @@
+{
+  "_udt": "AppConfig",
+  "settings_defaults": {
+    "pitch": true,
+    "harmony": false,
+    "drones": true,
+    "viz": true,
+    "aec": false
+  },
+  "boot_phases": [
+    { "prime": 2,  "label": "IDENTITY + ROOMS" },
+    { "prime": 3,  "label": "P2P MESH" },
+    { "prime": 5,  "label": "AUDIO FABRIC" },
+    { "prime": 7,  "label": "VOCAL PROCESSING" },
+    { "prime": 11, "label": "TRACK + LYRICS" },
+    { "prime": 13, "label": "VISUALIZATION" },
+    { "prime": 17, "label": "LAUNCHER" }
+  ],
+  "auto_enter": true,
+  "auto_enter_mode": "solo"
+}

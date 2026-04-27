@@ -1,0 +1,14 @@
+{
+  "_udt": "VocalConfig",
+  "harmony_interval": 1.25,
+  "harmony_interval_name": "major_third",
+  "mix_defaults": {
+    "self": 0.8,
+    "track": 0.7,
+    "others": 0.6,
+    "harmony": 0.15,
+    "master": 0.85
+  },
+  "note_names": ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
+  "pitch_a4_hz": 440
+}

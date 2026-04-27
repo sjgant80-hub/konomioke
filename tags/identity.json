@@ -1,0 +1,10 @@
+{
+  "_udt": "IdentityConfig",
+  "key_algo": "Ed25519",
+  "fallback_algo": "ECDSA-P256",
+  "db_name": "konomioke",
+  "db_version": 2,
+  "stores": ["keystore", "meta", "tracks", "sessions"],
+  "default_name": "Singer",
+  "room_code_length": 8
+}

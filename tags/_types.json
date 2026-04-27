@@ -1,0 +1,19 @@
+{
+  "_comment": "UDT type definitions for konomioke",
+  "types": {
+    "PhaseManifest":   { "desc": "7-prime boot phase manifest", "fields": "phases[]" },
+    "VagalRingConfig": { "desc": "7 vagal ring frequency/analysis configs", "fields": "rings[], drone_base_hz, coherence_target" },
+    "VoiceMiningConfig":{ "desc": "PoVW mining thresholds and rewards", "fields": "rewards[], min_coherence, mine_interval_ms" },
+    "MeshConfig":      { "desc": "WebRTC/signaling configuration", "fields": "ice_servers[], data_channel, signaling" },
+    "VizConfig":       { "desc": "Three.js orb/ring/singer visualization params", "fields": "orb, rings, singers, field_lines, camera" },
+    "PlatformConfig":  { "desc": "App branding and endpoints", "fields": "name, api, domain, token" },
+    "IdentityConfig":  { "desc": "Crypto identity and IndexedDB config", "fields": "key_algo, db_name, stores[]" },
+    "AudioConfig":     { "desc": "Web Audio API and drone settings", "fields": "fft_size, drone_freqs[], vagal_weights[]" },
+    "VocalConfig":     { "desc": "Harmony and mix settings", "fields": "harmony_interval, mix_defaults, note_names[]" },
+    "TrackConfig":     { "desc": "Audio file formats and queue settings", "fields": "supported_decode[], lrc_format" },
+    "AppConfig":       { "desc": "Boot sequence and default settings", "fields": "settings_defaults, boot_phases[], auto_enter" },
+    "ViewTemplate":    { "desc": "UI HTML template fragment", "fields": "file, slot, type" },
+    "StyleSheet":      { "desc": "CSS file for a specific UI section", "fields": "file, section" },
+    "JSModule":        { "desc": "JavaScript source module", "fields": "file, lines, class, phase" }
+  }
+}
