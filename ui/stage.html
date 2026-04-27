@@ -1,0 +1,245 @@
+
+<!-- ═══ BOOT SCREEN ═══ -->
+<div id="boot-screen">
+  <div class="boot-title">好みオケ</div>
+  <div class="boot-sub">KONOMIOKE</div>
+  <div class="boot-phases">
+    <div class="boot-phase" data-phase="2">
+      <span class="phase-prime">p=2</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">IDENTITY + ROOMS</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="3">
+      <span class="phase-prime">p=3</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">P2P MESH</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="5">
+      <span class="phase-prime">p=5</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">AUDIO FABRIC</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="7">
+      <span class="phase-prime">p=7</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">VOCAL PROCESSING</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="11">
+      <span class="phase-prime">p=11</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">TRACK + LYRICS</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="13">
+      <span class="phase-prime">p=13</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">VISUALIZATION</span>
+      <span class="phase-status"></span>
+    </div>
+    <div class="boot-phase" data-phase="17">
+      <span class="phase-prime">p=17</span>
+      <span class="phase-dot"></span>
+      <span class="phase-label">LAUNCHER</span>
+      <span class="phase-status"></span>
+    </div>
+  </div>
+  <div class="boot-fold">fold(konomioke) = 2 &times; 3 &times; 5 &times; 7 &times; 11 &times; 13 &times; 17 = 510,510</div>
+</div>
+
+<!-- ═══ LOBBY SCREEN ═══ -->
+<div id="lobby-screen">
+  <div class="lobby-card">
+    <h2>好みオケ</h2>
+    <p style="font-size:0.75rem;color:var(--text-dim);">Peer-to-Peer Therapeutic Karaoke</p>
+
+    <div class="lobby-identity">
+      <div class="identity-label">YOUR IDENTITY</div>
+      <div class="identity-id" id="lobby-pubkey">—</div>
+      <div class="identity-name-row">
+        <input id="display-name" placeholder="Display name" maxlength="24" />
+        <button id="save-name">SET</button>
+      </div>
+    </div>
+
+    <div class="lobby-actions">
+      <button class="primary" id="btn-create-room">CREATE ROOM</button>
+      <div class="lobby-join">
+        <input id="join-code" placeholder="ROOM CODE" maxlength="16" />
+        <button id="btn-join-room">JOIN</button>
+      </div>
+    </div>
+
+    <div class="lobby-signal">
+      <label>Signal:</label>
+      <input id="signal-url" value="" placeholder="ws://your-server:3000" />
+    </div>
+    <p style="font-size:0.55rem;color:var(--text-dim);margin-top:0.6rem;line-height:1.4">
+      Leave signal blank to sing solo. For P2P rooms, run<br>
+      <code style="color:var(--r4)">npm start</code> and enter your signaling server URL.
+    </p>
+  </div>
+</div>
+
+<!-- ═══ STAGE SCREEN ═══ -->
+<div id="stage-screen">
+  <canvas id="orb-canvas"></canvas>
+
+  <div class="stage-overlay">
+    <!-- Top bar -->
+    <div class="stage-top">
+      <div class="room-info">
+        <span class="room-code" id="stage-room-code">—</span>
+        <span class="room-peers-count" id="stage-peers-count">0 peers</span>
+        <span class="room-coherence" id="stage-coherence">coherence: 0.000</span>
+      </div>
+      <div class="stage-controls-top">
+        <button class="btn-icon" id="btn-mic" title="Toggle mic">&#x1f3a4;</button>
+        <button class="btn-icon" id="btn-settings" title="Settings">&#x2699;</button>
+        <button class="btn-icon" id="btn-leave" title="Leave room">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Left: Queue -->
+    <div class="stage-left">
+      <div class="panel-title">QUEUE</div>
+      <div id="queue-list"></div>
+      <div class="queue-actions">
+        <label>
+          <span>+ ADD TRACK</span>
+          <input type="file" id="track-upload" accept="audio/*,video/*,.mp4,.mkv,.webm,.mov" />
+        </label>
+        <button id="btn-import-lrc">IMPORT LYRICS (.lrc)</button>
+      </div>
+    </div>
+
+    <!-- Right: Peers + Mix + Vagal -->
+    <div class="stage-right">
+      <div class="peers-panel">
+        <div class="panel-title">PEERS</div>
+        <div id="peers-list"></div>
+      </div>
+
+      <div class="mix-panel">
+        <div class="panel-title">MIX</div>
+        <div class="mix-row">
+          <span class="mix-label">Self</span>
+          <input type="range" class="mix-slider" id="mix-self" min="0" max="100" value="80" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Track</span>
+          <input type="range" class="mix-slider" id="mix-track" min="0" max="100" value="70" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Others</span>
+          <input type="range" class="mix-slider" id="mix-others" min="0" max="100" value="60" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Drones</span>
+          <input type="range" class="mix-slider" id="mix-drones" min="0" max="100" value="20" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Harmony</span>
+          <input type="range" class="mix-slider" id="mix-harmony" min="0" max="100" value="30" />
+        </div>
+      </div>
+
+      <div class="vagal-panel">
+        <div class="panel-title">VAGAL RINGS</div>
+        <div class="ring-bars" id="ring-bars">
+          <div class="ring-bar" style="background:var(--r0);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r1);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r2);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r3);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r4);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r5);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r6);height:2px"></div>
+        </div>
+        <div class="vagal-metrics" id="vagal-metrics">
+          <div>TONE: <span class="vagal-metric-val" id="vm-tone">0.00</span></div>
+          <div>MODE: <span class="vagal-metric-val" id="vm-mode">—</span></div>
+          <div>COHER: <span class="vagal-metric-val" id="vm-coher">0.000</span></div>
+          <div>EXHALE: <span class="vagal-metric-val" id="vm-exhale">0.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom: Lyrics + Playback -->
+    <div class="stage-bottom">
+      <div class="lyrics-display">
+        <div class="lyrics-prev" id="lyrics-prev"></div>
+        <div class="lyrics-current" id="lyrics-current">~ ready to sing ~</div>
+        <div class="lyrics-next" id="lyrics-next"></div>
+      </div>
+      <div class="pitch-bar">
+        <div class="pitch-indicator" id="pitch-indicator"></div>
+      </div>
+      <div class="playback-controls">
+        <button id="btn-prev-track">&laquo;</button>
+        <button id="btn-play-pause">&#9654;</button>
+        <button id="btn-next-track">&raquo;</button>
+        <span class="playback-time" id="playback-time">0:00 / 0:00</span>
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-panel">
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <input id="chat-input" placeholder="Chat..." maxlength="200" />
+      <button id="btn-chat-send">&#9654;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS MODAL ═══ -->
+<div id="settings-modal">
+  <div class="settings-card">
+    <h3>SETTINGS</h3>
+    <div class="settings-row">
+      <label>Pitch Display</label>
+      <div class="toggle-switch on" id="toggle-pitch" data-key="pitch"></div>
+    </div>
+    <div class="settings-row">
+      <label>Harmony</label>
+      <div class="toggle-switch" id="toggle-harmony" data-key="harmony"></div>
+    </div>
+    <div class="settings-row">
+      <label>Prime Drones</label>
+      <div class="toggle-switch on" id="toggle-drones" data-key="drones"></div>
+    </div>
+    <div class="settings-row">
+      <label>Orb Visualization</label>
+      <div class="toggle-switch on" id="toggle-viz" data-key="viz"></div>
+    </div>
+    <div class="settings-row">
+      <label>Echo Cancellation</label>
+      <div class="toggle-switch" id="toggle-aec" data-key="aec"></div>
+    </div>
+    <div style="margin-top:1rem;text-align:right">
+      <button id="btn-close-settings" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.5rem 1rem;color:var(--text);font-family:var(--font);cursor:pointer;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LRC IMPORT MODAL ═══ -->
+<div id="lrc-modal">
+  <div class="lrc-card">
+    <h3>IMPORT LYRICS (LRC)</h3>
+    <textarea id="lrc-text" placeholder="[00:12.00]First line of lyrics
+[00:17.20]Second line
+[00:23.50]Third line"></textarea>
+    <div class="btn-row">
+      <button id="btn-lrc-cancel">CANCEL</button>
+      <button class="primary" id="btn-lrc-import">IMPORT</button>
+    </div>
+  </div>
+</div>
+

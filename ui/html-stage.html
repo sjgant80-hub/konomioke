@@ -1,0 +1,115 @@
+<div id="stage-screen">
+  <canvas id="orb-canvas"></canvas>
+
+  <div class="stage-overlay">
+    <!-- Top bar -->
+    <div class="stage-top">
+      <div class="room-info">
+        <span class="room-code" id="stage-room-code">—</span>
+        <span class="room-peers-count" id="stage-peers-count">0 peers</span>
+        <span class="room-coherence" id="stage-coherence">coherence: 0.000</span>
+      </div>
+      <div class="stage-controls-top">
+        <button class="btn-icon" id="btn-mic" title="Toggle mic">&#x1f3a4;</button>
+        <button class="btn-icon" id="btn-settings" title="Settings">&#x2699;</button>
+        <button class="btn-icon" id="btn-leave" title="Leave room">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Left: Queue -->
+    <div class="stage-left">
+      <div class="panel-title">QUEUE</div>
+      <div id="queue-list"></div>
+      <div class="queue-actions">
+        <label>
+          <span>+ ADD TRACK</span>
+          <input type="file" id="track-upload" accept="audio/*,video/*,.mp4,.mkv,.webm,.mov" />
+        </label>
+        <button id="btn-import-lrc">IMPORT LYRICS (.lrc)</button>
+      </div>
+    </div>
+
+    <!-- Right: Peers + Mix + Vagal -->
+    <div class="stage-right">
+      <div class="peers-panel">
+        <div class="panel-title">PEERS</div>
+        <div id="peers-list"></div>
+      </div>
+
+      <div class="mix-panel">
+        <div class="panel-title">MIX</div>
+        <div class="mix-row">
+          <span class="mix-label">Self</span>
+          <input type="range" class="mix-slider" id="mix-self" min="0" max="100" value="80" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Track</span>
+          <input type="range" class="mix-slider" id="mix-track" min="0" max="100" value="70" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Others</span>
+          <input type="range" class="mix-slider" id="mix-others" min="0" max="100" value="60" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Drones</span>
+          <input type="range" class="mix-slider" id="mix-drones" min="0" max="100" value="20" />
+        </div>
+        <div class="mix-row">
+          <span class="mix-label">Harmony</span>
+          <input type="range" class="mix-slider" id="mix-harmony" min="0" max="100" value="30" />
+        </div>
+      </div>
+
+      <div class="vagal-panel">
+        <div class="panel-title">VAGAL RINGS</div>
+        <div class="ring-bars" id="ring-bars">
+          <div class="ring-bar" style="background:var(--r0);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r1);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r2);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r3);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r4);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r5);height:2px"></div>
+          <div class="ring-bar" style="background:var(--r6);height:2px"></div>
+        </div>
+        <div class="vagal-metrics" id="vagal-metrics">
+          <div>TONE: <span class="vagal-metric-val" id="vm-tone">0.00</span></div>
+          <div>MODE: <span class="vagal-metric-val" id="vm-mode">—</span></div>
+          <div>COHER: <span class="vagal-metric-val" id="vm-coher">0.000</span></div>
+          <div>EXHALE: <span class="vagal-metric-val" id="vm-exhale">0.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom: Lyrics + Playback -->
+    <div class="stage-bottom">
+      <div class="lyrics-display">
+        <div class="lyrics-prev" id="lyrics-prev"></div>
+        <div class="lyrics-current" id="lyrics-current">~ ready to sing ~</div>
+        <div class="lyrics-next" id="lyrics-next"></div>
+      </div>
+      <div class="pitch-bar">
+        <div class="pitch-indicator" id="pitch-indicator"></div>
+      </div>
+      <div class="playback-controls">
+        <button id="btn-prev-track">&laquo;</button>
+        <button id="btn-play-pause">&#9654;</button>
+        <button id="btn-next-track">&raquo;</button>
+        <span class="playback-time" id="playback-time">0:00 / 0:00</span>
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-panel">
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <input id="chat-input" placeholder="Chat..." maxlength="200" />
+      <button id="btn-chat-send">&#9654;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS MODAL ═══ -->

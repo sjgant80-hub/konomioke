@@ -1,0 +1,93 @@
+/* ── BOOT SCREEN ───────────────────────────────────────── */
+#boot-screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 1000;
+  background: var(--bg);
+}
+
+.boot-title {
+  font-size: 3rem;
+  letter-spacing: 0.3em;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.boot-sub {
+  font-size: 1rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-bottom: 3rem;
+}
+
+.boot-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 320px;
+}
+
+.boot-phase {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  opacity: 0.3;
+  transition: all 0.4s ease;
+}
+
+.boot-phase.active {
+  opacity: 1;
+  border-color: var(--gold);
+  box-shadow: 0 0 20px var(--gold-glow);
+}
+
+.boot-phase.done {
+  opacity: 0.7;
+  border-color: rgba(255,255,255,0.1);
+}
+
+.boot-phase.fail {
+  opacity: 1;
+  border-color: var(--r0);
+  box-shadow: 0 0 20px rgba(255, 34, 68, 0.3);
+}
+
+.phase-prime {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  min-width: 36px;
+}
+
+.phase-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: all 0.4s ease;
+}
+
+.boot-phase.active .phase-dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.boot-phase.done .phase-dot { background: var(--r3); }
+.boot-phase.fail .phase-dot { background: var(--r0); }
+
+.phase-label {
+  font-size: 0.8rem;
+  flex: 1;
+}
+
+.phase-status {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.boot-fold {
+  margin-top: 2rem;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+}
+

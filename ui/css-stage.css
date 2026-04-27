@@ -1,0 +1,342 @@
+/* ── STAGE SCREEN ──────────────────────────────────────── */
+#stage-screen {
+  position: fixed; inset: 0;
+  display: none;
+  z-index: 800;
+}
+
+#orb-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+/* Stage overlay panels */
+.stage-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.stage-overlay > * { pointer-events: auto; }
+
+/* Top bar */
+.stage-top {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.room-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+}
+
+.room-code {
+  font-size: 1rem;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  font-weight: bold;
+}
+
+.room-peers-count {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.room-coherence {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.room-coherence.golden { color: var(--gold); }
+
+.stage-controls-top {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover { border-color: var(--gold); }
+.btn-icon.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+.btn-icon.muted { background: var(--r0); color: white; border-color: var(--r0); }
+
+/* Left panel — Queue */
+.stage-left {
+  grid-column: 1;
+  grid-row: 2;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.panel-title {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.8rem;
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.queue-item:hover { border-color: var(--border); }
+.queue-item.playing { border-color: var(--gold); background: rgba(212,175,55,0.08); }
+
+.queue-num {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  min-width: 18px;
+}
+
+.queue-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-artist { font-size: 0.7rem; color: var(--text-dim); }
+
+.queue-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.queue-actions button, .queue-actions label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.queue-actions button:hover, .queue-actions label:hover { border-color: var(--gold); }
+.queue-actions input[type="file"] { display: none; }
+
+/* Right panel — Peers + Mix */
+.stage-right {
+  grid-column: 3;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.peers-panel, .mix-panel, .vagal-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.peer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-size: 0.8rem;
+}
+
+.peer-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+}
+
+.peer-name { flex: 1; }
+.peer-role { font-size: 0.65rem; color: var(--text-dim); }
+
+/* Mix sliders */
+.mix-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.mix-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  min-width: 60px;
+}
+
+.mix-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.mix-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+
+/* Vagal rings display */
+.ring-bars {
+  display: flex;
+  gap: 4px;
+  height: 60px;
+  align-items: flex-end;
+}
+
+.ring-bar {
+  flex: 1;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.1s ease;
+}
+
+.vagal-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.vagal-metric-val { color: var(--text); }
+
+/* Bottom bar — Lyrics + Pitch */
+.stage-bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lyrics-display {
+  text-align: center;
+  max-width: 700px;
+  width: 100%;
+}
+
+.lyrics-prev {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  opacity: 0.5;
+  margin-bottom: 0.3rem;
+}
+
+.lyrics-current {
+  font-size: 1.4rem;
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(212,175,55,0.3);
+  min-height: 2rem;
+}
+
+.lyrics-next {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  opacity: 0.5;
+  margin-top: 0.3rem;
+}
+
+.pitch-bar {
+  width: 200px;
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pitch-indicator {
+  position: absolute;
+  width: 12px; height: 6px;
+  border-radius: 3px;
+  background: var(--r3);
+  left: 50%;
+  transform: translateX(-50%);
+  transition: left 0.05s ease, background 0.2s ease;
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.playback-controls button {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.playback-controls button:hover { border-color: var(--gold); }
+
+.playback-time {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.progress-bar {
+  width: 300px;
+  height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.2s linear;
+}
+

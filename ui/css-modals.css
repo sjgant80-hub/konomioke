@@ -1,0 +1,115 @@
+/* ── SETTINGS MODAL ────────────────────────────────────── */
+#settings-modal {
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 950;
+  background: rgba(0,0,0,0.7);
+}
+
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.settings-card h3 {
+  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+
+.settings-row label { color: var(--text-dim); }
+
+.toggle-switch {
+  position: relative;
+  width: 36px; height: 20px;
+  background: var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-switch.on { background: var(--gold); }
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: white;
+  top: 2px; left: 2px;
+  transition: transform 0.2s;
+}
+
+.toggle-switch.on::after { transform: translateX(16px); }
+
+/* ── LRC IMPORT MODAL ──────────────────────────────────── */
+#lrc-modal {
+  position: fixed; inset: 0;
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 950;
+  background: rgba(0,0,0,0.7);
+}
+
+.lrc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+}
+
+.lrc-card h3 { margin-bottom: 1rem; }
+
+.lrc-card textarea {
+  width: 100%;
+  height: 200px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  padding: 0.6rem;
+  resize: vertical;
+  outline: none;
+}
+
+.lrc-card textarea:focus { border-color: var(--gold); }
+
+.lrc-card .btn-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.lrc-card button {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.lrc-card button.primary { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+

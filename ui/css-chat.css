@@ -1,0 +1,80 @@
+/* ── CHAT OVERLAY ──────────────────────────────────────── */
+.chat-panel {
+  position: absolute;
+  bottom: 120px; left: 1rem;
+  width: 260px;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: 0.5rem;
+}
+
+.chat-msg {
+  font-size: 0.7rem;
+  color: var(--text);
+  background: var(--panel);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  max-width: 100%;
+  word-break: break-word;
+  animation: fadeIn 0.3s ease;
+}
+
+.chat-msg .chat-author {
+  font-weight: bold;
+  margin-right: 0.3rem;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.chat-input-row {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.7rem;
+  outline: none;
+}
+
+.chat-input-row button {
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-family: var(--font);
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .stage-overlay {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  .stage-left, .stage-right { display: none; }
+}
+
+/* ── SCROLLBAR ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }

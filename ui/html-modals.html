@@ -1,0 +1,43 @@
+<div id="settings-modal">
+  <div class="settings-card">
+    <h3>SETTINGS</h3>
+    <div class="settings-row">
+      <label>Pitch Display</label>
+      <div class="toggle-switch on" id="toggle-pitch" data-key="pitch"></div>
+    </div>
+    <div class="settings-row">
+      <label>Harmony</label>
+      <div class="toggle-switch" id="toggle-harmony" data-key="harmony"></div>
+    </div>
+    <div class="settings-row">
+      <label>Prime Drones</label>
+      <div class="toggle-switch on" id="toggle-drones" data-key="drones"></div>
+    </div>
+    <div class="settings-row">
+      <label>Orb Visualization</label>
+      <div class="toggle-switch on" id="toggle-viz" data-key="viz"></div>
+    </div>
+    <div class="settings-row">
+      <label>Echo Cancellation</label>
+      <div class="toggle-switch" id="toggle-aec" data-key="aec"></div>
+    </div>
+    <div style="margin-top:1rem;text-align:right">
+      <button id="btn-close-settings" style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:0.5rem 1rem;color:var(--text);font-family:var(--font);cursor:pointer;">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LRC IMPORT MODAL ═══ -->
+<div id="lrc-modal">
+  <div class="lrc-card">
+    <h3>IMPORT LYRICS (LRC)</h3>
+    <textarea id="lrc-text" placeholder="[00:12.00]First line of lyrics
+[00:17.20]Second line
+[00:23.50]Third line"></textarea>
+    <div class="btn-row">
+      <button id="btn-lrc-cancel">CANCEL</button>
+      <button class="primary" id="btn-lrc-import">IMPORT</button>
+    </div>
+  </div>
+</div>
+

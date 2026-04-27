@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════════════════
+   KONOMIOKE — 好みオケ — Peer-to-Peer Therapeutic Karaoke
+   fold(konomioke) = 2 × 3 × 5 × 7 × 11 × 13 × 17 = 510,510
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --bg: #06060c;
+  --surface: #0d0d18;
+  --panel: rgba(12, 12, 24, 0.85);
+  --border: rgba(255, 255, 255, 0.06);
+  --text: #d8d8e4;
+  --text-dim: #6a6a80;
+  --gold: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --r0: #ff2244;
+  --r1: #ff8800;
+  --r2: #ffcc00;
+  --r3: #00ff88;
+  --r4: #00ccff;
+  --r5: #4466ff;
+  --r6: #aa00ff;
+  --font: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+

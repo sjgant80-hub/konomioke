@@ -3275,17 +3275,14 @@ class KonomiApp {
 
 const konomi = new KonomiApp();
 
-// ── KCC MINING LAYER ── singing IS mining
-import('./lib/kcc-widget.js').then(async kccWidget => {
-  kccWidget.injectWidget();
-  const origLoop = konomi._analyzeLoop?.bind(konomi);
-  const patchAnalysis = () => {
-    if (konomi.fabric) {
-      kccWidget.tick(konomi.fabric);
-    }
-    requestAnimationFrame(patchAnalysis);
+// ── KCC MINING LAYER ── singing IS mining (uses shared template)
+import('./_kcc/js/kcc-mine.js').then(kcc => {
+  kcc.initMiningWidget();
+  const tick = () => {
+    if (konomi.fabric) kcc.tickMining(konomi.fabric);
+    requestAnimationFrame(tick);
   };
-  requestAnimationFrame(patchAnalysis);
+  requestAnimationFrame(tick);
 }).catch(() => console.warn('KCC mining layer not loaded'));
 
 konomi.boot().catch(err => {
