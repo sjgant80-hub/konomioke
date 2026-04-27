@@ -3274,6 +3274,20 @@ class KonomiApp {
 // ─────────────────────────────────────────────────────────
 
 const konomi = new KonomiApp();
+
+// ── KCC MINING LAYER ── singing IS mining
+import('./lib/kcc-widget.js').then(async kccWidget => {
+  kccWidget.injectWidget();
+  const origLoop = konomi._analyzeLoop?.bind(konomi);
+  const patchAnalysis = () => {
+    if (konomi.fabric) {
+      kccWidget.tick(konomi.fabric);
+    }
+    requestAnimationFrame(patchAnalysis);
+  };
+  requestAnimationFrame(patchAnalysis);
+}).catch(() => console.warn('KCC mining layer not loaded'));
+
 konomi.boot().catch(err => {
   console.error('KONOMIOKE boot failed:', err);
   document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace;text-align:center;padding:2rem">
