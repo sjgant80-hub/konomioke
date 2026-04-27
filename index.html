@@ -2791,6 +2791,18 @@ class KonomiApp {
     if (savedName && savedName !== 'Singer') {
       $('#display-name').value = savedName;
     }
+
+    // Auto-enter public room — skip lobby
+    try {
+      await this.fabric.resume();
+      const code = await this.identity.createRoomCode();
+      this.mesh.roomCode = code;
+      this.mesh.isHost = true;
+      await this._getMicrophone();
+      this._enterStage(code);
+    } catch (e) {
+      console.warn('Auto-enter failed, showing lobby:', e.message);
+    }
   }
 
   // ── LOBBY EVENTS ───────────────────────────────────────
