@@ -1,0 +1,17 @@
+{
+  "_udt": "VagalRingConfig",
+  "rings": [
+    { "index": 0, "name": "Diaphragm",      "prime": 2,  "freq_hz": 110,  "color": "#ff3366", "analysis": "amplitude_rms",    "weight": 0.20 },
+    { "index": 1, "name": "Larynx",          "prime": 3,  "freq_hz": 165,  "color": "#ff8833", "analysis": "pitch_f0",         "weight": 0.25 },
+    { "index": 2, "name": "Breath",          "prime": 5,  "freq_hz": 275,  "color": "#ffcc33", "analysis": "fricative_4khz",   "weight": 0.10 },
+    { "index": 3, "name": "Thoracic",        "prime": 7,  "freq_hz": 385,  "color": "#33cccc", "analysis": "formant_100_400",  "weight": 0.15 },
+    { "index": 4, "name": "Nasopharyngeal",  "prime": 11, "freq_hz": 605,  "color": "#3366ff", "analysis": "formant_800_2500", "weight": 0.10 },
+    { "index": 5, "name": "Oral",            "prime": 13, "freq_hz": 715,  "color": "#9933ff", "analysis": "formant_2500_4000","weight": 0.10 },
+    { "index": 6, "name": "Observer",        "prime": 17, "freq_hz": 935,  "color": "#ff33cc", "analysis": "silence_detect",   "weight": 0.10 }
+  ],
+  "drone_base_hz": 55,
+  "drone_gain": 0.03,
+  "coherence_target": 0.618,
+  "fft_size": 2048,
+  "smoothing": 0.8
+}

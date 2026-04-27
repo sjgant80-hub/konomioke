@@ -1,0 +1,15 @@
+{
+  "_udt": "PlatformConfig",
+  "name": "Konomioke",
+  "japanese": "好みオケ",
+  "meaning": "My Favorite Karaoke",
+  "tagline": "Singing is simultaneously social performance and vagal nerve therapy",
+  "fold": "2 × 3 × 5 × 7 × 11 × 13 × 17 = 510,510",
+  "powered_by": "OnlyASS",
+  "runs_on": "ASS-OS",
+  "token": "KCC",
+  "mining": "Proof of Voice Work",
+  "api": "https://onlybrains.onrender.com",
+  "domain": "konomi-systems.com",
+  "contact": "thomas@konomi-systems.com"
+}

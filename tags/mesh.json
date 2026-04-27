@@ -1,0 +1,23 @@
+{
+  "_udt": "MeshConfig",
+  "signaling": {
+    "protocol": "WebSocket",
+    "default_port": 3000,
+    "messages": ["join", "signal", "state", "peer-joined", "peer-left"]
+  },
+  "webrtc": {
+    "ice_servers": [
+      "stun:stun.l.google.com:19302",
+      "stun:stun1.l.google.com:19302"
+    ],
+    "data_channel": "konomi",
+    "audio_only": true
+  },
+  "identity": {
+    "key_algo": "Ed25519",
+    "fallback": "ECDSA-P256",
+    "storage": "IndexedDB",
+    "db_name": "konomioke",
+    "stores": ["keystore", "meta", "tracks", "sessions"]
+  }
+}

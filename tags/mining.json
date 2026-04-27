@@ -1,0 +1,17 @@
+{
+  "_udt": "VoiceMiningConfig",
+  "protocol": "PoVW",
+  "full_name": "Proof of Voice Work",
+  "api": "https://onlybrains.onrender.com/api/sing",
+  "mine_interval_ms": 10000,
+  "min_coherence": 0.3,
+  "rewards": [
+    { "threshold": "psi >= phi",       "kcc": 4, "strategy": "Reflexion", "desc": "Golden coherence — full vagal alignment" },
+    { "threshold": "coherence >= phi",  "kcc": 3, "strategy": "GoT",       "desc": "Phi-aligned rings" },
+    { "threshold": "coherence >= 0.5",  "kcc": 2, "strategy": "ToT",       "desc": "Harmonizing" },
+    { "threshold": "coherence >= 0.3",  "kcc": 1, "strategy": "CoT",       "desc": "Participating" }
+  ],
+  "proof_format": "PoVW|coherence=N|vagal=N|psi=N|mode=S|exhale=N|rings=N,N,N,N,N,N,N",
+  "phi": 0.6180339887498949,
+  "anchor": "BSV"
+}

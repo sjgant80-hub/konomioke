@@ -1,0 +1,398 @@
+{
+ "_comment": "KONOMIOKE TAG.DB",
+ "_built": "2026-04-27T20:24:45.035Z",
+ "udt_types": {
+  "MeshConfig": {
+   "desc": "MeshConfig",
+   "count": 1
+  },
+  "VoiceMiningConfig": {
+   "desc": "VoiceMiningConfig",
+   "count": 1
+  },
+  "PhaseManifest": {
+   "desc": "PhaseManifest",
+   "count": 1
+  },
+  "PlatformConfig": {
+   "desc": "PlatformConfig",
+   "count": 1
+  },
+  "VagalRingConfig": {
+   "desc": "VagalRingConfig",
+   "count": 1
+  },
+  "VizConfig": {
+   "desc": "VizConfig",
+   "count": 1
+  },
+  "Phase": {
+   "desc": "Konomioke prime phase module",
+   "count": 9
+  },
+  "Lib": {
+   "desc": "Library module",
+   "count": 5
+  }
+ },
+ "tags": {
+  "mesh": {
+   "udt": "MeshConfig",
+   "signaling": {
+    "protocol": "WebSocket",
+    "default_port": 3000,
+    "messages": [
+     "join",
+     "signal",
+     "state",
+     "peer-joined",
+     "peer-left"
+    ]
+   },
+   "webrtc": {
+    "ice_servers": [
+     "stun:stun.l.google.com:19302",
+     "stun:stun1.l.google.com:19302"
+    ],
+    "data_channel": "konomi",
+    "audio_only": true
+   },
+   "identity": {
+    "key_algo": "Ed25519",
+    "fallback": "ECDSA-P256",
+    "storage": "IndexedDB",
+    "db_name": "konomioke",
+    "stores": [
+     "keystore",
+     "meta",
+     "tracks",
+     "sessions"
+    ]
+   }
+  },
+  "mining": {
+   "udt": "VoiceMiningConfig",
+   "protocol": "PoVW",
+   "full_name": "Proof of Voice Work",
+   "api": "https://onlybrains.onrender.com/api/sing",
+   "mine_interval_ms": 10000,
+   "min_coherence": 0.3,
+   "rewards": [
+    {
+     "threshold": "psi >= phi",
+     "kcc": 4,
+     "strategy": "Reflexion",
+     "desc": "Golden coherence — full vagal alignment"
+    },
+    {
+     "threshold": "coherence >= phi",
+     "kcc": 3,
+     "strategy": "GoT",
+     "desc": "Phi-aligned rings"
+    },
+    {
+     "threshold": "coherence >= 0.5",
+     "kcc": 2,
+     "strategy": "ToT",
+     "desc": "Harmonizing"
+    },
+    {
+     "threshold": "coherence >= 0.3",
+     "kcc": 1,
+     "strategy": "CoT",
+     "desc": "Participating"
+    }
+   ],
+   "proof_format": "PoVW|coherence=N|vagal=N|psi=N|mode=S|exhale=N|rings=N,N,N,N,N,N,N",
+   "phi": 0.6180339887498949,
+   "anchor": "BSV"
+  },
+  "phases": {
+   "udt": "PhaseManifest",
+   "primorial": 510510,
+   "phases": [
+    {
+     "prime": 2,
+     "name": "Identity",
+     "file": "phases/p2-identity.js",
+     "class": "KonomiIdentity",
+     "lines": 156,
+     "deps": [
+      "utils"
+     ]
+    },
+    {
+     "prime": 3,
+     "name": "Mesh",
+     "file": "phases/p3-mesh.js",
+     "class": "KonomiMesh",
+     "lines": 227,
+     "deps": [
+      "identity"
+     ]
+    },
+    {
+     "prime": 5,
+     "name": "AudioFabric",
+     "file": "phases/p5-fabric.js",
+     "class": "AudioFabricEngine",
+     "lines": 296,
+     "deps": [
+      "mesh"
+     ]
+    },
+    {
+     "prime": 7,
+     "name": "Vocal",
+     "file": "phases/p7-vocal.js",
+     "class": "VocalProcessor",
+     "lines": 122,
+     "deps": [
+      "fabric"
+     ]
+    },
+    {
+     "prime": 11,
+     "name": "Tracks",
+     "file": "phases/p11-tracks.js",
+     "class": "TrackEngine",
+     "lines": 303,
+     "deps": [
+      "vocal",
+      "crdt-queue"
+     ]
+    },
+    {
+     "prime": 13,
+     "name": "Viz",
+     "file": "phases/p13-viz.js",
+     "class": "VizEngine",
+     "lines": 398,
+     "deps": [
+      "fabric"
+     ]
+    },
+    {
+     "prime": 17,
+     "name": "App",
+     "file": "phases/p17-app.js",
+     "class": "KonomiApp",
+     "lines": 586,
+     "deps": [
+      "all"
+     ]
+    }
+   ]
+  },
+  "platform": {
+   "udt": "PlatformConfig",
+   "name": "Konomioke",
+   "japanese": "好みオケ",
+   "meaning": "My Favorite Karaoke",
+   "tagline": "Singing is simultaneously social performance and vagal nerve therapy",
+   "fold": "2 × 3 × 5 × 7 × 11 × 13 × 17 = 510,510",
+   "powered_by": "OnlyASS",
+   "runs_on": "ASS-OS",
+   "token": "KCC",
+   "mining": "Proof of Voice Work",
+   "api": "https://onlybrains.onrender.com",
+   "domain": "konomi-systems.com",
+   "contact": "thomas@konomi-systems.com"
+  },
+  "rings": {
+   "udt": "VagalRingConfig",
+   "rings": [
+    {
+     "index": 0,
+     "name": "Diaphragm",
+     "prime": 2,
+     "freq_hz": 110,
+     "color": "#ff3366",
+     "analysis": "amplitude_rms",
+     "weight": 0.2
+    },
+    {
+     "index": 1,
+     "name": "Larynx",
+     "prime": 3,
+     "freq_hz": 165,
+     "color": "#ff8833",
+     "analysis": "pitch_f0",
+     "weight": 0.25
+    },
+    {
+     "index": 2,
+     "name": "Breath",
+     "prime": 5,
+     "freq_hz": 275,
+     "color": "#ffcc33",
+     "analysis": "fricative_4khz",
+     "weight": 0.1
+    },
+    {
+     "index": 3,
+     "name": "Thoracic",
+     "prime": 7,
+     "freq_hz": 385,
+     "color": "#33cccc",
+     "analysis": "formant_100_400",
+     "weight": 0.15
+    },
+    {
+     "index": 4,
+     "name": "Nasopharyngeal",
+     "prime": 11,
+     "freq_hz": 605,
+     "color": "#3366ff",
+     "analysis": "formant_800_2500",
+     "weight": 0.1
+    },
+    {
+     "index": 5,
+     "name": "Oral",
+     "prime": 13,
+     "freq_hz": 715,
+     "color": "#9933ff",
+     "analysis": "formant_2500_4000",
+     "weight": 0.1
+    },
+    {
+     "index": 6,
+     "name": "Observer",
+     "prime": 17,
+     "freq_hz": 935,
+     "color": "#ff33cc",
+     "analysis": "silence_detect",
+     "weight": 0.1
+    }
+   ],
+   "drone_base_hz": 55,
+   "drone_gain": 0.03,
+   "coherence_target": 0.618,
+   "fft_size": 2048,
+   "smoothing": 0.8
+  },
+  "viz": {
+   "udt": "VizConfig",
+   "orb": {
+    "radius": 6,
+    "segments": 64,
+    "shader": "vagal-breath",
+    "breathing_freq": 1.5,
+    "deform_amplitude": 0.15
+   },
+   "rings": {
+    "count": 7,
+    "particles_per_ring": 1400,
+    "base_radius": 8,
+    "radius_step": 2.5,
+    "tube_base": 1,
+    "tube_step": 0.3,
+    "blending": "additive"
+   },
+   "singers": {
+    "particles_per_peer": 200,
+    "golden_lerp_threshold": 0.618
+   },
+   "field_lines": {
+    "count": 12,
+    "base_opacity": 0.05,
+    "vagal_opacity": 0.15
+   },
+   "camera": {
+    "fov": 60,
+    "sway_x": 0.1,
+    "sway_y": 0.07,
+    "distance": 25
+   }
+  },
+  "phase:crdt-queue": {
+   "udt": "Phase",
+   "file": "phases/crdt-queue.js",
+   "lines": 40,
+   "size": 1304,
+   "hasExport": true
+  },
+  "phase:p11-tracks": {
+   "udt": "Phase",
+   "file": "phases/p11-tracks.js",
+   "lines": 304,
+   "size": 9265,
+   "hasExport": true
+  },
+  "phase:p13-viz": {
+   "udt": "Phase",
+   "file": "phases/p13-viz.js",
+   "lines": 399,
+   "size": 12961,
+   "hasExport": true
+  },
+  "phase:p17-app": {
+   "udt": "Phase",
+   "file": "phases/p17-app.js",
+   "lines": 587,
+   "size": 19001,
+   "hasExport": true
+  },
+  "phase:p2-identity": {
+   "udt": "Phase",
+   "file": "phases/p2-identity.js",
+   "lines": 157,
+   "size": 5544,
+   "hasExport": true
+  },
+  "phase:p3-mesh": {
+   "udt": "Phase",
+   "file": "phases/p3-mesh.js",
+   "lines": 228,
+   "size": 6376,
+   "hasExport": true
+  },
+  "phase:p5-fabric": {
+   "udt": "Phase",
+   "file": "phases/p5-fabric.js",
+   "lines": 297,
+   "size": 9280,
+   "hasExport": true
+  },
+  "phase:p7-vocal": {
+   "udt": "Phase",
+   "file": "phases/p7-vocal.js",
+   "lines": 123,
+   "size": 4036,
+   "hasExport": true
+  },
+  "phase:utils": {
+   "udt": "Phase",
+   "file": "phases/utils.js",
+   "lines": 33,
+   "size": 1204,
+   "hasExport": true
+  },
+  "lib:crdt-queue": {
+   "udt": "Lib",
+   "file": "lib/crdt-queue.js",
+   "size": 1108
+  },
+  "lib:dsp": {
+   "udt": "Lib",
+   "file": "lib/dsp.js",
+   "size": 2989
+  },
+  "lib:kcc-mine": {
+   "udt": "Lib",
+   "file": "lib/kcc-mine.js",
+   "size": 2604
+  },
+  "lib:kcc-widget": {
+   "udt": "Lib",
+   "file": "lib/kcc-widget.js",
+   "size": 2393
+  },
+  "lib:lrc-parser": {
+   "udt": "Lib",
+   "file": "lib/lrc-parser.js",
+   "size": 640
+  }
+ }
+}

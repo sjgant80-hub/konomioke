@@ -1,0 +1,13 @@
+{
+  "_udt": "PhaseManifest",
+  "primorial": 510510,
+  "phases": [
+    { "prime": 2,  "name": "Identity",    "file": "phases/p2-identity.js",  "class": "KonomiIdentity",    "lines": 156, "deps": ["utils"] },
+    { "prime": 3,  "name": "Mesh",        "file": "phases/p3-mesh.js",      "class": "KonomiMesh",        "lines": 227, "deps": ["identity"] },
+    { "prime": 5,  "name": "AudioFabric", "file": "phases/p5-fabric.js",    "class": "AudioFabricEngine", "lines": 296, "deps": ["mesh"] },
+    { "prime": 7,  "name": "Vocal",       "file": "phases/p7-vocal.js",     "class": "VocalProcessor",    "lines": 122, "deps": ["fabric"] },
+    { "prime": 11, "name": "Tracks",      "file": "phases/p11-tracks.js",   "class": "TrackEngine",       "lines": 303, "deps": ["vocal","crdt-queue"] },
+    { "prime": 13, "name": "Viz",         "file": "phases/p13-viz.js",      "class": "VizEngine",         "lines": 398, "deps": ["fabric"] },
+    { "prime": 17, "name": "App",         "file": "phases/p17-app.js",      "class": "KonomiApp",         "lines": 586, "deps": ["all"] }
+  ]
+}
