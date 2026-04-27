@@ -121,6 +121,52 @@ class KonomiApp {
     }
   }
 
+  // ── SETTINGS ───────────────────────────────────────────
+  _bindSettingsEvents() {
+    $('#btn-close-settings').onclick = () => {
+      $('#settings-modal').style.display = 'none';
+    };
+
+    $$('.toggle-switch').forEach(el => {
+      el.onclick = () => {
+        el.classList.toggle('on');
+        const key = el.dataset.key;
+        this.settings[key] = el.classList.contains('on');
+
+        switch (key) {
+          case 'harmony':
+            this.vocal.setHarmonyEnabled(this.settings.harmony);
+            break;
+          case 'drones':
+            this.fabric.setDroneVolume(this.settings.drones ? $('#mix-drones').value / 100 : 0);
+            break;
+          case 'viz':
+            this.viz.setEnabled(this.settings.viz);
+            break;
+          case 'aec':
+            // Re-request mic with new echo cancellation setting
+            this._getMicrophone();
+            break;
+        }
+      };
+    });
+  }
+
+  // ── SERVICE WORKER ─────────────────────────────────────
+  _registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  }
+
+  _delay(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// IGNITION
+// ─────────────────────────────────────────────────────────
   // ── LOBBY EVENTS ───────────────────────────────────────
   _bindLobbyEvents() {
     // Save display name
@@ -302,37 +348,6 @@ class KonomiApp {
       const fraction = (e.clientX - rect.left) / rect.width;
       this.tracks.seek(Math.max(0, Math.min(1, fraction)));
     };
-  }
-
-  // ── SETTINGS ───────────────────────────────────────────
-  _bindSettingsEvents() {
-    $('#btn-close-settings').onclick = () => {
-      $('#settings-modal').style.display = 'none';
-    };
-
-    $$('.toggle-switch').forEach(el => {
-      el.onclick = () => {
-        el.classList.toggle('on');
-        const key = el.dataset.key;
-        this.settings[key] = el.classList.contains('on');
-
-        switch (key) {
-          case 'harmony':
-            this.vocal.setHarmonyEnabled(this.settings.harmony);
-            break;
-          case 'drones':
-            this.fabric.setDroneVolume(this.settings.drones ? $('#mix-drones').value / 100 : 0);
-            break;
-          case 'viz':
-            this.viz.setEnabled(this.settings.viz);
-            break;
-          case 'aec':
-            // Re-request mic with new echo cancellation setting
-            this._getMicrophone();
-            break;
-        }
-      };
-    });
   }
 
   // ── TRACK + LYRICS EVENTS ─────────────────────────────
@@ -585,18 +600,3 @@ class KonomiApp {
     }
   }
 
-  // ── SERVICE WORKER ─────────────────────────────────────
-  _registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  }
-
-  _delay(ms) {
-    return new Promise(r => setTimeout(r, ms));
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// IGNITION
-// ─────────────────────────────────────────────────────────
