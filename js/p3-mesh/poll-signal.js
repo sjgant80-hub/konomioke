@@ -1,29 +1,65 @@
-// poll-signal.js — signaling via OnlyBrains API polling (no WebSocket needed)
-// Replaces WebSocket signaling for GitHub Pages deployments
-var POLL_SIG = { interval: null, room: null, peerId: null, displayName: null, api: 'https://onlybrains.onrender.com/api/chat', pollMs: 3000, seen: {} };
+// poll-signal.js — peer signaling: BroadcastChannel (same-origin) + API (cross-device)
+var POLL_SIG = {
+  room: null, peerId: null, displayName: null,
+  bc: null, seen: {}, state: 'disconnected',
+  api: 'https://onlybrains.onrender.com/api/chat',
+  pollTimer: null, pollMs: 4000, peers: {}
+};
+
+function _sigState(s) {
+  POLL_SIG.state = s;
+  if (typeof rlog === 'function') rlog('p2p: ' + s);
+  if (typeof highlightState === 'function') highlightState(s);
+}
 
 function pollSignalJoin(room, peerId, displayName) {
   POLL_SIG.room = room; POLL_SIG.peerId = peerId; POLL_SIG.displayName = displayName;
-  // Announce presence
-  _sigPost({ type: 'join', room: room, peerId: peerId, displayName: displayName, ts: Date.now() });
-  // Start polling
-  if (POLL_SIG.interval) clearInterval(POLL_SIG.interval);
-  POLL_SIG.interval = setInterval(_sigPoll, POLL_SIG.pollMs);
-  _sigPoll();
+  _sigState('joining');
+
+  // BroadcastChannel — instant same-origin signaling
+  try {
+    POLL_SIG.bc = new BroadcastChannel('konomi-sig-' + room);
+    POLL_SIG.bc.onmessage = function(e) { _handleMsg(e.data) };
+  } catch (e) {}
+
+  // Announce via both channels
+  var joinMsg = { type: 'join', room: room, peerId: peerId, displayName: displayName, ts: Date.now() };
+  _broadcast(joinMsg);
+  _sigState('connected');
+
+  // Heartbeat every 4s so peers know we're alive
+  if (POLL_SIG.pollTimer) clearInterval(POLL_SIG.pollTimer);
+  POLL_SIG.pollTimer = setInterval(function() {
+    _broadcast({ type: 'heartbeat', room: POLL_SIG.room, peerId: POLL_SIG.peerId, displayName: POLL_SIG.displayName, ts: Date.now() });
+    // Prune peers not seen in 12s
+    var now = Date.now();
+    for (var pid in POLL_SIG.peers) {
+      if (now - POLL_SIG.peers[pid].lastSeen > 12000) {
+        delete POLL_SIG.peers[pid];
+        if (typeof window._onPollPeerLeave === 'function') window._onPollPeerLeave(pid);
+      }
+    }
+  }, POLL_SIG.pollMs);
 }
 
 function pollSignalLeave() {
-  if (POLL_SIG.interval) { clearInterval(POLL_SIG.interval); POLL_SIG.interval = null; }
   if (POLL_SIG.room && POLL_SIG.peerId) {
-    _sigPost({ type: 'leave', room: POLL_SIG.room, peerId: POLL_SIG.peerId, ts: Date.now() });
+    _broadcast({ type: 'leave', room: POLL_SIG.room, peerId: POLL_SIG.peerId, ts: Date.now() });
   }
+  if (POLL_SIG.bc) { POLL_SIG.bc.close(); POLL_SIG.bc = null }
+  if (POLL_SIG.pollTimer) { clearInterval(POLL_SIG.pollTimer); POLL_SIG.pollTimer = null }
+  POLL_SIG.peers = {};
+  _sigState('disconnected');
 }
 
 function pollSignalSend(data) {
-  _sigPost(Object.assign({ room: POLL_SIG.room, from: POLL_SIG.peerId, ts: Date.now() }, data));
+  _broadcast(Object.assign({ room: POLL_SIG.room, peerId: POLL_SIG.peerId, from: POLL_SIG.displayName, ts: Date.now() }, data));
 }
 
-function _sigPost(data) {
+function _broadcast(data) {
+  // BroadcastChannel (same-origin tabs — instant)
+  if (POLL_SIG.bc) try { POLL_SIG.bc.postMessage(data) } catch (e) {}
+  // API fallback (cross-device — async)
   try {
     var ctrl = new AbortController();
     setTimeout(function() { ctrl.abort() }, 3000);
@@ -34,30 +70,27 @@ function _sigPost(data) {
   } catch (e) {}
 }
 
-async function _sigPoll() {
-  try {
-    var ctrl = new AbortController();
-    setTimeout(function() { ctrl.abort() }, 3000);
-    var r = await fetch(POLL_SIG.api + '?key=sig-' + POLL_SIG.room + '&limit=20', { signal: ctrl.signal });
-    var msgs = await r.json();
-    if (!Array.isArray(msgs)) return;
-    for (var m of msgs) {
-      try {
-        var d = typeof m.message === 'string' ? JSON.parse(m.message) : m;
-        if (!d.peerId || d.peerId === POLL_SIG.peerId) continue;
-        var key = d.peerId + ':' + d.ts;
-        if (POLL_SIG.seen[key]) continue;
-        POLL_SIG.seen[key] = true;
-        if (d.type === 'join' && d.room === POLL_SIG.room) {
-          if (typeof window._onPollPeerJoin === 'function') window._onPollPeerJoin(d.peerId, d.displayName);
-        }
-        if (d.type === 'leave' && d.room === POLL_SIG.room) {
-          if (typeof window._onPollPeerLeave === 'function') window._onPollPeerLeave(d.peerId);
-        }
-        if (d.type === 'chat' && d.room === POLL_SIG.room) {
-          if (typeof window._onPollChat === 'function') window._onPollChat(d);
-        }
-      } catch (e) {}
+function _handleMsg(d) {
+  if (!d || !d.peerId || d.peerId === POLL_SIG.peerId) return;
+  if (d.room && d.room !== POLL_SIG.room) return;
+  var key = d.peerId + ':' + d.type + ':' + d.ts;
+  if (POLL_SIG.seen[key]) return;
+  POLL_SIG.seen[key] = true;
+
+  if (d.type === 'join' || d.type === 'heartbeat') {
+    var isNew = !POLL_SIG.peers[d.peerId];
+    POLL_SIG.peers[d.peerId] = { displayName: d.displayName, lastSeen: Date.now() };
+    if (isNew && d.type === 'join') {
+      if (typeof window._onPollPeerJoin === 'function') window._onPollPeerJoin(d.peerId, d.displayName);
     }
-  } catch (e) {}
+  }
+  if (d.type === 'leave') {
+    delete POLL_SIG.peers[d.peerId];
+    if (typeof window._onPollPeerLeave === 'function') window._onPollPeerLeave(d.peerId);
+  }
+  if (d.type === 'chat') {
+    if (typeof window._onPollChat === 'function') window._onPollChat(d);
+  }
 }
+
+function getPollPeerCount() { return Object.keys(POLL_SIG.peers).length }
