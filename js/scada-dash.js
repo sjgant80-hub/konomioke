@@ -21,70 +21,65 @@ async function dashRefresh(){
   setDot('kon-status',true);setDot('mus-status',true);
 }
 
-// Shared mic — grab ONCE in the parent, push to both iframes.
-// Engine (same-origin /engine/): injected directly via contentWindow.
-// Moosic (cross-origin):  receives a postMessage nudge so its own
-//   auto-prime fires immediately rather than waiting for its 5s retry.
+// Audio status — one button, two sources (mic + tab), shared with both iframes.
+// Mic: auto-grabbed on first gesture, kept alive, injected into engine + moosic nudged.
+// Tab: opened by clicking the button (getDisplayMedia needs direct gesture).
+// Button label reflects compound state:
+//   ⚪ audio  — nothing active yet
+//   🎤 mic    — mic only (auto-grabbed)
+//   🔴 live   — mic + tab both active
+//   📺 tab    — tab only (edge case)
 (function(){
   if(!navigator.mediaDevices)return;
-  var _stream=null,_injected=false;
-  var CONSTRAINTS={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:48000,channelCount:1}};
+  var _ms=null,_msInjected=false;  // mic
+  var _ts=null,_tac=null,_tan=null,_tfr=null,_trt=null; // tab
+  var MIC_C={audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:48000,channelCount:1}};
 
-  async function grabOnce(){
-    if(_stream&&_stream.active)return;
+  // ── button label ────────────────────────────────────────
+  function updateBtn(){
+    var b=document.getElementById('scada-audio-btn');if(!b)return;
+    var hasMic=_ms&&_ms.active,hasTab=_ts&&_ts.active;
+    if(hasMic&&hasTab){b.textContent='🔴 live';b.style.color='#ff4466';b.style.borderColor='#ff4466';}
+    else if(hasMic)    {b.textContent='🎤 mic'; b.style.color='#ffaa00';b.style.borderColor='#ffaa00';}
+    else if(hasTab)    {b.textContent='📺 tab'; b.style.color='#0af';   b.style.borderColor='#0af';}
+    else               {b.textContent='⚪ audio';b.style.color='';       b.style.borderColor='';}
+  }
+
+  // ── mic ─────────────────────────────────────────────────
+  async function grabMic(){
+    if(_ms&&_ms.active)return;
     try{
-      _stream=await navigator.mediaDevices.getUserMedia(CONSTRAINTS);
-      window._sharedMicStream=_stream;
-      tryInject();
+      _ms=await navigator.mediaDevices.getUserMedia(MIC_C);
+      window._sharedMicStream=_ms;
+      injectMic();
+      updateBtn();
     }catch(e){console.warn('[scada] mic:',e.message)}
   }
-
-  function tryInject(){
-    if(!_stream||!_stream.active)return;
-    // Engine iframe — same-origin, direct contentWindow access
+  function injectMic(){
+    if(!_ms||!_ms.active)return;
     var fk=document.getElementById('frame-kon');
-    if(fk&&fk.contentWindow&&!_injected){
-      fk.contentWindow.__sharedMicStream=_stream;
-      if(typeof fk.contentWindow.__onSharedMicStream==='function')fk.contentWindow.__onSharedMicStream(_stream);
-      _injected=true;
+    if(fk&&fk.contentWindow&&!_msInjected){
+      fk.contentWindow.__sharedMicStream=_ms;
+      if(typeof fk.contentWindow.__onSharedMicStream==='function')fk.contentWindow.__onSharedMicStream(_ms);
+      _msInjected=true;
     }
-    // Moosic iframe — cross-origin, postMessage nudge only
     var fm=document.getElementById('frame-mus');
-    if(fm&&fm.contentWindow){
-      try{fm.contentWindow.postMessage({type:'konomioke-mic-ready'},'*')}catch(e){}
-    }
+    if(fm&&fm.contentWindow){try{fm.contentWindow.postMessage({type:'konomioke-mic-ready'},'*')}catch(e){}}
   }
+  var micRetryT=setInterval(function(){if(_msInjected)clearInterval(micRetryT);else injectMic()},500);
+  function armMic(){grabMic();if(!_ms)setTimeout(grabMic,5000);}
+  window.addEventListener('pointerdown',armMic,{capture:true,once:true});
+  window.addEventListener('keydown',armMic,{capture:true,once:true});
+  if(navigator.permissions)navigator.permissions.query({name:'microphone'}).then(function(p){if(p.state==='granted')grabMic()}).catch(function(){});
+  setInterval(function(){if(!_ms)grabMic()},5000);
 
-  // Re-attempt injection every 500 ms until the engine iframe is ready
-  var injectT=setInterval(function(){if(_injected)clearInterval(injectT);else tryInject()},500);
-
-  function arm(){
-    grabOnce();
-    if(!_stream)setTimeout(grabOnce,5000);
-  }
-  window.addEventListener('pointerdown',arm,{capture:true,once:true});
-  window.addEventListener('keydown',arm,{capture:true,once:true});
-  if(navigator.permissions)navigator.permissions.query({name:'microphone'}).then(function(p){if(p.state==='granted')grabOnce()}).catch(function(){});
-  // Background retry in case gesture fires before getUserMedia resolves
-  setInterval(function(){if(!_stream)grabOnce()},5000);
-})();
-
-// Tab audio — captured by the parent on explicit button click.
-// getDisplayMedia requires a direct user gesture; a cross-origin postMessage
-// from moosic cannot transfer that activation, so the Tab button lives here.
-//   Engine (same-origin): MediaStream injected via contentWindow.
-//   Moosic (cross-origin): 30 fps Uint8Array frequency relay via postMessage.
-(function(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia)return;
-  var _ts=null,_tac=null,_tan=null,_tfr=null,_trt=null;
-
+  // ── tab ─────────────────────────────────────────────────
   async function grabTab(){
     if(_ts&&_ts.active)return;
     try{
       var s=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true,preferCurrentTab:true,selfBrowserSurface:'include',systemAudio:'include'});
       s.getVideoTracks().forEach(function(t){t.stop()});
       _ts=s;
-      updateBtn(true);
       var fk=document.getElementById('frame-kon');
       if(fk&&fk.contentWindow){
         fk.contentWindow.__sharedTabStream=s;
@@ -101,31 +96,23 @@ async function dashRefresh(){
         var fm=document.getElementById('frame-mus');
         if(fm&&fm.contentWindow){try{fm.contentWindow.postMessage({type:'konomioke-tab-freqdata',data:Array.from(_tfr)},'*')}catch(e){}}
       },33);
-      var atracks=s.getAudioTracks();
-      if(atracks.length)atracks[0].onended=function(){stopTab();};
+      s.getAudioTracks().forEach(function(t){t.onended=function(){stopTab();};});
+      updateBtn();
     }catch(e){console.warn('[scada] tab:',e.message)}
   }
-
   function stopTab(){
     if(_ts)_ts.getTracks().forEach(function(t){t.stop()});
     if(_tac){_tac.close().catch(function(){});}
     if(_trt)clearInterval(_trt);
     _ts=null;_tac=null;_tan=null;_tfr=null;_trt=null;
-    updateBtn(false);
     var fk=document.getElementById('frame-kon');
     if(fk&&fk.contentWindow&&typeof fk.contentWindow.__onSharedTabStream==='function')fk.contentWindow.__onSharedTabStream(null);
+    updateBtn();
   }
 
-  function updateBtn(on){
-    var b=document.getElementById('scada-tab-btn');
-    if(!b)return;
-    b.textContent=on?'🔴 Tab':'⚪ Tab';
-    b.style.borderColor=on?'#ff4466':'';
-    b.style.color=on?'#ff4466':'';
-  }
-
-  var btn=document.getElementById('scada-tab-btn');
-  if(btn)btn.onclick=function(){if(_ts&&_ts.active)stopTab();else grabTab();};
+  // ── button: click = grab mic+tab; click again = stop tab ─
+  var btn=document.getElementById('scada-audio-btn');
+  if(btn)btn.onclick=function(){if(_ts&&_ts.active)stopTab();else{grabMic();grabTab();}};
 })();
 
 setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString()},1000);
