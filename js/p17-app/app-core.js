@@ -131,6 +131,15 @@ class KonomiApp {
     // LAUNCHER finishes here — mic + AudioContext.resume() require a user
     // gesture (especially when embedded in an iframe), so we arm a tap-to-start
     // handler instead of blocking the boot phase on getUserMedia.
+
+    // Register callback so the parent SCADA page can push the shared mic
+    // stream in after boot (in case injection races ahead of _startMicRetry).
+    window.__onSharedMicStream = (stream) => {
+      if (this.micStream) return; // already have one
+      window.__sharedMicStream = stream;
+      if (typeof rlog === 'function') rlog('shared mic injected by parent');
+      this._getMicrophone();
+    };
   }
 
   // ── TAP TO START ───────────────────────────────────────

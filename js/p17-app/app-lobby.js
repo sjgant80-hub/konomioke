@@ -80,15 +80,23 @@
         this.micSourceNode = null;
       }
 
-      this.micStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: this.settings.aec,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 48000,
-          channelCount: 1
-        }
-      });
+      // Use the stream injected by the parent SCADA page when available —
+      // that way only one getUserMedia permission prompt fires for the whole
+      // konomioke.com origin regardless of how many iframes are open.
+      const _shared = window.__sharedMicStream;
+      if (_shared && _shared.active && _shared.getAudioTracks().length > 0) {
+        this.micStream = _shared;
+      } else {
+        this.micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: this.settings.aec,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 48000,
+            channelCount: 1
+          }
+        });
+      }
 
       // Connect mic to Audio Fabric for analysis
       this.micSourceNode = this.fabric.ctx.createMediaStreamSource(this.micStream);
