@@ -5,15 +5,17 @@
       const text = input.value.trim();
       if (!text) return;
 
-      // Broadcast via mesh
+      // Broadcast via WebRTC data channel
       this.mesh.broadcast({
         type: 'chat',
         from: this.identity.displayName,
         text: text
       });
 
-      // Show locally
-      this._addChatMessage(this.identity.displayName, text, peerColor(this.identity.publicKeyHex));
+      // Show locally + persist to tag
+      const color = peerColor(this.identity.publicKeyHex);
+      this._addChatMessage(this.identity.displayName, text, color);
+      if (typeof chatPush === 'function') chatPush(this.identity.displayName, text, color, this.mesh.roomCode);
       input.value = '';
     };
 
@@ -28,9 +30,15 @@
     div.innerHTML = `<span class="chat-author" style="color:${color}">${author}:</span>${this._escapeHtml(text)}`;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
-
-    // Keep only last 50 messages
     while (container.children.length > 50) container.removeChild(container.firstChild);
+  }
+
+  async _loadChatHistory() {
+    if (typeof loadChatHistory !== 'function') return;
+    const msgs = await loadChatHistory(this.mesh.roomCode);
+    for (const m of msgs) {
+      this._addChatMessage(m.from, m.text, m.color || '#8898b4');
+    }
   }
 
   _escapeHtml(str) {
@@ -43,6 +51,7 @@
   _bindMeshCallbacks() {
     this.mesh.onRoomJoined = (code, peers) => {
       this._updatePeersList();
+      this._loadChatHistory();
     };
 
     this.mesh.onPeerJoined = (peerId, displayName) => {
@@ -67,7 +76,9 @@
 
     this.mesh.onPeerData = (peerId, data) => {
       if (data.type === 'chat') {
-        this._addChatMessage(data.from || shortId(peerId), data.text, peerColor(peerId));
+        const color = peerColor(peerId);
+        this._addChatMessage(data.from || shortId(peerId), data.text, color);
+        if (typeof chatPush === 'function') chatPush(data.from || shortId(peerId), data.text, color, this.mesh.roomCode);
       }
       if (data.type === 'queue') {
         this.tracks.queue.merge(data.queue);

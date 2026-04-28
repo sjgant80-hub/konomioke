@@ -6,7 +6,8 @@ async function fetchKonomiTags(){
   try{
     var r=await fetch('https://api.github.com/repos/'+KONOMI_REPO+'/issues?labels='+KONOMI_LABEL+'&state=open&per_page=50',
       {headers:{Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(6000)});
-    var issues=await r.json();
+    var data=await r.json();
+    var issues=Array.isArray(data)?data:[];
     KONOMI_TAGS=[];
     for(var iss of issues){
       var m=iss.body?.match(/```json\s*([\s\S]*?)```/);

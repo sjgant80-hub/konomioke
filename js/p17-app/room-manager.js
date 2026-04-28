@@ -17,7 +17,8 @@ async function fetchRoomTags() {
     var r = await fetch('https://api.github.com/repos/' + ROOM_MGR.repo + '/issues?labels=' + ROOM_MGR.label + '&state=open&per_page=50',
       { headers: { Accept: 'application/vnd.github+json' }, signal: ctrl.signal });
     clearTimeout(tid);
-    var issues = await r.json();
+    var data = await r.json();
+    var issues = Array.isArray(data) ? data : [];
     for (var iss of issues) {
       var m = iss.body?.match(/```json\s*([\s\S]*?)```/);
       if (!m) continue;
