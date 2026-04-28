@@ -24,7 +24,12 @@ async function fetchRoomTags() {
       if (!m) continue;
       try {
         var tag = JSON.parse(m[1]);
-        if (tag.tag_id === '_rooms') { ROOM_MGR.rooms = tag.rooms || []; return; }
+        if (tag.tag_id === '_rooms') {
+          ROOM_MGR.rooms = tag.rooms || [];
+          if (tag.max_per_room) ROOM_MGR.MAX_PER_ROOM = tag.max_per_room;
+          if (tag.base_name) ROOM_MGR.BASE_NAME = tag.base_name;
+          return;
+        }
       } catch (e) {}
     }
   } catch (e) {}

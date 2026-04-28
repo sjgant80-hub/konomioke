@@ -46,6 +46,7 @@ async function loadChatHistory(room) {
       try {
         var tag = JSON.parse(m[1]);
         if (tag.tag_id === '_chat' && tag.room === CHAT_BUF.room) {
+          if (tag.maxMessages) CHAT_BUF.maxMessages = tag.maxMessages;
           CHAT_BUF.messages = (tag.messages || []).slice(-CHAT_BUF.maxMessages);
           return CHAT_BUF.messages;
         }
