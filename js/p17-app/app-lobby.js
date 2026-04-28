@@ -171,5 +171,6 @@
     this._setState('stage');
     $('#stage-room-code').textContent = roomCode;
     this._startLoop();
+    if (typeof this._loadChatHistory === 'function') this._loadChatHistory();
   }
 

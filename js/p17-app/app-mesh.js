@@ -57,7 +57,6 @@
   _bindMeshCallbacks() {
     this.mesh.onRoomJoined = (code, peers) => {
       this._updatePeersList();
-      this._loadChatHistory();
     };
 
     this.mesh.onPeerJoined = (peerId, displayName) => {

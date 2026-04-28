@@ -152,8 +152,12 @@ async function dashRefresh(){
 
   function updateP2PStatus(){
     var n=typeof getPollPeerCount==='function'?getPollPeerCount():0;
+    var total=n+1;
     var el=document.getElementById('p2p-status');
-    if(el)el.textContent='👥 '+(n+1);
+    if(el)el.textContent='👥 '+total;
+    // Push count to engine iframe
+    var fk=document.getElementById('frame-kon');
+    if(fk&&fk.contentWindow)try{fk.contentWindow.postMessage({type:'peer-count',count:total},'*')}catch(e){}
   }
   setInterval(updateP2PStatus,2000);
   window.addEventListener('beforeunload',function(){if(typeof pollSignalLeave==='function')pollSignalLeave()});

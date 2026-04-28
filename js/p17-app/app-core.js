@@ -199,23 +199,25 @@ class KonomiApp {
       this.mesh.roomCode = code;
       this.mesh.isHost = (code === 'KONOMI' && (!ROOM_MGR.rooms.length || ROOM_MGR.rooms[0]?.users?.length <= 1));
 
-      // Peer signaling handled by parent dock via postMessage — listen for forwarded events
+      // Peer signaling handled by parent dock via postMessage
       var self = this;
       window.addEventListener('message', function(e) {
         if (!e.data || !e.data.type) return;
         if (e.data.type === 'peer-joined') {
           self._addChatMessage('SYSTEM', (e.data.displayName || e.data.peerId?.slice(0,8)) + ' joined', '#d4af37');
           if (self.viz) self.viz.addSingerCluster(e.data.peerId, peerColor(e.data.peerId));
-          self._updatePeersList();
         }
         if (e.data.type === 'peer-left') {
           self._addChatMessage('SYSTEM', (e.data.peerId?.slice(0,8) || '?') + ' left', '#ff2244');
           if (self.viz) self.viz.removeSingerCluster(e.data.peerId);
-          self._updatePeersList();
         }
         if (e.data.type === 'poll-chat') {
           self._addChatMessage(e.data.from || '?', e.data.text, e.data.color || '#8898b4');
-          if (typeof chatPush === 'function') chatPush(e.data.from || '?', e.data.text, e.data.color, code);
+          if (typeof chatPush === 'function') chatPush(e.data.from || '?', e.data.text, e.data.color, self.mesh.roomCode);
+        }
+        if (e.data.type === 'peer-count') {
+          var el = document.getElementById('stage-peers-count');
+          if (el) el.textContent = e.data.count + ' peers';
         }
       });
 
