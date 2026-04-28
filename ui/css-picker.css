@@ -131,7 +131,8 @@ body {
   overflow: hidden;
 }
 
-.moosic-frame {
+.moosic-frame,
+.konomi-frame {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -141,7 +142,8 @@ body {
   display: block;
 }
 
-.moosic-bar {
+.moosic-bar,
+.konomi-bar {
   position: absolute;
   top: 0;
   left: 0;
@@ -155,32 +157,42 @@ body {
   z-index: 2;
 }
 
-.moosic-bar .glyph {
-  color: #2dd4ff;
-  font-size: 1.2rem;
-  line-height: 1;
-}
+.moosic-bar .glyph { color: #2dd4ff; font-size: 1.2rem; line-height: 1; }
+.konomi-bar .glyph { color: #ff2d75; font-size: 1.2rem; line-height: 1; font-family: serif; }
 
-.moosic-bar .title {
+.moosic-bar .title,
+.konomi-bar .title {
   color: #e6e6f0;
   font-size: 0.8rem;
   letter-spacing: 0.2em;
   flex: 1;
 }
 
-.moosic-bar .open {
+.moosic-bar .open,
+.konomi-bar .open {
   pointer-events: auto;
-  color: #2dd4ff;
   text-decoration: none;
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   padding: 0.2rem 0.6rem;
-  border: 1px solid rgba(45,212,255,0.4);
   border-radius: 4px;
   background: rgba(5,5,8,0.6);
 }
 
+.moosic-bar .open {
+  color: #2dd4ff;
+  border: 1px solid rgba(45,212,255,0.4);
+}
 .moosic-bar .open:hover {
   background: rgba(45,212,255,0.15);
   border-color: #2dd4ff;
+}
+
+.konomi-bar .open {
+  color: #ff2d75;
+  border: 1px solid rgba(255,45,117,0.4);
+}
+.konomi-bar .open:hover {
+  background: rgba(255,45,117,0.15);
+  border-color: #ff2d75;
 }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>好みオケ KONOMIOKE × MOOSIC</title>
-<link rel="stylesheet" href="ui/css-picker.css?v=2">
+<link rel="stylesheet" href="ui/css-picker.css?v=3">
 </head>
 <body>
 <header class="picker-head">
@@ -13,12 +13,20 @@
 </header>
 
 <main class="picker">
-  <a class="card card-konomi" href="engine/">
-    <div class="glyph">好</div>
-    <div class="title">KONOMIOKE</div>
-    <div class="desc">P2P karaoke engine — primes, vagal viz, mining</div>
-    <div class="cta">enter →</div>
-  </a>
+  <section class="card card-konomi card-iframe">
+    <iframe
+      class="konomi-frame"
+      src="engine/"
+      title="KONOMIOKE engine"
+      loading="lazy"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-modals allow-downloads"
+      allow="autoplay; microphone; camera; clipboard-read; clipboard-write; fullscreen; display-capture"></iframe>
+    <header class="konomi-bar">
+      <span class="glyph">好</span>
+      <span class="title">KONOMIOKE</span>
+      <a class="open" href="engine/" target="_top">open ↗</a>
+    </header>
+  </section>
 
   <section class="card card-moosic card-iframe">
     <iframe
