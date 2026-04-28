@@ -18,7 +18,7 @@ class KonomiApp {
       viz: true,
       aec: true,            // echo cancellation ON by default
       noiseGate: true,      // adaptive ambient-noise gate ON by default
-      selfMonitor: false,   // don't pipe own mic to local speakers (still broadcast to peers)
+      selfMonitor: true,    // map own mic back down to local speakers (gated + AEC keep it tame)
       noiseGateDb: -50,     // floor offset (dB) — anything within +X of measured floor is muted
       noiseGateAttackMs: 8,
       noiseGateReleaseMs: 120
