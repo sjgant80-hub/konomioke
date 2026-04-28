@@ -1,5 +1,4 @@
 // room-manager.js — KONOMI default room with 8-user cap + FIFO overflow
-// Tracks rooms via GitHub Issue tags (konomi-config label)
 var ROOM_MGR = {
   MAX_PER_ROOM: 8,
   BASE_NAME: 'KONOMI',
@@ -12,7 +11,7 @@ var ROOM_MGR = {
 async function fetchRoomTags() {
   try {
     var r = await fetch('https://api.github.com/repos/' + ROOM_MGR.repo + '/issues?labels=' + ROOM_MGR.label + '&state=open&per_page=50',
-      { headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(5000) });
+      { headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(4000) });
     var issues = await r.json();
     ROOM_MGR.rooms = [];
     for (var iss of issues) {
@@ -28,27 +27,20 @@ async function fetchRoomTags() {
 }
 
 function findAvailableRoom() {
-  // Find first room with space
   for (var i = 0; i < ROOM_MGR.rooms.length; i++) {
-    var rm = ROOM_MGR.rooms[i];
-    if ((rm.users || []).length < ROOM_MGR.MAX_PER_ROOM) return rm;
+    if ((ROOM_MGR.rooms[i].users || []).length < ROOM_MGR.MAX_PER_ROOM) return ROOM_MGR.rooms[i];
   }
   return null;
 }
 
 function createRoomName() {
   if (ROOM_MGR.rooms.length === 0) return ROOM_MGR.BASE_NAME;
-  // FIFO: next sequential name
   var max = 1;
   for (var rm of ROOM_MGR.rooms) {
     var m = rm.name.match(/^KONOMI-?(\d*)$/);
     if (m) { var n = m[1] ? parseInt(m[1]) : 1; if (n >= max) max = n + 1; }
   }
   return ROOM_MGR.BASE_NAME + '-' + max;
-}
-
-function buildRoomEntry(name, userId, displayName) {
-  return { name: name, code: name, users: [{ id: userId.slice(0, 16), name: displayName, joined: new Date().toISOString() }], created: new Date().toISOString() };
 }
 
 async function joinDefaultRoom(userId, displayName) {
@@ -58,18 +50,15 @@ async function joinDefaultRoom(userId, displayName) {
     room.users = room.users || [];
     room.users.push({ id: userId.slice(0, 16), name: displayName, joined: new Date().toISOString() });
     ROOM_MGR.myRoom = room.name;
-    await saveRoomTags();
-    return room.name;
+  } else {
+    var name = createRoomName();
+    room = { name: name, code: name, users: [{ id: userId.slice(0, 16), name: displayName, joined: new Date().toISOString() }], created: new Date().toISOString() };
+    ROOM_MGR.rooms.push(room);
+    ROOM_MGR.myRoom = name;
   }
-  // All full or none exist — create new
-  var name = createRoomName();
-  var entry = buildRoomEntry(name, userId, displayName);
-  ROOM_MGR.rooms.push(entry);
-  ROOM_MGR.myRoom = name;
-  // Prune empty rooms (FIFO cleanup)
   ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0; });
-  await saveRoomTags();
-  return name;
+  saveRoomTags();
+  return ROOM_MGR.myRoom;
 }
 
 async function leaveDefaultRoom(userId) {
@@ -80,18 +69,18 @@ async function leaveDefaultRoom(userId) {
       break;
     }
   }
-  // Prune empty
   ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0; });
   ROOM_MGR.myRoom = null;
-  await saveRoomTags();
+  saveRoomTags();
 }
 
-async function saveRoomTags() {
+function saveRoomTags() {
   var tag = { tag_id: '_rooms', max_per_room: ROOM_MGR.MAX_PER_ROOM, rooms: ROOM_MGR.rooms, updated: new Date().toISOString() };
   try {
-    await fetch('https://onlybrains.onrender.com/api/chat', {
+    fetch('https://onlybrains.onrender.com/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(3000),
       body: JSON.stringify({ key: 'konomioke-rooms', message: JSON.stringify(tag), role: 'system' })
-    });
+    }).catch(function() {});
   } catch (e) {}
 }
