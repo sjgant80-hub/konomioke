@@ -115,5 +115,49 @@ async function dashRefresh(){
   if(btn)btn.onclick=function(){if(_ts&&_ts.active)stopTab();else{grabMic();grabTab();}};
 })();
 
+// ── P2P at dock level ─────────────────────────────────────
+(function initDockP2P(){
+  if(typeof pollSignalJoin!=='function')return;
+  var myId='dock-'+Math.random().toString(36).slice(2,10);
+  var room='KONOMI';
+  pollSignalJoin(room,myId,'SCADA');
+  document.getElementById('p2p-room').textContent=room;
+
+  window._onPollPeerJoin=function(pid,name){
+    console.log('[dock] peer joined:',name||pid);
+    updateP2PStatus();
+    // Forward to engine iframe
+    var fk=document.getElementById('frame-kon');
+    if(fk&&fk.contentWindow)try{fk.contentWindow.postMessage({type:'peer-joined',peerId:pid,displayName:name},'*')}catch(e){}
+  };
+  window._onPollPeerLeave=function(pid){
+    console.log('[dock] peer left:',pid);
+    updateP2PStatus();
+    var fk=document.getElementById('frame-kon');
+    if(fk&&fk.contentWindow)try{fk.contentWindow.postMessage({type:'peer-left',peerId:pid},'*')}catch(e){}
+  };
+  window._onPollChat=function(d){
+    console.log('[dock] chat:',d.from,d.text);
+    // Forward to engine iframe
+    var fk=document.getElementById('frame-kon');
+    if(fk&&fk.contentWindow)try{fk.contentWindow.postMessage({type:'poll-chat',from:d.from,text:d.text,color:d.color},'*')}catch(e){}
+  };
+
+  // Listen for chat sent from engine iframe
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.type==='send-chat'&&typeof pollSignalSend==='function'){
+      pollSignalSend({type:'chat',from:e.data.from,text:e.data.text,color:e.data.color});
+    }
+  });
+
+  function updateP2PStatus(){
+    var n=typeof getPollPeerCount==='function'?getPollPeerCount():0;
+    var el=document.getElementById('p2p-status');
+    if(el)el.textContent='👥 '+(n+1);
+  }
+  setInterval(updateP2PStatus,2000);
+  window.addEventListener('beforeunload',function(){if(typeof pollSignalLeave==='function')pollSignalLeave()});
+})();
+
 setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString()},1000);
 dashRefresh();setInterval(dashRefresh,60000);
