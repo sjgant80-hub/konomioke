@@ -3,7 +3,7 @@
  * Caches static assets and WASM modules for fast reload.
  */
 
-const CACHE_NAME = 'konomioke-v1';
+const CACHE_NAME = 'konomioke-v2';
 const PRECACHE_URLS = [
   './',
   './index.html',
