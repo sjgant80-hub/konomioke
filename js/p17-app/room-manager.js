@@ -8,22 +8,25 @@ var ROOM_MGR = {
   label: 'konomi-config'
 };
 
+function _timeout(ms) { return new Promise(function(_, rej) { setTimeout(function() { rej(new Error('timeout')) }, ms) }) }
+
 async function fetchRoomTags() {
   try {
+    var ctrl = new AbortController();
+    var tid = setTimeout(function() { ctrl.abort() }, 3000);
     var r = await fetch('https://api.github.com/repos/' + ROOM_MGR.repo + '/issues?labels=' + ROOM_MGR.label + '&state=open&per_page=50',
-      { headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(4000) });
+      { headers: { Accept: 'application/vnd.github+json' }, signal: ctrl.signal });
+    clearTimeout(tid);
     var issues = await r.json();
-    ROOM_MGR.rooms = [];
     for (var iss of issues) {
       var m = iss.body?.match(/```json\s*([\s\S]*?)```/);
       if (!m) continue;
       try {
         var tag = JSON.parse(m[1]);
-        if (tag.tag_id === '_rooms') { ROOM_MGR.rooms = tag.rooms || []; return tag; }
+        if (tag.tag_id === '_rooms') { ROOM_MGR.rooms = tag.rooms || []; return; }
       } catch (e) {}
     }
   } catch (e) {}
-  return null;
 }
 
 function findAvailableRoom() {
@@ -37,14 +40,17 @@ function createRoomName() {
   if (ROOM_MGR.rooms.length === 0) return ROOM_MGR.BASE_NAME;
   var max = 1;
   for (var rm of ROOM_MGR.rooms) {
-    var m = rm.name.match(/^KONOMI-?(\d*)$/);
-    if (m) { var n = m[1] ? parseInt(m[1]) : 1; if (n >= max) max = n + 1; }
+    var n = rm.name === 'KONOMI' ? 1 : parseInt((rm.name.match(/(\d+)$/) || [])[1] || '0');
+    if (n >= max) max = n + 1;
   }
   return ROOM_MGR.BASE_NAME + '-' + max;
 }
 
 async function joinDefaultRoom(userId, displayName) {
-  await fetchRoomTags();
+  // Hard 3s race — never block boot longer than this
+  try {
+    await Promise.race([fetchRoomTags(), _timeout(3000)]);
+  } catch (e) {}
   var room = findAvailableRoom();
   if (room) {
     room.users = room.users || [];
@@ -52,11 +58,10 @@ async function joinDefaultRoom(userId, displayName) {
     ROOM_MGR.myRoom = room.name;
   } else {
     var name = createRoomName();
-    room = { name: name, code: name, users: [{ id: userId.slice(0, 16), name: displayName, joined: new Date().toISOString() }], created: new Date().toISOString() };
-    ROOM_MGR.rooms.push(room);
+    ROOM_MGR.rooms.push({ name: name, code: name, users: [{ id: userId.slice(0, 16), name: displayName, joined: new Date().toISOString() }], created: new Date().toISOString() });
     ROOM_MGR.myRoom = name;
   }
-  ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0; });
+  ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0 });
   saveRoomTags();
   return ROOM_MGR.myRoom;
 }
@@ -65,11 +70,11 @@ async function leaveDefaultRoom(userId) {
   if (!ROOM_MGR.myRoom) return;
   for (var rm of ROOM_MGR.rooms) {
     if (rm.name === ROOM_MGR.myRoom) {
-      rm.users = (rm.users || []).filter(function(u) { return u.id !== userId.slice(0, 16); });
+      rm.users = (rm.users || []).filter(function(u) { return u.id !== userId.slice(0, 16) });
       break;
     }
   }
-  ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0; });
+  ROOM_MGR.rooms = ROOM_MGR.rooms.filter(function(rm) { return (rm.users || []).length > 0 });
   ROOM_MGR.myRoom = null;
   saveRoomTags();
 }
@@ -77,9 +82,10 @@ async function leaveDefaultRoom(userId) {
 function saveRoomTags() {
   var tag = { tag_id: '_rooms', max_per_room: ROOM_MGR.MAX_PER_ROOM, rooms: ROOM_MGR.rooms, updated: new Date().toISOString() };
   try {
+    var ctrl = new AbortController();
+    setTimeout(function() { ctrl.abort() }, 3000);
     fetch('https://onlybrains.onrender.com/api/chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      signal: AbortSignal.timeout(3000),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
       body: JSON.stringify({ key: 'konomioke-rooms', message: JSON.stringify(tag), role: 'system' })
     }).catch(function() {});
   } catch (e) {}
