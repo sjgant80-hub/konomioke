@@ -18,7 +18,7 @@ class KonomiApp {
       viz: true,
       aec: true,            // echo cancellation ON by default
       noiseGate: true,      // adaptive ambient-noise gate ON by default
-      selfMonitor: true,    // map own mic back down to local speakers (gated + AEC keep it tame)
+      selfMonitor: false,
       noiseGateDb: -18,     // gap (dB) above ambient floor required to open gate — gentler so normal speech passes
       noiseGateAttackMs: 8,
       noiseGateReleaseMs: 120
