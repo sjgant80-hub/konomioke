@@ -172,12 +172,43 @@ class KonomiApp {
       this.mesh.roomCode = code;
       this.mesh.isHost = true;
       try { await this.fabric.resume(); if (typeof rlog === 'function') rlog('fabric resumed'); } catch (e) { if (typeof rlog === 'function') rlog('fabric resume fail: ' + e.message); }
-      try { await this._getMicrophone(); if (typeof rlog === 'function') rlog('mic acquired'); } catch (e) { if (typeof rlog === 'function') rlog('mic fail: ' + e.message); }
+
+      // Enter stage immediately so the user can interact, then keep retrying
+      // mic acquisition every 5s in the background until it succeeds. The
+      // top-level page may still be waiting for the user to grant the
+      // permission prompt.
       this._enterStage(code);
+      this._startMicRetry();
       if (typeof rlog === 'function') rlog('entered stage: ' + code);
     } catch (err) {
       if (typeof rlog === 'function') rlog('auto-enter fail: ' + err.message);
       this._setState('lobby');
     }
+  }
+
+  // Background poller: tries getUserMedia every 5s until it succeeds, then
+  // stops. Idempotent — calling twice does nothing.
+  _startMicRetry() {
+    if (this._micRetryTimer || this.micStream) return;
+    const tick = async () => {
+      if (this.micStream) { this._stopMicRetry(); return; }
+      try {
+        await this._getMicrophone();
+        if (this.micStream) {
+          if (typeof rlog === 'function') rlog('mic acquired (retry)');
+          this._stopMicRetry();
+          return;
+        }
+      } catch (e) {
+        if (typeof rlog === 'function') rlog('mic retry: ' + e.message);
+      }
+    };
+    // Try once immediately, then every 5s.
+    tick();
+    this._micRetryTimer = setInterval(tick, 5000);
+  }
+
+  _stopMicRetry() {
+    if (this._micRetryTimer) { clearInterval(this._micRetryTimer); this._micRetryTimer = null; }
   }
 

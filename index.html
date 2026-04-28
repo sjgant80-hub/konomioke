@@ -51,27 +51,43 @@
 
 <script>
 // Prime mic permission from the top-level origin so the prompt isn't blocked
-// inside the engine iframe. Fires once on first user gesture (click/key) on
-// the picker page. The granted permission is then inherited by the iframe
-// thanks to allow="microphone *".
+// inside the engine iframe. Fires on first user gesture (click/key) and then
+// retries every 5s until permission is actually granted, since users may
+// dismiss the prompt the first time.
 (function () {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-  let armed = true;
-  const prime = async () => {
-    if (!armed) return;
-    armed = false;
-    window.removeEventListener('pointerdown', prime, true);
-    window.removeEventListener('keydown', prime, true);
+  let granted = false;
+  let timer = null;
+
+  async function tryPrime() {
+    if (granted) return;
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Release immediately — we just wanted the permission grant.
+      // Release immediately — the engine iframe will re-acquire its own stream
+      // and inherits the permission grant via allow="microphone *".
       s.getTracks().forEach(t => t.stop());
+      granted = true;
+      if (timer) { clearInterval(timer); timer = null; }
     } catch (e) {
-      // user denied or no device — engine will fall back to lobby
+      // user dismissed/denied — keep polling so the next gesture or
+      // re-grant flips it on without a page reload.
     }
-  };
-  window.addEventListener('pointerdown', prime, true);
-  window.addEventListener('keydown', prime, true);
+  }
+
+  function arm() {
+    tryPrime();
+    if (!granted && !timer) timer = setInterval(tryPrime, 5000);
+  }
+  window.addEventListener('pointerdown', arm, { capture: true, once: true });
+  window.addEventListener('keydown', arm, { capture: true, once: true });
+
+  // If the browser already remembers a grant from a previous visit, kick off
+  // priming without waiting for a gesture.
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'microphone' }).then(p => {
+      if (p.state === 'granted') tryPrime();
+    }).catch(() => {});
+  }
 })();
 </script>
 </body>
