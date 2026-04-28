@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Konomioke</string>
+    <string name="app_short_name">好みオケ</string>
+    <string name="mic_rationale">Konomioke needs the microphone so you can sing and be heard by other participants.</string>
+    <string name="offline_message">No connection — check Wi-Fi or mobile data</string>
+    <string name="retry">Retry</string>
+</resources>
