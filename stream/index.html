@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📡 KONOMIOKE STREAM — broadcast</title>
+<style>
+:root{--bg:#050810;--c:#0a0d15;--b:#161d2a;--t:#8898b4;--t2:#3a4860;--ig:#38b5f9;--ok:#42e898;--er:#ff4466;--gd:#d4a94a;--kon:#ff2d75}
+*{margin:0;box-sizing:border-box;font-family:'Courier New',monospace}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t)}
+body{display:grid;grid-template:32px 1fr 28px/1fr;gap:0}
+.hdr{background:var(--c);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 10px;gap:8px;font-size:9px}
+.main{display:grid;grid-template:1fr/1fr 280px;gap:1px;overflow:hidden;min-height:0}
+.preview{background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.preview canvas,.preview iframe{width:100%;height:100%;border:none}
+.panel{background:var(--c);padding:10px;overflow-y:auto;font-size:8px;display:flex;flex-direction:column;gap:8px}
+.ftr{background:#030508;border-top:1px solid var(--b);display:flex;align-items:center;padding:0 10px;gap:8px;font-size:7px;color:var(--t2)}
+.btn{background:var(--b);border:1px solid var(--t2);color:var(--t);padding:4px 10px;border-radius:3px;font-size:8px;cursor:pointer;font-family:inherit;width:100%}
+.btn:hover{border-color:var(--ig);color:var(--ig)}
+.btn.live{background:rgba(255,45,117,.1);border-color:var(--kon);color:var(--kon)}
+.btn.go{background:rgba(66,232,152,.1);border-color:var(--ok);color:var(--ok)}
+.link-box{background:var(--bg);border:1px solid var(--b);padding:6px;border-radius:3px;font-size:7px;word-break:break-all;color:var(--ig);cursor:pointer}
+.stat{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--b)}
+.stat .k{color:var(--t2)}.stat .v{color:var(--ok);font-weight:600}
+h3{font-size:9px;color:var(--ig);margin-bottom:4px}
+#status{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="color:var(--kon);font-weight:700;font-size:11px">📡 STREAM</span>
+  <span style="color:var(--b)">│</span>
+  <span>好みオケ broadcast</span>
+  <span style="flex:1"></span>
+  <span id="status">offline</span>
+  <span style="color:var(--b)">│</span>
+  <span>👁 <span id="viewer-count">0</span></span>
+  <span style="color:var(--b)">│</span>
+  <a href="../" style="color:var(--ig);text-decoration:none;font-size:8px">← dashboard</a>
+</div>
+
+<div class="main">
+  <div class="preview" id="preview">
+    <canvas id="broadcast-cv" width="1280" height="720"></canvas>
+  </div>
+  <div class="panel">
+    <div>
+      <h3>SOURCE</h3>
+      <button class="btn" onclick="sourceEngine()">📺 Embed konomioke engine</button>
+      <button class="btn" style="margin-top:4px" onclick="sourceScreen()">🖥 Capture screen/tab</button>
+      <button class="btn" style="margin-top:4px" onclick="sourceCanvas()">🎨 Canvas only (test)</button>
+    </div>
+    <div>
+      <h3>AUDIO</h3>
+      <button class="btn" onclick="toggleMic()" id="btn-mic">🎤 Add mic</button>
+      <button class="btn" style="margin-top:4px" onclick="toggleTab()" id="btn-tab">🔊 Add tab audio</button>
+    </div>
+    <div>
+      <h3>BROADCAST</h3>
+      <button class="btn go" onclick="goLive()" id="btn-live">▶ GO LIVE</button>
+    </div>
+    <div id="share-section" style="display:none">
+      <h3>SHARE LINK</h3>
+      <div class="link-box" id="share-url" onclick="copyLink()">—</div>
+      <button class="btn" style="margin-top:4px" onclick="copyLink()">⎘ Copy link</button>
+    </div>
+    <div>
+      <h3>STATS</h3>
+      <div class="stat"><span class="k">viewers</span><span class="v" id="s-viewers">0</span></div>
+      <div class="stat"><span class="k">uptime</span><span class="v" id="s-uptime">—</span></div>
+      <div class="stat"><span class="k">peer ID</span><span class="v" id="s-peer">—</span></div>
+      <div class="stat"><span class="k">tracks</span><span class="v" id="s-tracks">—</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr">
+  <span>📡 WebRTC P2P broadcast · PeerJS</span>
+  <span style="flex:1"></span>
+  <span id="clock"></span>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="capture.js"></script>
+<script src="peer.js"></script>
+<script src="sources.js"></script>
+<script src="controls.js"></script>
+</body></html>

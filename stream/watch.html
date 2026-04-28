@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📡 KONOMIOKE STREAM — watch</title>
+<style>
+:root{--bg:#050810;--c:#0a0d15;--b:#161d2a;--t:#8898b4;--ok:#42e898;--er:#ff4466;--kon:#ff2d75}
+*{margin:0;box-sizing:border-box;font-family:'Courier New',monospace}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t)}
+body{display:flex;flex-direction:column}
+.hdr{height:28px;flex-shrink:0;background:var(--c);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 10px;gap:8px;font-size:9px}
+.vid{flex:1;display:flex;align-items:center;justify-content:center;background:#000;min-height:0}
+.vid video{max-width:100%;max-height:100%;object-fit:contain}
+.ftr{height:22px;flex-shrink:0;background:#030508;border-top:1px solid var(--b);display:flex;align-items:center;padding:0 10px;gap:8px;font-size:7px;color:#3a4860}
+.msg{text-align:center;padding:20px;font-size:11px}
+#status{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <span style="color:var(--kon);font-weight:700">📡</span>
+  <span>好みオケ STREAM</span>
+  <span style="flex:1"></span>
+  <span id="status">connecting...</span>
+</div>
+<div class="vid" id="player">
+  <div class="msg" id="msg">⏳ connecting to broadcaster...</div>
+</div>
+<div class="ftr">
+  <span>WebRTC P2P · konomioke.com</span>
+  <span style="flex:1"></span>
+  <a href="./" style="color:#38b5f9;text-decoration:none">start your own →</a>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="peer.js"></script>
+<script>
+var hostId = new URLSearchParams(location.search).get('id');
+if (!hostId) {
+  document.getElementById('msg').innerHTML = '❌ no stream ID in URL<br><a href="./" style="color:#38b5f9">go to broadcaster</a>';
+  document.getElementById('status').textContent = 'no stream ID';
+} else {
+  document.getElementById('status').textContent = 'connecting to ' + hostId.slice(0,8) + '…';
+  peerInit('watch').then(function() {
+    return watchStream(hostId);
+  }).then(function(stream) {
+    if (!stream) { document.getElementById('msg').textContent = '📡 stream ended'; return }
+    document.getElementById('msg').remove();
+    var vid = document.createElement('video');
+    vid.srcObject = stream;
+    vid.autoplay = true;
+    vid.playsInline = true;
+    vid.controls = true;
+    document.getElementById('player').appendChild(vid);
+    document.getElementById('status').textContent = '▶ watching live';
+  }).catch(function(e) {
+    document.getElementById('msg').textContent = '❌ ' + e.message;
+    document.getElementById('status').textContent = 'failed';
+  });
+}
+</script>
+</body></html>
