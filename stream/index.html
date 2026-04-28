@@ -79,6 +79,13 @@ h3{font-size:9px;color:var(--ig);margin-bottom:4px}
   <span id="clock"></span>
 </div>
 
+<script src="state-widget.js"></script>
+<script>
+stateWidgetInit(
+  'stateDiagram-v2\n[*]-->offline\noffline-->source : pick source\nsource-->audio : add mic/tab\naudio-->connecting : GO LIVE\nconnecting-->live : PeerJS open\nlive-->streaming : viewers connect',
+  'offline'
+);
+</script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="capture.js"></script>
 <script src="peer.js"></script>

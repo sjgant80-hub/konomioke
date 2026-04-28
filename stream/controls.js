@@ -3,7 +3,7 @@ var _started = null, _micStream = null, _tabStream = null;
 
 function toggleMic() {
   if (_micStream) { _micStream.getTracks().forEach(function(t){t.stop()}); _micStream = null; document.getElementById('btn-mic').textContent = '🎤 Add mic'; return }
-  addMicToCapture().then(function(s) { _micStream = s; document.getElementById('btn-mic').textContent = '🔴 Mic ON'; updateTracks() }).catch(function(e) { setStatus('mic: ' + e) });
+  addMicToCapture().then(function(s) { _micStream = s; document.getElementById('btn-mic').textContent = '🔴 Mic ON'; updateTracks(); if(typeof highlightState==='function')highlightState('audio') }).catch(function(e) { setStatus('mic: ' + e) });
 }
 
 function toggleTab() {
@@ -20,6 +20,7 @@ async function goLive() {
     _started = Date.now();
     document.getElementById('btn-live').textContent = '🔴 LIVE';
     document.getElementById('btn-live').className = 'btn live';
+    if(typeof highlightState==='function')highlightState('live');
     document.getElementById('share-section').style.display = '';
     document.getElementById('share-url').textContent = getShareURL();
     document.getElementById('s-peer').textContent = id.slice(0, 12) + '…';

@@ -40,6 +40,13 @@ body{display:flex;flex-direction:column}
 </div>
 <div id="log"></div>
 
+<script src="state-widget.js"></script>
+<script>
+stateWidgetInit(
+  'stateDiagram-v2\n[*]-->idle\nidle-->connecting : click Watch\nconnecting-->peer_init : PeerJS open\npeer_init-->calling : call host\ncalling-->streaming : stream received\nstreaming-->ended : call closed',
+  'idle'
+);
+</script>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="peer.js"></script>
 <script>
@@ -57,12 +64,14 @@ async function connectToStream() {
   var btn = document.getElementById('btn-watch');
   btn.textContent = '⏳ connecting...';
   btn.disabled = true;
+  if(typeof highlightState==='function')highlightState('connecting');
   document.getElementById('status').textContent = 'connecting to ' + hostId.slice(0,8) + '…';
   log('init peer...');
 
   try {
     await peerInit('watch');
     log('peer ready: ' + PEER.id.slice(0,8));
+    if(typeof highlightState==='function')highlightState('peer_init');
   } catch(e) {
     log('peer init failed: ' + e.message);
     document.getElementById('msg').textContent = '❌ peer init failed: ' + e.message;
@@ -71,6 +80,7 @@ async function connectToStream() {
   }
 
   log('calling host ' + hostId.slice(0,8) + '...');
+  if(typeof highlightState==='function')highlightState('calling');
   try {
     var call = PEER.peer.call(hostId, silentStream());
     if (!call) { throw new Error('call returned null — host may be offline'); }
@@ -96,6 +106,7 @@ async function connectToStream() {
       vid.play().then(function(){
         log('playing');
         document.getElementById('status').textContent = '▶ watching live';
+        if(typeof highlightState==='function')highlightState('streaming');
       }).catch(function(e){
         log('autoplay blocked, trying muted: ' + e.message);
         vid.muted = true;

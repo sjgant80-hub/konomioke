@@ -96,11 +96,34 @@
   }
 
   _createLogPanel();
-  // ─────────────────────────────────────────────────────────────────────────
+
+  // Init mermaid state widget if available
+  if (typeof stateWidgetInit === 'function') {
+    stateWidgetInit(
+      'stateDiagram-v2\n' +
+      '[*] --> init\n' +
+      'init --> booting : page load\n' +
+      'booting --> arm_start : phases done\n' +
+      'arm_start --> auto_enter : tap gesture\n' +
+      'auto_enter --> stage : joinDefaultRoom\n' +
+      'booting --> lobby : auto-enter fail\n' +
+      'lobby --> stage : create/join\n' +
+      'stage --> lobby : leave\n' +
+      'stage --> ended : tab close',
+      'init'
+    );
+  }
 
   function rlog(msg) {
     console.log('[K]', msg);
     _appendLog(msg);
+    // Sync state widget
+    if (typeof highlightState === 'function') {
+      var sm = msg.match(/STATE:\s*\w+\s*→\s*(\w+)/);
+      if (sm) highlightState(sm[1]);
+      else if (msg.indexOf('auto-enter starting') > -1) highlightState('auto_enter');
+      else if (msg.indexOf('room-mgr:') > -1) highlightState('stage');
+    }
     fetch('https://onlybrains.onrender.com/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'konomioke-debug', message: msg, role: 'system' }),

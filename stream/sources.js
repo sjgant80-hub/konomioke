@@ -25,6 +25,7 @@ function sourceCanvas() {
   })();
   initCapture(cv);
   setStatus('canvas source ready');
+  if(typeof highlightState==='function')highlightState('source');
 }
 
 function sourceEngine() {
@@ -39,6 +40,7 @@ function sourceEngine() {
   iframe.allowFullscreen = true;
   prev.appendChild(iframe);
   setStatus('engine loaded — use "Add tab audio" to capture');
+  if(typeof highlightState==='function')highlightState('source');
 }
 
 function sourceScreen() {

@@ -67,6 +67,13 @@
   <a href="https://github.com/teslasolar/moosic" target="_blank" class="btn">gh/moosic</a>
 </div>
 
+<script src="js/state-widget.js"></script>
+<script>
+stateWidgetInit(
+  'stateDiagram-v2\n[*]-->load\nload-->fetchTags : count tags\nfetchTags-->ready : both repos\nready-->kon_active : engine boots\nkon_active-->mus_active : grid loads\nmus_active-->live : both iframes live',
+  'load'
+);
+</script>
 <script src="js/scada-dash.js"></script>
 </body>
 </html>
