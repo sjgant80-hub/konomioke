@@ -32,6 +32,21 @@ class AudioFabricEngine {
       latencyHint: 'interactive'
     });
 
+    // Browser autoplay policy: AudioContext starts suspended until a user
+    // gesture. Resume on the first pointer/key event so the prime drones
+    // and analyser actually run.
+    if (this.ctx.state === 'suspended') {
+      const resume = () => {
+        this.ctx.resume().catch(() => {});
+        window.removeEventListener('pointerdown', resume);
+        window.removeEventListener('keydown', resume);
+        window.removeEventListener('touchstart', resume);
+      };
+      window.addEventListener('pointerdown', resume, { once: true });
+      window.addEventListener('keydown', resume, { once: true });
+      window.addEventListener('touchstart', resume, { once: true });
+    }
+
     // Create analyser for local mic
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = this.fftSize;
