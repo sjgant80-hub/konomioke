@@ -20,11 +20,11 @@
   function _createLogPanel() {
     var panel = document.createElement('div');
     panel.id = 'k-log-panel';
-    panel.style.cssText = 'position:fixed;bottom:0;right:0;width:340px;max-height:38vh;background:#080810;border:1px solid #22223a;border-radius:8px 0 0 0;font-family:monospace;font-size:11px;color:#8888aa;z-index:99999;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -2px 14px #000c';
+    panel.style.cssText = 'position:fixed;top:4px;right:4px;width:280px;max-height:30vh;background:#080810;border:1px solid #22223a;border-radius:0 0 0 8px;font-family:monospace;font-size:11px;color:#8888aa;z-index:99999;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 14px #000c;pointer-events:none';
 
     // Header: state machine chips + collapse toggle
     var hdr = document.createElement('div');
-    hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:4px 8px;border-bottom:1px solid #16162a;flex-shrink:0;cursor:pointer;user-select:none';
+    hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:4px 8px;border-bottom:1px solid #16162a;flex-shrink:0;cursor:pointer;user-select:none;pointer-events:auto';
     _SM_STATES.forEach(function (s, i) {
       var chip = document.createElement('span');
       chip.id = 'k-sm-' + s;
