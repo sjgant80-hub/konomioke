@@ -21,10 +21,23 @@ class KonomiApp {
 
     this._animFrame = null;
     this._lastTime = 0;
+    this._state = 'init'; // init → booting → lobby → stage → ended
+  }
+
+  _setState(s) {
+    const prev = this._state;
+    this._state = s;
+    const screens = { init:'none', booting:'none', lobby:'none', stage:'none', ended:'none' };
+    screens[s] = s === 'lobby' ? 'flex' : 'block';
+    if ($('#boot-screen')) $('#boot-screen').style.display = s === 'booting' ? 'flex' : 'none';
+    if ($('#lobby-screen')) $('#lobby-screen').style.display = screens.lobby;
+    if ($('#stage-screen')) $('#stage-screen').style.display = screens.stage;
+    console.log(`STATE: ${prev} → ${s}`);
   }
 
   // ── BOOT SEQUENCE ──────────────────────────────────────
   async boot() {
+    this._setState('booting');
     const phases = [
       { prime: 2, label: 'IDENTITY + ROOMS', fn: () => this._bootIdentity() },
       { prime: 3, label: 'P2P MESH', fn: () => this._bootMesh() },
@@ -56,10 +69,8 @@ class KonomiApp {
       }
     }
 
-    // Transition to lobby
     await this._delay(600);
-    $('#boot-screen').style.display = 'none';
-    $('#lobby-screen').style.display = 'flex';
+    if (this._state !== 'stage') this._setState('lobby');
   }
 
   async _bootIdentity() {
@@ -231,11 +242,8 @@ class KonomiApp {
   }
 
   _enterStage(roomCode) {
-    $('#lobby-screen').style.display = 'none';
-    $('#stage-screen').style.display = 'block';
+    this._setState('stage');
     $('#stage-room-code').textContent = roomCode;
-
-    // Start the render/analysis loop
     this._startLoop();
   }
 

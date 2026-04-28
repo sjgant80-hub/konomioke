@@ -1,0 +1,19 @@
+{
+  "_udt": "StateMachine",
+  "states": ["init", "booting", "lobby", "stage", "ended"],
+  "transitions": [
+    { "from": "init",    "to": "booting", "trigger": "boot()" },
+    { "from": "booting", "to": "stage",   "trigger": "auto-enter (mic optional)" },
+    { "from": "booting", "to": "lobby",   "trigger": "auto-enter failed" },
+    { "from": "lobby",   "to": "stage",   "trigger": "create/join room" },
+    { "from": "stage",   "to": "lobby",   "trigger": "leave room" },
+    { "from": "stage",   "to": "ended",   "trigger": "close" }
+  ],
+  "screens": {
+    "init":    { "boot": "none", "lobby": "none", "stage": "none" },
+    "booting": { "boot": "flex", "lobby": "none", "stage": "none" },
+    "lobby":   { "boot": "none", "lobby": "flex", "stage": "none" },
+    "stage":   { "boot": "none", "lobby": "none", "stage": "block" },
+    "ended":   { "boot": "none", "lobby": "none", "stage": "none" }
+  }
+}
