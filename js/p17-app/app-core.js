@@ -80,7 +80,7 @@ class KonomiApp {
     }
 
     await this._delay(600);
-    if (this._state !== 'stage') this._setState('lobby');
+    if (this._state !== 'stage') this._armStart();
   }
 
   async _bootIdentity() {
@@ -128,15 +128,56 @@ class KonomiApp {
     if (savedName && savedName !== 'Singer') {
       $('#display-name').value = savedName;
     }
+    // LAUNCHER finishes here — mic + AudioContext.resume() require a user
+    // gesture (especially when embedded in an iframe), so we arm a tap-to-start
+    // handler instead of blocking the boot phase on getUserMedia.
+  }
 
-    // Auto-enter public room — skip lobby, mic optional
+  // ── TAP TO START ───────────────────────────────────────
+  // Called after all phases complete. Shows a prompt on the boot screen and
+  // waits for the first user gesture, then resumes audio, grabs the mic, and
+  // auto-enters the public room.
+  _armStart() {
+    const screen = $('#boot-screen');
+    if (!screen) { this._autoEnter(); return; }
+
+    // Inject a tap-to-start hint if not already present
+    let hint = screen.querySelector('.boot-start-hint');
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.className = 'boot-start-hint';
+      hint.textContent = 'tap anywhere to start';
+      hint.style.cssText = 'margin-top:1.5rem;padding:0.6rem 1.2rem;border:1px solid #ff2d75;border-radius:6px;color:#ff2d75;font-family:monospace;font-size:0.85rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;animation:konomiPulse 1.4s ease-in-out infinite';
+      screen.appendChild(hint);
+      const style = document.createElement('style');
+      style.textContent = '@keyframes konomiPulse{0%,100%{opacity:0.55}50%{opacity:1}}';
+      document.head.appendChild(style);
+    }
+
+    const start = async (ev) => {
+      if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+      window.removeEventListener('pointerdown', start, true);
+      window.removeEventListener('keydown', start, true);
+      hint.textContent = 'starting…';
+      await this._autoEnter();
+    };
+    window.addEventListener('pointerdown', start, true);
+    window.addEventListener('keydown', start, true);
+  }
+
+  async _autoEnter() {
     if (typeof rlog === 'function') rlog('auto-enter starting');
-    const code = await this.identity.createRoomCode();
-    this.mesh.roomCode = code;
-    this.mesh.isHost = true;
-    try { await this.fabric.resume(); if (typeof rlog === 'function') rlog('fabric resumed'); } catch (e) { if (typeof rlog === 'function') rlog('fabric resume fail: ' + e.message); }
-    try { await this._getMicrophone(); if (typeof rlog === 'function') rlog('mic acquired'); } catch (e) { if (typeof rlog === 'function') rlog('mic fail: ' + e.message); }
-    this._enterStage(code);
-    if (typeof rlog === 'function') rlog('entered stage: ' + code);
+    try {
+      const code = await this.identity.createRoomCode();
+      this.mesh.roomCode = code;
+      this.mesh.isHost = true;
+      try { await this.fabric.resume(); if (typeof rlog === 'function') rlog('fabric resumed'); } catch (e) { if (typeof rlog === 'function') rlog('fabric resume fail: ' + e.message); }
+      try { await this._getMicrophone(); if (typeof rlog === 'function') rlog('mic acquired'); } catch (e) { if (typeof rlog === 'function') rlog('mic fail: ' + e.message); }
+      this._enterStage(code);
+      if (typeof rlog === 'function') rlog('entered stage: ' + code);
+    } catch (err) {
+      if (typeof rlog === 'function') rlog('auto-enter fail: ' + err.message);
+      this._setState('lobby');
+    }
   }
 
