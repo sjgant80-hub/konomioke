@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "better-sqlite3": "^12.9.0",
     "ws": "^8.16.0"
   },
   "keywords": [
