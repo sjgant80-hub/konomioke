@@ -39,6 +39,7 @@ function formatTime(s) {
 // ─────────────────────────────────────────────────────────
 // p=2  IDENTITY + ROOMS — Ed25519 keypair, IndexedDB
 // ─────────────────────────────────────────────────────────
+
 class KonomiIdentity {
   constructor() {
     this.keyPair = null;
@@ -195,6 +196,12 @@ class KonomiIdentity {
   async saveTrack(hash, data) { await this._dbPut('tracks', hash, data); }
   async loadTrack(hash) { return this._dbGet('tracks', hash); }
 }
+
+// ─────────────────────────────────────────────────────────
+// CRDT Queue — Conflict-free queue for song ordering
+// NOTE: Canonical testable copy in lib/crdt-queue.js — keep in sync
+// ─────────────────────────────────────────────────────────
+
 class CRDTQueue {
   constructor() {
     this.items = new Map();
@@ -230,6 +237,10 @@ class CRDTQueue {
     return Object.fromEntries(this.items);
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// p=3  P2P MESH LAYER — WebRTC + WebSocket signaling
+// ─────────────────────────────────────────────────────────
 
 class KonomiMesh {
   constructor(identity) {
@@ -458,6 +469,11 @@ class KonomiMesh {
     }
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// p=5  AUDIO FABRIC ENGINE — Vagal phoneme detection, 7 rings
+// ─────────────────────────────────────────────────────────
+
 class AudioFabricEngine {
   constructor() {
     this.ctx = null;
@@ -762,6 +778,7 @@ class AudioFabricEngine {
 // ─────────────────────────────────────────────────────────
 // p=7  VOCAL PROCESSING — Pitch display, harmony, mixing
 // ─────────────────────────────────────────────────────────
+
 class VocalProcessor {
   constructor(audioFabric) {
     this.fabric = audioFabric;
@@ -884,6 +901,7 @@ class VocalProcessor {
 // ─────────────────────────────────────────────────────────
 // p=11  TRACK + LYRICS ENGINE — Track loading, LRC, queue
 // ─────────────────────────────────────────────────────────
+
 class TrackEngine {
   constructor(audioFabric, vocalProcessor) {
     this.fabric = audioFabric;
@@ -1187,6 +1205,7 @@ class TrackEngine {
 // ─────────────────────────────────────────────────────────
 // p=13  VISUALIZATION ENGINE — Three.js 127D vagal orb
 // ─────────────────────────────────────────────────────────
+
 class VizEngine {
   constructor(audioFabric) {
     this.fabric = audioFabric;
@@ -1585,6 +1604,7 @@ class VizEngine {
 // ─────────────────────────────────────────────────────────
 // p=17  LAUNCHER — Boot sequence, UI, the stage
 // ─────────────────────────────────────────────────────────
+
 class KonomiApp {
   constructor() {
     this.identity = null;
@@ -1708,52 +1728,6 @@ class KonomiApp {
     }
   }
 
-  // ── SETTINGS ───────────────────────────────────────────
-  _bindSettingsEvents() {
-    $('#btn-close-settings').onclick = () => {
-      $('#settings-modal').style.display = 'none';
-    };
-
-    $$('.toggle-switch').forEach(el => {
-      el.onclick = () => {
-        el.classList.toggle('on');
-        const key = el.dataset.key;
-        this.settings[key] = el.classList.contains('on');
-
-        switch (key) {
-          case 'harmony':
-            this.vocal.setHarmonyEnabled(this.settings.harmony);
-            break;
-          case 'drones':
-            this.fabric.setDroneVolume(this.settings.drones ? $('#mix-drones').value / 100 : 0);
-            break;
-          case 'viz':
-            this.viz.setEnabled(this.settings.viz);
-            break;
-          case 'aec':
-            // Re-request mic with new echo cancellation setting
-            this._getMicrophone();
-            break;
-        }
-      };
-    });
-  }
-
-  // ── SERVICE WORKER ─────────────────────────────────────
-  _registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  }
-
-  _delay(ms) {
-    return new Promise(r => setTimeout(r, ms));
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// IGNITION
-// ─────────────────────────────────────────────────────────
   // ── LOBBY EVENTS ───────────────────────────────────────
   _bindLobbyEvents() {
     // Save display name
@@ -1935,6 +1909,37 @@ class KonomiApp {
       const fraction = (e.clientX - rect.left) / rect.width;
       this.tracks.seek(Math.max(0, Math.min(1, fraction)));
     };
+  }
+
+  // ── SETTINGS ───────────────────────────────────────────
+  _bindSettingsEvents() {
+    $('#btn-close-settings').onclick = () => {
+      $('#settings-modal').style.display = 'none';
+    };
+
+    $$('.toggle-switch').forEach(el => {
+      el.onclick = () => {
+        el.classList.toggle('on');
+        const key = el.dataset.key;
+        this.settings[key] = el.classList.contains('on');
+
+        switch (key) {
+          case 'harmony':
+            this.vocal.setHarmonyEnabled(this.settings.harmony);
+            break;
+          case 'drones':
+            this.fabric.setDroneVolume(this.settings.drones ? $('#mix-drones').value / 100 : 0);
+            break;
+          case 'viz':
+            this.viz.setEnabled(this.settings.viz);
+            break;
+          case 'aec':
+            // Re-request mic with new echo cancellation setting
+            this._getMicrophone();
+            break;
+        }
+      };
+    });
   }
 
   // ── TRACK + LYRICS EVENTS ─────────────────────────────
@@ -2187,6 +2192,22 @@ class KonomiApp {
     }
   }
 
+  // ── SERVICE WORKER ─────────────────────────────────────
+  _registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  }
+
+  _delay(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// IGNITION
+// ─────────────────────────────────────────────────────────
+
 const konomi = new KonomiApp();
 
 // ── KCC MINING LAYER ── singing IS mining (uses shared template)
@@ -2209,4 +2230,3 @@ konomi.boot().catch(err => {
     </div>
   </div>`;
 });
-</script>
