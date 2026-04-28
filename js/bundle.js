@@ -1641,6 +1641,7 @@ class KonomiApp {
 
   _setState(s) {
     const prev = this._state;
+    if (typeof rlog === 'function') rlog('STATE: ' + prev + ' → ' + s);
     this._state = s;
     const screens = { init:'none', booting:'none', lobby:'none', stage:'none', ended:'none' };
     screens[s] = s === 'lobby' ? 'flex' : 'block';
@@ -1734,13 +1735,15 @@ class KonomiApp {
       $('#display-name').value = savedName;
     }
 
-    // Auto-enter public room — skip lobby, mic optional, no user gesture needed
+    // Auto-enter public room — skip lobby, mic optional
+    if (typeof rlog === 'function') rlog('auto-enter starting');
     const code = await this.identity.createRoomCode();
     this.mesh.roomCode = code;
     this.mesh.isHost = true;
-    try { await this.fabric.resume(); } catch {}
-    try { await this._getMicrophone(); } catch {}
+    try { await this.fabric.resume(); if (typeof rlog === 'function') rlog('fabric resumed'); } catch (e) { if (typeof rlog === 'function') rlog('fabric resume fail: ' + e.message); }
+    try { await this._getMicrophone(); if (typeof rlog === 'function') rlog('mic acquired'); } catch (e) { if (typeof rlog === 'function') rlog('mic fail: ' + e.message); }
     this._enterStage(code);
+    if (typeof rlog === 'function') rlog('entered stage: ' + code);
   }
 
   // ── LOBBY EVENTS ───────────────────────────────────────

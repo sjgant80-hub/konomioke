@@ -16,7 +16,21 @@
 <div id="app">Loading...</div>
 
 <script>
+// Remote logger — sends console to OnlyBrains API
+const _rlog = [];
+function rlog(msg) {
+  _rlog.push(msg);
+  console.log('[KONOMIOKE]', msg);
+  fetch('https://onlybrains.onrender.com/api/chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: 'konomioke-debug', message: msg, role: 'system' }),
+  }).catch(() => {});
+}
+window.addEventListener('error', e => rlog('ERR: ' + e.message + ' @ ' + e.filename + ':' + e.lineno));
+window.addEventListener('unhandledrejection', e => rlog('REJECT: ' + (e.reason?.message || e.reason)));
+
 async function boot() {
+  rlog('boot start');
   const app = document.getElementById('app');
   const templates = ['html-canvas','html-boot','html-lobby','html-stage','html-modals'];
   app.innerHTML = '';
@@ -24,11 +38,15 @@ async function boot() {
     const r = await fetch('ui/' + t + '.html');
     if (r.ok) app.insertAdjacentHTML('beforeend', await r.text());
   }
+  rlog('templates loaded: ' + app.children.length + ' elements');
   const s = document.createElement('script');
   s.src = 'js/bundle.js';
+  s.onload = () => rlog('bundle.js loaded');
+  s.onerror = (e) => rlog('bundle.js FAILED: ' + e);
   document.body.appendChild(s);
 }
 boot().catch(e => {
+  rlog('boot CATCH: ' + e.message);
   document.getElementById('app').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace"><div><h1>好みオケ</h1><p>' + e.message + '</p></div></div>';
 });
