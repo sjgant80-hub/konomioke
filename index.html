@@ -11,45 +11,26 @@
 <link rel="stylesheet" href="ui/css-stage.css">
 <link rel="stylesheet" href="ui/css-modals.css">
 <link rel="stylesheet" href="ui/css-chat.css">
-<link rel="stylesheet" href="_kcc/css/kcc-base.css">
 </head>
 <body>
-<div id="app"></div>
+<div id="app">Loading...</div>
 
 <script>
-// Load HTML templates
-async function loadTemplates() {
+async function boot() {
   const app = document.getElementById('app');
-  const templates = ['html-canvas', 'html-boot', 'html-lobby', 'html-stage', 'html-modals'];
+  const templates = ['html-canvas','html-boot','html-lobby','html-stage','html-modals'];
+  app.innerHTML = '';
   for (const t of templates) {
     const r = await fetch('ui/' + t + '.html');
-    app.insertAdjacentHTML('beforeend', await r.text());
+    if (r.ok) app.insertAdjacentHTML('beforeend', await r.text());
   }
+  const s = document.createElement('script');
+  s.src = 'js/bundle.js';
+  document.body.appendChild(s);
 }
-
-// Load the full app script (legacy classes inline until fully modularized)
-async function boot() {
-  await loadTemplates();
-
-  // Load split class files in order
-  const scripts = [
-    'js/utils.js', 'js/identity.js', 'js/crdt-queue.js', 'js/mesh.js',
-    'js/fabric.js', 'js/vocal.js', 'js/tracks.js', 'js/viz.js',
-    'js/app.js', 'js/boot.js'
-  ];
-  for (const src of scripts) {
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = resolve;
-      s.onerror = reject;
-      document.body.appendChild(s);
-    });
-  }
-}
-
-boot().catch(err => {
-  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace;text-align:center;padding:2rem"><div><h1>好みオケ</h1><p>Load failed: ' + err.message + '</p></div></div>';
+boot().catch(e => {
+  document.getElementById('app').innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace"><div><h1>好みオケ</h1><p>' + e.message + '</p></div></div>';
 });
 </script>
 </body>
