@@ -10,8 +10,97 @@
   if (window.__konomiokeBooting) return;   // guard against double-boot
   window.__konomiokeBooting = true;
 
+  // ── ON-SCREEN LOG PANEL ────────────────────────────────────────────────
+  // Maps the boot/state-machine sequence and streams every rlog() entry live.
+  // State machine: init → booting → lobby → stage → ended
+  var _SM_STATES = ['init','booting','lobby','stage','ended'];
+  var _logList = null;
+  var _logCollapsed = false;
+
+  function _createLogPanel() {
+    var panel = document.createElement('div');
+    panel.id = 'k-log-panel';
+    panel.style.cssText = 'position:fixed;bottom:0;right:0;width:340px;max-height:38vh;background:#080810;border:1px solid #22223a;border-radius:8px 0 0 0;font-family:monospace;font-size:11px;color:#8888aa;z-index:99999;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -2px 14px #000c';
+
+    // Header: state machine chips + collapse toggle
+    var hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:4px 8px;border-bottom:1px solid #16162a;flex-shrink:0;cursor:pointer;user-select:none';
+    _SM_STATES.forEach(function (s, i) {
+      var chip = document.createElement('span');
+      chip.id = 'k-sm-' + s;
+      chip.textContent = s;
+      chip.style.cssText = 'padding:1px 5px;border-radius:3px;font-size:10px;border:1px solid #2a2a44;color:#44445a;transition:all .25s';
+      hdr.appendChild(chip);
+      if (i < _SM_STATES.length - 1) {
+        var arr = document.createElement('span');
+        arr.textContent = '→';
+        arr.style.color = '#2a2a44';
+        hdr.appendChild(arr);
+      }
+    });
+    var tog = document.createElement('span');
+    tog.id = 'k-log-tog';
+    tog.textContent = '▾';
+    tog.style.cssText = 'margin-left:auto;color:#ff2d75;font-size:12px';
+    hdr.appendChild(tog);
+    hdr.onclick = function () {
+      _logCollapsed = !_logCollapsed;
+      tog.textContent = _logCollapsed ? '▸' : '▾';
+      list.style.display = _logCollapsed ? 'none' : '';
+      panel.style.maxHeight = _logCollapsed ? '26px' : '38vh';
+    };
+
+    var list = document.createElement('div');
+    list.style.cssText = 'overflow-y:auto;flex:1;padding:4px 8px';
+    _logList = list;
+
+    panel.appendChild(hdr);
+    panel.appendChild(list);
+    document.body.appendChild(panel);
+    _setLogState('init');
+  }
+
+  function _setLogState(s) {
+    var idx = _SM_STATES.indexOf(s);
+    _SM_STATES.forEach(function (name, i) {
+      var el = document.getElementById('k-sm-' + name);
+      if (!el) return;
+      if (i < idx) {
+        el.style.cssText = 'padding:1px 5px;border-radius:3px;font-size:10px;border:1px solid #226644;color:#44cc88;transition:all .25s';
+      } else if (i === idx) {
+        el.style.cssText = 'padding:1px 5px;border-radius:3px;font-size:10px;border:1px solid #ff2d75;color:#ff2d75;background:#1a0010;transition:all .25s';
+      } else {
+        el.style.cssText = 'padding:1px 5px;border-radius:3px;font-size:10px;border:1px solid #2a2a44;color:#44445a;transition:all .25s';
+      }
+    });
+  }
+
+  function _appendLog(msg) {
+    if (!_logList) return;
+    var ts = new Date().toISOString().slice(11, 23);
+    var isState = msg.indexOf('STATE:') === 0;
+    var isErr   = /^(ERR|FAIL):/.test(msg);
+    var isMic   = msg.indexOf('mic') !== -1;
+    var row = document.createElement('div');
+    row.style.cssText = 'padding:1px 0;line-height:1.55;white-space:pre-wrap;color:' +
+      (isErr ? '#ff3344' : isState ? '#ffaa33' : isMic ? '#33aaff' : '#7777aa');
+    if (isState) row.style.fontWeight = 'bold';
+    row.textContent = ts + '  ' + msg;
+    _logList.appendChild(row);
+    _logList.scrollTop = _logList.scrollHeight;
+    // Advance state machine indicator
+    if (isState) {
+      var m = msg.match(/STATE:\s*\w+\s*→\s*(\w+)/);
+      if (m) _setLogState(m[1]);
+    }
+  }
+
+  _createLogPanel();
+  // ─────────────────────────────────────────────────────────────────────────
+
   function rlog(msg) {
     console.log('[K]', msg);
+    _appendLog(msg);
     fetch('https://onlybrains.onrender.com/api/chat', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'konomioke-debug', message: msg, role: 'system' }),

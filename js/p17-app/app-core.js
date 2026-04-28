@@ -190,17 +190,21 @@ class KonomiApp {
   // stops. Idempotent — calling twice does nothing.
   _startMicRetry() {
     if (this._micRetryTimer || this.micStream) return;
+    let attempt = 0;
     const tick = async () => {
       if (this.micStream) { this._stopMicRetry(); return; }
+      attempt++;
+      if (typeof rlog === 'function') rlog('mic attempt #' + attempt);
       try {
         await this._getMicrophone();
         if (this.micStream) {
-          if (typeof rlog === 'function') rlog('mic acquired (retry)');
+          if (typeof rlog === 'function') rlog('mic acquired on attempt #' + attempt);
           this._stopMicRetry();
           return;
         }
+        if (typeof rlog === 'function') rlog('mic attempt #' + attempt + ': getUserMedia resolved but no stream');
       } catch (e) {
-        if (typeof rlog === 'function') rlog('mic retry: ' + e.message);
+        if (typeof rlog === 'function') rlog('mic attempt #' + attempt + ' failed: ' + e.message);
       }
     };
     // Try once immediately, then every 5s.
