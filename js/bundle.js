@@ -40,6 +40,7 @@ function formatTime(s) {
 // p=2  IDENTITY + ROOMS — Ed25519 keypair, IndexedDB
 // ─────────────────────────────────────────────────────────
 
+
 class KonomiIdentity {
   constructor() {
     this.keyPair = null;
@@ -202,6 +203,7 @@ class KonomiIdentity {
 // NOTE: Canonical testable copy in lib/crdt-queue.js — keep in sync
 // ─────────────────────────────────────────────────────────
 
+
 class CRDTQueue {
   constructor() {
     this.items = new Map();
@@ -241,6 +243,7 @@ class CRDTQueue {
 // ─────────────────────────────────────────────────────────
 // p=3  P2P MESH LAYER — WebRTC + WebSocket signaling
 // ─────────────────────────────────────────────────────────
+
 
 class KonomiMesh {
   constructor(identity) {
@@ -473,6 +476,7 @@ class KonomiMesh {
 // ─────────────────────────────────────────────────────────
 // p=5  AUDIO FABRIC ENGINE — Vagal phoneme detection, 7 rings
 // ─────────────────────────────────────────────────────────
+
 
 class AudioFabricEngine {
   constructor() {
@@ -779,6 +783,7 @@ class AudioFabricEngine {
 // p=7  VOCAL PROCESSING — Pitch display, harmony, mixing
 // ─────────────────────────────────────────────────────────
 
+
 class VocalProcessor {
   constructor(audioFabric) {
     this.fabric = audioFabric;
@@ -901,6 +906,7 @@ class VocalProcessor {
 // ─────────────────────────────────────────────────────────
 // p=11  TRACK + LYRICS ENGINE — Track loading, LRC, queue
 // ─────────────────────────────────────────────────────────
+
 
 class TrackEngine {
   constructor(audioFabric, vocalProcessor) {
@@ -1205,6 +1211,7 @@ class TrackEngine {
 // ─────────────────────────────────────────────────────────
 // p=13  VISUALIZATION ENGINE — Three.js 127D vagal orb
 // ─────────────────────────────────────────────────────────
+
 
 class VizEngine {
   constructor(audioFabric) {
@@ -1604,6 +1611,7 @@ class VizEngine {
 // ─────────────────────────────────────────────────────────
 // p=17  LAUNCHER — Boot sequence, UI, the stage
 // ─────────────────────────────────────────────────────────
+
 
 class KonomiApp {
   constructor() {
@@ -2207,6 +2215,7 @@ class KonomiApp {
 // ─────────────────────────────────────────────────────────
 // IGNITION
 // ─────────────────────────────────────────────────────────
+
 
 const konomi = new KonomiApp();
 
