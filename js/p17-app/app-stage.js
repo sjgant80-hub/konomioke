@@ -12,8 +12,11 @@
     };
 
     // Leave room
-    $('#btn-leave').onclick = () => {
+    $('#btn-leave').onclick = async () => {
       this._stopLoop();
+      if (typeof leaveDefaultRoom === 'function') {
+        await leaveDefaultRoom(this.identity.publicKeyHex || 'anon');
+      }
       this.mesh.leaveRoom();
       this.tracks.stop();
       $('#stage-screen').style.display = 'none';

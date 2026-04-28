@@ -69,5 +69,64 @@ async function dashRefresh(){
   setInterval(function(){if(!_stream)grabOnce()},5000);
 })();
 
+// Tab audio — captured by the parent on explicit button click.
+// getDisplayMedia requires a direct user gesture; a cross-origin postMessage
+// from moosic cannot transfer that activation, so the Tab button lives here.
+//   Engine (same-origin): MediaStream injected via contentWindow.
+//   Moosic (cross-origin): 30 fps Uint8Array frequency relay via postMessage.
+(function(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia)return;
+  var _ts=null,_tac=null,_tan=null,_tfr=null,_trt=null;
+
+  async function grabTab(){
+    if(_ts&&_ts.active)return;
+    try{
+      var s=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true,preferCurrentTab:true,selfBrowserSurface:'include',systemAudio:'include'});
+      s.getVideoTracks().forEach(function(t){t.stop()});
+      _ts=s;
+      updateBtn(true);
+      var fk=document.getElementById('frame-kon');
+      if(fk&&fk.contentWindow){
+        fk.contentWindow.__sharedTabStream=s;
+        if(typeof fk.contentWindow.__onSharedTabStream==='function')fk.contentWindow.__onSharedTabStream(s);
+      }
+      _tac=new AudioContext();
+      var src=_tac.createMediaStreamSource(s);
+      _tan=_tac.createAnalyser();_tan.fftSize=128;
+      _tfr=new Uint8Array(_tan.frequencyBinCount);
+      src.connect(_tan);
+      _trt=setInterval(function(){
+        if(!_tan)return;
+        _tan.getByteFrequencyData(_tfr);
+        var fm=document.getElementById('frame-mus');
+        if(fm&&fm.contentWindow){try{fm.contentWindow.postMessage({type:'konomioke-tab-freqdata',data:Array.from(_tfr)},'*')}catch(e){}}
+      },33);
+      var atracks=s.getAudioTracks();
+      if(atracks.length)atracks[0].onended=function(){stopTab();};
+    }catch(e){console.warn('[scada] tab:',e.message)}
+  }
+
+  function stopTab(){
+    if(_ts)_ts.getTracks().forEach(function(t){t.stop()});
+    if(_tac){_tac.close().catch(function(){});}
+    if(_trt)clearInterval(_trt);
+    _ts=null;_tac=null;_tan=null;_tfr=null;_trt=null;
+    updateBtn(false);
+    var fk=document.getElementById('frame-kon');
+    if(fk&&fk.contentWindow&&typeof fk.contentWindow.__onSharedTabStream==='function')fk.contentWindow.__onSharedTabStream(null);
+  }
+
+  function updateBtn(on){
+    var b=document.getElementById('scada-tab-btn');
+    if(!b)return;
+    b.textContent=on?'🔴 Tab':'⚪ Tab';
+    b.style.borderColor=on?'#ff4466':'';
+    b.style.color=on?'#ff4466':'';
+  }
+
+  var btn=document.getElementById('scada-tab-btn');
+  if(btn)btn.onclick=function(){if(_ts&&_ts.active)stopTab();else grabTab();};
+})();
+
 setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString()},1000);
 dashRefresh();setInterval(dashRefresh,60000);

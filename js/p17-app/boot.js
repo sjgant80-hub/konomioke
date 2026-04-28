@@ -19,6 +19,13 @@ konomi.boot = (function (orig, p) {
   return function () { return p.then(() => orig.call(this)); };
 })(konomi.boot, _ghPromise);
 
+// Clean up room state on tab close
+window.addEventListener('beforeunload', function() {
+  if (typeof leaveDefaultRoom === 'function' && konomi.identity) {
+    leaveDefaultRoom(konomi.identity.publicKeyHex || 'anon');
+  }
+});
+
 konomi.boot().catch(err => {
   console.error('KONOMIOKE boot failed:', err);
   document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace;text-align:center;padding:2rem">

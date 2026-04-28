@@ -144,6 +144,29 @@
     }
   }
 
+  // Connect (or disconnect) a tab-audio stream to the fabric analyser so the
+  // engine rings react to tab/system audio captured by the parent SCADA page.
+  _connectTabStream(stream) {
+    try {
+      if (this.tabSourceNode) {
+        this.tabSourceNode.disconnect();
+        this.tabSourceNode = null;
+      }
+      if (!stream) return;
+      if (!this.fabric || !this.fabric.ctx) return;
+      this.tabSourceNode = this.fabric.ctx.createMediaStreamSource(stream);
+      this.fabric.connectSource(this.tabSourceNode);
+      // Auto-disconnect when the user stops sharing
+      stream.getAudioTracks().forEach(t => {
+        t.onended = () => {
+          if (this.tabSourceNode) { this.tabSourceNode.disconnect(); this.tabSourceNode = null; }
+        };
+      });
+    } catch (err) {
+      console.warn('Tab stream connect failed:', err.message);
+    }
+  }
+
   _enterStage(roomCode) {
     this._setState('stage');
     $('#stage-room-code').textContent = roomCode;

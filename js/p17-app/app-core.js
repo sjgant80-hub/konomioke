@@ -140,6 +140,12 @@ class KonomiApp {
       if (typeof rlog === 'function') rlog('shared mic injected by parent');
       this._getMicrophone();
     };
+
+    // Tab audio injected by the parent SCADA Tab button (stream=null → disconnect)
+    window.__onSharedTabStream = (stream) => {
+      if (typeof rlog === 'function') rlog('shared tab stream ' + (stream ? 'injected' : 'stopped') + ' by parent');
+      this._connectTabStream(stream);
+    };
   }
 
   // ── TAP TO START ───────────────────────────────────────
@@ -177,15 +183,21 @@ class KonomiApp {
   async _autoEnter() {
     if (typeof rlog === 'function') rlog('auto-enter starting');
     try {
-      const code = await this.identity.createRoomCode();
-      this.mesh.roomCode = code;
-      this.mesh.isHost = true;
       try { await this.fabric.resume(); if (typeof rlog === 'function') rlog('fabric resumed'); } catch (e) { if (typeof rlog === 'function') rlog('fabric resume fail: ' + e.message); }
 
-      // Enter stage immediately so the user can interact, then keep retrying
-      // mic acquisition every 5s in the background until it succeeds. The
-      // top-level page may still be waiting for the user to grant the
-      // permission prompt.
+      // Join default KONOMI room (8 users max, FIFO overflow)
+      var code;
+      if (typeof joinDefaultRoom === 'function') {
+        var uid = this.identity.publicKeyHex || 'anon';
+        var name = this.identity.displayName || 'Singer';
+        code = await joinDefaultRoom(uid, name);
+        if (typeof rlog === 'function') rlog('room-mgr: joined ' + code);
+      } else {
+        code = 'KONOMI';
+      }
+
+      this.mesh.roomCode = code;
+      this.mesh.isHost = (code === 'KONOMI' && (!ROOM_MGR.rooms.length || ROOM_MGR.rooms[0]?.users?.length <= 1));
       this._enterStage(code);
       this._startMicRetry();
       if (typeof rlog === 'function') rlog('entered stage: ' + code);

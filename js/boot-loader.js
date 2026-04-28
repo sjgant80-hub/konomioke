@@ -171,6 +171,7 @@
         'js/p13-viz/viz-extras.js',
         'js/p13-viz/viz-render.js',
     ]},
+    { label: 'p17-rooms',   files: ['js/p17-app/room-manager.js'] },
     { label: 'p17-app',     files: [
         'js/p17-app/app-core.js',
         'js/p17-app/app-lobby.js',
