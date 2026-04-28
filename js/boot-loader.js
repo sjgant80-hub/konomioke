@@ -118,6 +118,12 @@
       await loadPhase(PHASES[j]);
     }
     rlog('all ' + PHASES.length + ' phases loaded');
+
+    // Apply GitHub Issues tag.db
+    if (typeof applyKonomiTags === 'function') {
+      var n = await applyKonomiTags();
+      rlog('tags:' + n + ' applied');
+    }
   }
 
   boot().catch(function (e) {
