@@ -13,7 +13,10 @@ body{display:flex;flex-direction:column}
 .vid video{max-width:100%;max-height:100%;object-fit:contain}
 .ftr{height:22px;flex-shrink:0;background:#030508;border-top:1px solid var(--b);display:flex;align-items:center;padding:0 10px;gap:8px;font-size:7px;color:#3a4860}
 .msg{text-align:center;padding:20px;font-size:11px}
+.watch-btn{background:rgba(255,45,117,.1);border:2px solid var(--kon);color:var(--kon);padding:16px 40px;border-radius:8px;font-size:16px;cursor:pointer;font-family:inherit;transition:all .2s}
+.watch-btn:hover{background:rgba(255,45,117,.2);transform:scale(1.05)}
 #status{color:var(--ok)}
+#log{font-size:7px;color:#3a4860;position:fixed;bottom:24px;left:8px;max-width:50%;line-height:1.4}
 </style>
 </head>
 <body>
@@ -21,42 +24,105 @@ body{display:flex;flex-direction:column}
   <span style="color:var(--kon);font-weight:700">📡</span>
   <span>好みオケ STREAM</span>
   <span style="flex:1"></span>
-  <span id="status">connecting...</span>
+  <span id="status">ready</span>
 </div>
 <div class="vid" id="player">
-  <div class="msg" id="msg">⏳ connecting to broadcaster...</div>
+  <div id="connect-ui" style="text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">📡</div>
+    <button class="watch-btn" id="btn-watch" onclick="connectToStream()">▶ Watch Stream</button>
+    <div id="msg" style="margin-top:10px;font-size:9px;color:#3a4860"></div>
+  </div>
 </div>
 <div class="ftr">
   <span>WebRTC P2P · konomioke.com</span>
   <span style="flex:1"></span>
   <a href="./" style="color:#38b5f9;text-decoration:none">start your own →</a>
 </div>
+<div id="log"></div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="peer.js"></script>
 <script>
 var hostId = new URLSearchParams(location.search).get('id');
+function log(m){var el=document.getElementById('log');el.textContent+=m+'\n';console.log('[watch]',m)}
+
 if (!hostId) {
-  document.getElementById('msg').innerHTML = '❌ no stream ID in URL<br><a href="./" style="color:#38b5f9">go to broadcaster</a>';
+  document.getElementById('msg').innerHTML = '❌ no stream ID<br><a href="./" style="color:#38b5f9">go to broadcaster</a>';
+  document.getElementById('btn-watch').style.display = 'none';
   document.getElementById('status').textContent = 'no stream ID';
-} else {
+}
+
+async function connectToStream() {
+  if (!hostId) return;
+  var btn = document.getElementById('btn-watch');
+  btn.textContent = '⏳ connecting...';
+  btn.disabled = true;
   document.getElementById('status').textContent = 'connecting to ' + hostId.slice(0,8) + '…';
-  peerInit('watch').then(function() {
-    return watchStream(hostId);
-  }).then(function(stream) {
-    if (!stream) { document.getElementById('msg').textContent = '📡 stream ended'; return }
-    document.getElementById('msg').remove();
-    var vid = document.createElement('video');
-    vid.srcObject = stream;
-    vid.autoplay = true;
-    vid.playsInline = true;
-    vid.controls = true;
-    document.getElementById('player').appendChild(vid);
-    document.getElementById('status').textContent = '▶ watching live';
-  }).catch(function(e) {
+  log('init peer...');
+
+  try {
+    await peerInit('watch');
+    log('peer ready: ' + PEER.id.slice(0,8));
+  } catch(e) {
+    log('peer init failed: ' + e.message);
+    document.getElementById('msg').textContent = '❌ peer init failed: ' + e.message;
+    btn.textContent = '▶ Retry'; btn.disabled = false;
+    return;
+  }
+
+  log('calling host ' + hostId.slice(0,8) + '...');
+  try {
+    var call = PEER.peer.call(hostId, silentStream());
+    if (!call) { throw new Error('call returned null — host may be offline'); }
+
+    var timeout = setTimeout(function() {
+      log('timeout — no stream received after 15s');
+      document.getElementById('msg').textContent = '⏳ no response — broadcaster may be offline';
+      btn.textContent = '▶ Retry'; btn.disabled = false;
+    }, 15000);
+
+    call.on('stream', function(remote) {
+      clearTimeout(timeout);
+      log('stream received! tracks: ' + remote.getTracks().map(function(t){return t.kind}).join('+'));
+      document.getElementById('connect-ui').remove();
+      var vid = document.createElement('video');
+      vid.srcObject = remote;
+      vid.autoplay = true;
+      vid.playsInline = true;
+      vid.muted = false;
+      vid.controls = true;
+      vid.style.cssText = 'width:100%;height:100%;object-fit:contain';
+      document.getElementById('player').appendChild(vid);
+      vid.play().then(function(){
+        log('playing');
+        document.getElementById('status').textContent = '▶ watching live';
+      }).catch(function(e){
+        log('autoplay blocked, trying muted: ' + e.message);
+        vid.muted = true;
+        vid.play().then(function(){
+          document.getElementById('status').textContent = '▶ watching (click to unmute)';
+          vid.onclick = function(){ vid.muted = false; document.getElementById('status').textContent = '▶ watching live' };
+        });
+      });
+    });
+
+    call.on('error', function(e) {
+      clearTimeout(timeout);
+      log('call error: ' + e.message);
+      document.getElementById('msg').textContent = '❌ ' + e.message;
+      btn.textContent = '▶ Retry'; btn.disabled = false;
+    });
+
+    call.on('close', function() {
+      log('call closed');
+      document.getElementById('status').textContent = '📡 stream ended';
+    });
+
+  } catch(e) {
+    log('call failed: ' + e.message);
     document.getElementById('msg').textContent = '❌ ' + e.message;
-    document.getElementById('status').textContent = 'failed';
-  });
+    btn.textContent = '▶ Retry'; btn.disabled = false;
+  }
 }
 </script>
 </body></html>
