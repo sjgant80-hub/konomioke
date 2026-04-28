@@ -110,7 +110,11 @@
         this.gatedStream = this.micStream;
       }
 
-      this.fabric.connectSource(this.gatedSource);
+      // Visualizer / ring analyser must always see the RAW mic so the graphic
+      // reacts to your voice immediately, even before the noise gate decides
+      // whether to pass the audio out to peers. Without this, an aggressive
+      // gate setting can leave the rings flat while you're clearly speaking.
+      this.fabric.connectSource(this.micSourceNode);
 
       // Self-monitor: only route mic to local speakers when explicitly enabled.
       // Off by default so users don't hear themselves; peers still hear them.
