@@ -12,10 +12,11 @@
         text: text
       });
 
-      // Show locally + persist to tag
+      // Show locally + persist to tag + relay via poll-signal
       const color = peerColor(this.identity.publicKeyHex);
       this._addChatMessage(this.identity.displayName, text, color);
       if (typeof chatPush === 'function') chatPush(this.identity.displayName, text, color, this.mesh.roomCode);
+      if (typeof pollSignalSend === 'function') pollSignalSend({ type: 'chat', from: this.identity.displayName, text: text, color: color });
       input.value = '';
     };
 

@@ -17,6 +17,7 @@
       if (typeof leaveDefaultRoom === 'function') {
         await leaveDefaultRoom(this.identity.publicKeyHex || 'anon');
       }
+      if (typeof pollSignalLeave === 'function') pollSignalLeave();
       this.mesh.leaveRoom();
       this.tracks.stop();
       $('#stage-screen').style.display = 'none';

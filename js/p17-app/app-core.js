@@ -198,6 +198,24 @@ class KonomiApp {
 
       this.mesh.roomCode = code;
       this.mesh.isHost = (code === 'KONOMI' && (!ROOM_MGR.rooms.length || ROOM_MGR.rooms[0]?.users?.length <= 1));
+
+      // Start poll-based signaling (works without WebSocket server)
+      if (typeof pollSignalJoin === 'function') {
+        var self = this;
+        pollSignalJoin(code, this.identity.publicKeyHex || 'anon', this.identity.displayName || 'Singer');
+        window._onPollPeerJoin = function(pid, name) {
+          self._addChatMessage('SYSTEM', (name || pid.slice(0,8)) + ' joined', '#d4af37');
+        };
+        window._onPollPeerLeave = function(pid) {
+          self._addChatMessage('SYSTEM', pid.slice(0,8) + ' left', '#ff2244');
+        };
+        window._onPollChat = function(d) {
+          self._addChatMessage(d.from || d.peerId?.slice(0,8) || '?', d.text, d.color || '#8898b4');
+          if (typeof chatPush === 'function') chatPush(d.from || '?', d.text, d.color, code);
+        };
+        if (typeof rlog === 'function') rlog('poll-signal: joined ' + code);
+      }
+
       this._enterStage(code);
       this._startMicRetry();
       if (typeof rlog === 'function') rlog('entered stage: ' + code);

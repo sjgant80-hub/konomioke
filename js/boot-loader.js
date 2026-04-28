@@ -179,6 +179,7 @@
     { label: 'p1-globals',  files: ['js/globals.js'] },
     { label: 'p2-identity', files: ['js/p2-identity/identity.js'] },
     { label: 'p3-mesh',     files: ['js/p3-mesh/mesh.js'] },
+    { label: 'p3-poll',     files: ['js/p3-mesh/poll-signal.js'] },
     { label: 'p11-crdt',    files: ['js/p11-tracks/crdt-queue.js'] },
     { label: 'p5-fabric',   files: [
         'js/p5-fabric/fabric-init.js',
