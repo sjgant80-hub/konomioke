@@ -24,7 +24,6 @@ window.addEventListener('beforeunload', function() {
   if (typeof leaveDefaultRoom === 'function' && konomi.identity) {
     leaveDefaultRoom(konomi.identity.publicKeyHex || 'anon');
   }
-  if (typeof pollSignalLeave === 'function') pollSignalLeave();
 });
 
 konomi.boot().catch(err => {

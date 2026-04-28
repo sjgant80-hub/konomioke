@@ -179,7 +179,6 @@
     { label: 'p1-globals',  files: ['js/globals.js'] },
     { label: 'p2-identity', files: ['p2p/identity.js'] },
     { label: 'p3-mesh',     files: ['p2p/mesh.js'] },
-    { label: 'p3-poll',     files: ['p2p/poll-signal.js'] },
     { label: 'p11-crdt',    files: ['js/p11-tracks/crdt-queue.js'] },
     { label: 'p5-fabric',   files: [
         'js/p5-fabric/fabric-init.js',

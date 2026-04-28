@@ -16,7 +16,12 @@
       const color = peerColor(this.identity.publicKeyHex);
       this._addChatMessage(this.identity.displayName, text, color);
       if (typeof chatPush === 'function') chatPush(this.identity.displayName, text, color, this.mesh.roomCode);
-      if (typeof pollSignalSend === 'function') pollSignalSend({ type: 'chat', from: this.identity.displayName, text: text, color: color });
+      // Relay to dock for BroadcastChannel distribution
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'send-chat', from: this.identity.displayName, text: text, color: color }, '*');
+      } else if (typeof pollSignalSend === 'function') {
+        pollSignalSend({ type: 'chat', from: this.identity.displayName, text: text, color: color });
+      }
       input.value = '';
     };
 
