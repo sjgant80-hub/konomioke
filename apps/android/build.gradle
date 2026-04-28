@@ -1,5 +1,5 @@
 // Top-level build file. Per-module configuration lives in apps/android/app/build.gradle.
 plugins {
-    id 'com.android.application' version '8.3.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
+    id 'com.android.application' version '8.1.4' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
 }

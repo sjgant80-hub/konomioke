@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 200" width="960" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0a0a14"/>
+      <stop offset="100%" stop-color="#12121f"/>
+    </linearGradient>
+    <filter id="g" x="-20%" y="-60%" width="140%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="200" rx="12" fill="url(#bg)"/>
+
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="4" height="200" rx="2" fill="#ff2d75" opacity="0.6"/>
+
+  <!-- ── Mic glyph (left side) ── -->
+  <!-- Mic body -->
+  <rect x="32" y="28" width="46" height="82" rx="23" fill="#ff2d75" filter="url(#g)"/>
+  <!-- Grille lines -->
+  <line x1="40" y1="48" x2="70" y2="48" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="38" y1="60" x2="72" y2="60" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="38" y1="72" x2="72" y2="72" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="38" y1="84" x2="72" y2="84" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <line x1="40" y1="96" x2="70" y2="96" stroke="#fff" stroke-width="1.5" opacity="0.2"/>
+  <!-- Stand -->
+  <line x1="55" y1="110" x2="55" y2="136" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 36,136 Q 36,152 55,152 Q 74,152 74,136"
+        fill="none" stroke="#ff6b9d" stroke-width="4" stroke-linecap="round"/>
+  <!-- Left mini sound wave -->
+  <path d="M 22,58 A 16,16 0 0,0 22,82"
+        fill="none" stroke="#00aaff" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 13,50 A 26,26 0 0,0 13,90"
+        fill="none" stroke="#00aaff" stroke-width="1.8" stroke-linecap="round" opacity="0.4"/>
+  <!-- Right mini sound wave -->
+  <path d="M 88,58 A 16,16 0 0,1 88,82"
+        fill="none" stroke="#00aaff" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 97,50 A 26,26 0 0,1 97,90"
+        fill="none" stroke="#00aaff" stroke-width="1.8" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- ── 好 kanji ── -->
+  <text x="148" y="120" text-anchor="middle" dominant-baseline="middle"
+        font-family="serif" font-size="100" fill="#ff2d75"
+        font-weight="bold" filter="url(#g)">好</text>
+
+  <!-- Divider -->
+  <line x1="198" y1="40" x2="198" y2="160" stroke="#ff2d75" stroke-width="1" opacity="0.3"/>
+
+  <!-- ── KONOMIOKE wordmark ── -->
+  <text x="350" y="88" text-anchor="middle" dominant-baseline="middle"
+        font-family="monospace" font-size="52" fill="#ff2d75"
+        font-weight="700" letter-spacing="10">KONOMIOKE</text>
+
+  <!-- Japanese subtitle -->
+  <text x="350" y="138" text-anchor="middle" dominant-baseline="middle"
+        font-family="serif" font-size="30" fill="#e8e8f0" opacity="0.75"
+        letter-spacing="6">好みオケ</text>
+
+  <!-- Cyan dot accent -->
+  <circle cx="552" cy="88" r="4" fill="#00aaff" opacity="0.7"/>
+
+  <!-- ── Tagline right side ── -->
+  <text x="740" y="82" text-anchor="middle" dominant-baseline="middle"
+        font-family="monospace" font-size="22" fill="#00aaff" opacity="0.8"
+        letter-spacing="3">PEER-TO-PEER</text>
+  <text x="740" y="114" text-anchor="middle" dominant-baseline="middle"
+        font-family="monospace" font-size="22" fill="#00aaff" opacity="0.8"
+        letter-spacing="3">KARAOKE</text>
+
+  <!-- Small waveform decoration -->
+  <g fill="#00aaff" opacity="0.3">
+    <rect x="840" y="74"  width="6"  height="36" rx="2"/>
+    <rect x="852" y="64"  width="6"  height="56" rx="2"/>
+    <rect x="864" y="56"  width="6"  height="72" rx="2"/>
+    <rect x="876" y="48"  width="6"  height="88" rx="2"/>
+    <rect x="888" y="56"  width="6"  height="72" rx="2"/>
+    <rect x="900" y="64"  width="6"  height="56" rx="2"/>
+    <rect x="912" y="74"  width="6"  height="36" rx="2"/>
+    <rect x="924" y="82"  width="6"  height="20" rx="2"/>
+    <rect x="936" y="74"  width="6"  height="36" rx="2"/>
+  </g>
+
+  <!-- Right accent bar -->
+  <rect x="956" y="0" width="4" height="200" rx="2" fill="#00aaff" opacity="0.4"/>
+</svg>

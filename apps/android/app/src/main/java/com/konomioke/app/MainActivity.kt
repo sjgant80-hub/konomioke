@@ -65,9 +65,9 @@ class MainActivity : AppCompatActivity() {
         binding.webView.loadUrl(url)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        intent?.data?.toString()?.takeIf { it.startsWith("https://konomioke.com") }
+        intent.data?.toString()?.takeIf { it.startsWith("https://konomioke.com") }
             ?.let { binding.webView.loadUrl(it) }
     }
 

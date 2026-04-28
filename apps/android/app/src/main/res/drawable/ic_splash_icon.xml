@@ -3,13 +3,32 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Dark background fill -->
-    <path android:fillColor="#0a0a14" android:pathData="M0,0h108v108H0z"/>
-    <!-- 好 character in hot-pink — replace with real artwork before publishing -->
-    <path
-        android:fillColor="#ff2d75"
-        android:pathData="M30,25 L78,25 L78,35 L58,35 L58,50 L72,50 L72,60 L58,60 L58,83 L48,83 L48,60 L36,60 L36,50 L48,50 L48,35 L30,35 Z
-                          M36,68 Q54,78 72,68 L72,78 Q54,90 36,78 Z"/>
-    <!-- Mic circle indicator -->
-    <circle android:fillColor="#ff2d75" android:cx="54" cy="90" r="4"/>
+
+    <!-- Sound waves LEFT -->
+    <path android:pathData="M 26,26 A 22,22 0 0,0 26,64"
+        android:strokeColor="#00aaff" android:strokeWidth="2"
+        android:strokeLineCap="round" android:fillColor="#00000000" android:strokeAlpha="0.5"/>
+    <path android:pathData="M 36,32 A 14,14 0 0,0 36,58"
+        android:strokeColor="#00aaff" android:strokeWidth="2.8"
+        android:strokeLineCap="round" android:fillColor="#00000000" android:strokeAlpha="0.85"/>
+
+    <!-- Sound waves RIGHT -->
+    <path android:pathData="M 82,26 A 22,22 0 0,1 82,64"
+        android:strokeColor="#00aaff" android:strokeWidth="2"
+        android:strokeLineCap="round" android:fillColor="#00000000" android:strokeAlpha="0.5"/>
+    <path android:pathData="M 72,32 A 14,14 0 0,1 72,58"
+        android:strokeColor="#00aaff" android:strokeWidth="2.8"
+        android:strokeLineCap="round" android:fillColor="#00000000" android:strokeAlpha="0.85"/>
+
+    <!-- Mic body -->
+    <path android:pathData="M 43,31 A 10,10 0 0,1 65,31 L 65,61 A 10,10 0 0,1 43,61 Z"
+        android:fillColor="#ff2d75"/>
+    <path android:pathData="M 43,31 A 10,10 0 0,1 65,31 L 65,46 A 10,10 0 0,1 43,46 Z"
+        android:fillColor="#ff6b9d" android:fillAlpha="0.35"/>
+
+    <!-- Stand -->
+    <path android:pathData="M 54,61 L 54,74 M 42,74 Q 42,82 54,82 Q 66,82 66,74 M 44,81 L 64,81"
+        android:strokeColor="#ff6b9d" android:strokeWidth="3"
+        android:strokeLineCap="round" android:fillColor="#00000000"/>
+
 </vector>
