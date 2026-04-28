@@ -3,10 +3,9 @@ var KON_REPO='teslasolar/konomioke',KON_LABEL='konomi-config';
 var MUS_REPO='teslasolar/moosic',MUS_LABEL='grid-config';
 
 async function countTags(repo,label){
-  try{var r=await fetch('https://api.github.com/repos/'+repo+'/issues?labels='+label+'&state=open&per_page=1',
+  try{var r=await fetch('https://api.github.com/repos/'+repo+'/issues?labels='+label+'&state=open&per_page=50',
     {headers:{Accept:'application/vnd.github+json'},signal:AbortSignal.timeout(5000)});
-    var link=r.headers.get('link')||'';var m=link.match(/page=(\d+)>;\s*rel="last"/);
-    if(m)return parseInt(m[1]);var j=await r.json();return Array.isArray(j)?j.length:0}
+    var j=await r.json();return Array.isArray(j)?j.length:0}
   catch(e){return 0}
 }
 
