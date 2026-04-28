@@ -1,5 +1,10 @@
 const konomi = new KonomiApp();
 
+// ── REMOTE CONFIG ── pull engine settings from GitHub Issues (label: engine-config)
+// before boot so toggles render in their configured state.
+const _ghCfg = new GhConfig(konomi._ghConfigRepo, konomi._ghConfigLabel);
+const _ghPromise = _ghCfg.applyTo(konomi).catch(() => 0);
+
 // ── KCC MINING LAYER ── singing IS mining (uses shared template)
 import(new URL('_kcc/js/kcc-mine.js', document.baseURI).href).then(kcc => {
   kcc.initMiningWidget();
@@ -9,6 +14,10 @@ import(new URL('_kcc/js/kcc-mine.js', document.baseURI).href).then(kcc => {
   };
   requestAnimationFrame(tick);
 }).catch(() => console.warn('KCC mining layer not loaded'));
+
+konomi.boot = (function (orig, p) {
+  return function () { return p.then(() => orig.call(this)); };
+})(konomi.boot, _ghPromise);
 
 konomi.boot().catch(err => {
   console.error('KONOMIOKE boot failed:', err);

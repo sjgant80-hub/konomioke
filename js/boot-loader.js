@@ -72,7 +72,7 @@
         'js/p5-fabric/fabric-init.js',
         'js/p5-fabric/fabric-analyze.js',
     ]},
-    { label: 'p7-vocal',    files: ['js/p7-vocal/vocal.js'] },
+    { label: 'p7-vocal',    files: ['js/p7-vocal/vocal.js', 'js/p7-vocal/noise-gate.js'] },
     { label: 'p11-tracks',  files: [
         'js/p11-tracks/tracks-load.js',
         'js/p11-tracks/tracks-play.js',
@@ -88,6 +88,7 @@
         'js/p17-app/app-stage.js',
         'js/p17-app/app-mesh.js',
         'js/p17-app/app-loop.js',
+        'js/p17-app/gh-config.js',
     ]},
     { label: 'p17-boot',    files: ['js/p17-app/boot.js'] },
   ];

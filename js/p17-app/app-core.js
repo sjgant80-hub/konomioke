@@ -14,10 +14,19 @@ class KonomiApp {
     this.settings = {
       pitch: true,
       harmony: false,
-      drones: true,
+      drones: false,        // off — primes were too loud by default
       viz: true,
-      aec: false
+      aec: true,            // echo cancellation ON by default
+      noiseGate: true,      // adaptive ambient-noise gate ON by default
+      selfMonitor: false,   // don't pipe own mic to local speakers (still broadcast to peers)
+      noiseGateDb: -50,     // floor offset (dB) — anything within +X of measured floor is muted
+      noiseGateAttackMs: 8,
+      noiseGateReleaseMs: 120
     };
+
+    // Loaded once at boot from GitHub issues (label: engine-config), merged into settings.
+    this._ghConfigRepo = 'teslasolar/konomioke';
+    this._ghConfigLabel = 'engine-config';
 
     this._animFrame = null;
     this._lastTime = 0;

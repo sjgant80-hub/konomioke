@@ -92,13 +92,34 @@
 
       // Connect mic to Audio Fabric for analysis
       this.micSourceNode = this.fabric.ctx.createMediaStreamSource(this.micStream);
-      this.fabric.connectSource(this.micSourceNode);
 
-      // Connect to vocal processor for self-monitoring
-      this.vocal.connectSelf(this.micSourceNode);
+      // Optional adaptive noise gate — measures ambient floor and ducks anything
+      // close to it. Sits between the raw mic and everything downstream (analyser,
+      // self-monitor, peer broadcast).
+      if (typeof NoiseGate === 'function' && this.settings.noiseGate) {
+        this.noiseGate = new NoiseGate(this.fabric.ctx, {
+          floorOffsetDb: this.settings.noiseGateDb,
+          attackMs: this.settings.noiseGateAttackMs,
+          releaseMs: this.settings.noiseGateReleaseMs
+        });
+        this.noiseGate.connect(this.micSourceNode);
+        this.gatedSource = this.noiseGate.output;
+        this.gatedStream = this.noiseGate.outputStream;
+      } else {
+        this.gatedSource = this.micSourceNode;
+        this.gatedStream = this.micStream;
+      }
 
-      // Set as local stream for WebRTC
-      this.mesh.setLocalStream(this.micStream);
+      this.fabric.connectSource(this.gatedSource);
+
+      // Self-monitor: only route mic to local speakers when explicitly enabled.
+      // Off by default so users don't hear themselves; peers still hear them.
+      if (this.settings.selfMonitor) {
+        this.vocal.connectSelf(this.gatedSource);
+      }
+
+      // Set as local stream for WebRTC (gated when noiseGate active)
+      this.mesh.setLocalStream(this.gatedStream);
 
       // Preserve mute state
       if (this.micMuted) {

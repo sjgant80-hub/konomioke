@@ -65,6 +65,16 @@
       $('#settings-modal').style.display = 'none';
     };
 
+    // Sync toggle visual state from current settings (defaults may have been
+    // overridden by GitHub-issues config). The HTML provides initial guesses
+    // but settings is the source of truth.
+    $$('.toggle-switch').forEach(el => {
+      const key = el.dataset.key;
+      if (key in this.settings) {
+        el.classList.toggle('on', !!this.settings[key]);
+      }
+    });
+
     $$('.toggle-switch').forEach(el => {
       el.onclick = () => {
         el.classList.toggle('on');
@@ -84,6 +94,20 @@
           case 'aec':
             // Re-request mic with new echo cancellation setting
             this._getMicrophone();
+            break;
+          case 'noiseGate':
+            // Rebuild the audio chain with/without the gate
+            this._getMicrophone();
+            break;
+          case 'selfMonitor':
+            // Connect or silence the self path without re-grabbing mic
+            if (this.vocal && this.gatedSource) {
+              if (this.settings.selfMonitor) {
+                this.vocal.connectSelf(this.gatedSource);
+              } else if (this.vocal.selfGain) {
+                this.vocal.selfGain.gain.setTargetAtTime(0, this.vocal.ctx.currentTime, 0.02);
+              }
+            }
             break;
         }
       };

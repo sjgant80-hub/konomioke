@@ -66,7 +66,7 @@ class AudioFabricEngine {
     const baseFreq = 55;
 
     this.masterDroneGain = this.ctx.createGain();
-    this.masterDroneGain.gain.value = 0.03; // very subtle
+    this.masterDroneGain.gain.value = 0; // off by default; toggled via settings.drones
     this.masterDroneGain.connect(this.ctx.destination);
 
     for (let i = 0; i < 7; i++) {
