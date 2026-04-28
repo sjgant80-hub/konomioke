@@ -2227,7 +2227,7 @@ class KonomiApp {
 const konomi = new KonomiApp();
 
 // ── KCC MINING LAYER ── singing IS mining (uses shared template)
-import('./_kcc/js/kcc-mine.js').then(kcc => {
+import(new URL('_kcc/js/kcc-mine.js', document.baseURI).href).then(kcc => {
   kcc.initMiningWidget();
   const tick = () => {
     if (konomi.fabric) kcc.tickMining(konomi.fabric);
