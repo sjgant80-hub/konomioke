@@ -16,37 +16,50 @@
 <div id="app">Loading...</div>
 
 <script>
-// Remote logger — sends console to OnlyBrains API
-const _rlog = [];
 function rlog(msg) {
-  _rlog.push(msg);
-  console.log('[KONOMIOKE]', msg);
+  console.log('[K]', msg);
   fetch('https://onlybrains.onrender.com/api/chat', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ key: 'konomioke-debug', message: msg, role: 'system' }),
   }).catch(() => {});
 }
 window.addEventListener('error', e => rlog('ERR: ' + e.message + ' @ ' + e.filename + ':' + e.lineno));
-window.addEventListener('unhandledrejection', e => rlog('REJECT: ' + (e.reason?.message || e.reason)));
+
+async function loadScript(src) {
+  return new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = ok; s.onerror = fail;
+    document.body.appendChild(s);
+  });
+}
 
 async function boot() {
-  rlog('boot start');
+  rlog('boot');
   const app = document.getElementById('app');
-  const templates = ['html-canvas','html-boot','html-lobby','html-stage','html-modals'];
   app.innerHTML = '';
-  for (const t of templates) {
+
+  // 1. Load HTML templates
+  for (const t of ['html-canvas','html-boot','html-lobby','html-stage','html-modals']) {
     const r = await fetch('ui/' + t + '.html');
     if (r.ok) app.insertAdjacentHTML('beforeend', await r.text());
   }
-  rlog('templates loaded: ' + app.children.length + ' elements');
-  const s = document.createElement('script');
-  s.src = 'js/bundle.js';
-  s.onload = () => rlog('bundle.js loaded');
-  s.onerror = (e) => rlog('bundle.js FAILED: ' + e);
-  document.body.appendChild(s);
+  rlog('templates:' + app.children.length);
+
+  // 2. Load JS modules individually by phase
+  await loadScript('js/globals.js');                   rlog('p0');
+  await loadScript('js/p2-identity/identity.js');      rlog('p2');
+  await loadScript('js/p11-tracks/crdt-queue.js');     rlog('p11a');
+  await loadScript('js/p3-mesh/mesh.js');              rlog('p3');
+  await loadScript('js/p5-fabric/fabric.js');          rlog('p5');
+  await loadScript('js/p7-vocal/vocal.js');            rlog('p7');
+  await loadScript('js/p11-tracks/tracks.js');         rlog('p11b');
+  await loadScript('js/p13-viz/viz.js');               rlog('p13');
+  await loadScript('js/p17-app/app.js');               rlog('p17');
+  await loadScript('js/p17-app/boot.js');              rlog('boot.js');
 }
+
 boot().catch(e => {
-  rlog('boot CATCH: ' + e.message);
+  rlog('FAIL:' + e.message);
   document.getElementById('app').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#ff2244;font-family:monospace"><div><h1>好みオケ</h1><p>' + e.message + '</p></div></div>';
 });
