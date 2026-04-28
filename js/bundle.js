@@ -1723,17 +1723,13 @@ class KonomiApp {
       $('#display-name').value = savedName;
     }
 
-    // Auto-enter public room — skip lobby, mic optional
-    try {
-      await this.fabric.resume();
-      const code = await this.identity.createRoomCode();
-      this.mesh.roomCode = code;
-      this.mesh.isHost = true;
-      try { await this._getMicrophone(); } catch { console.warn('Mic unavailable — entering without mic'); }
-      this._enterStage(code);
-    } catch (e) {
-      console.warn('Auto-enter failed, showing lobby:', e.message);
-    }
+    // Auto-enter public room — skip lobby, mic optional, no user gesture needed
+    const code = await this.identity.createRoomCode();
+    this.mesh.roomCode = code;
+    this.mesh.isHost = true;
+    try { await this.fabric.resume(); } catch {}
+    try { await this._getMicrophone(); } catch {}
+    this._enterStage(code);
   }
 
   // ── LOBBY EVENTS ───────────────────────────────────────
