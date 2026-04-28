@@ -1,0 +1,139 @@
+stateDiagram-v2
+  [*] --> init
+
+  state "BOOT SEQUENCE" as boot_seq {
+    init --> booting : page load
+
+    state "booting" as booting {
+      [*] --> p2_identity
+      p2_identity --> p3_mesh : Ed25519 keypair + IndexedDB
+      p3_mesh --> p5_fabric : WebRTC + signaling
+      p5_fabric --> p7_vocal : AudioContext + FFT + 7 rings
+      p7_vocal --> p11_tracks : pitch + harmony + noise gate
+      p11_tracks --> p13_viz : CRDT queue + LRC lyrics
+      p13_viz --> p17_rooms : Three.js orb + ring particles
+      p17_rooms --> p17_app : room-manager.js loaded
+      p17_app --> p17_boot : UI bindings + gh-config
+      p17_boot --> [*] : KCC mining layer
+    }
+  }
+
+  booting --> arm_start : all phases done
+
+  state "TAP TO START" as arm_start {
+    [*] --> waiting_gesture : "tap anywhere to start"
+    waiting_gesture --> auto_enter : pointerdown / keydown
+  }
+
+  state "AUTO ENTER" as auto_enter {
+    [*] --> fabric_resume : AudioContext.resume()
+    fabric_resume --> fetch_rooms : fetchRoomTags() ≤4s
+    fetch_rooms --> find_room : parse _rooms tag from GH Issues
+
+    state find_room <<choice>>
+    find_room --> join_existing : room.users < 8
+    find_room --> create_overflow : all rooms full
+
+    join_existing --> set_code : add user to room
+    create_overflow --> set_code : KONOMI-N (FIFO)
+    set_code --> save_tags : fire-and-forget (3s timeout)
+    save_tags --> enter_stage
+  }
+
+  state "ROOM MANAGER" as room_mgr {
+    state "KONOMI" as r1
+    state "KONOMI-2" as r2
+    state "KONOMI-3" as r3
+
+    r1 : max 8 users
+    r1 : first user = host
+    r2 : overflow room
+    r3 : overflow room
+
+    r1 --> r2 : 8/8 full → FIFO create
+    r2 --> r3 : 8/8 full → FIFO create
+    r3 --> r1 : empty → pruned
+    r2 --> r1 : empty → pruned
+  }
+
+  auto_enter --> stage : _enterStage(code)
+  booting --> lobby : auto-enter failed
+
+  state "LOBBY" as lobby {
+    [*] --> lobby_idle
+    lobby_idle --> create_room : btn-create-room
+    lobby_idle --> join_room : btn-join-room / ?room=CODE
+    create_room --> signal_connect : signalUrl provided
+    create_room --> solo_mode : no signalUrl
+    join_room --> signal_connect
+    signal_connect --> get_mic
+    solo_mode --> get_mic
+    get_mic --> [*]
+  }
+
+  lobby --> stage : create/join room
+
+  state "STAGE" as stage {
+    [*] --> stage_active
+
+    state "AUDIO PIPELINE" as audio {
+      mic_input --> noise_gate : getUserMedia
+      noise_gate --> fabric_analyser : gated signal
+      mic_input --> fabric_analyser : raw (viz always sees raw)
+      fabric_analyser --> ring_analysis : 7 vagal frequency bands
+      noise_gate --> vocal_processor : harmony + pitch
+      vocal_processor --> self_monitor : optional local playback
+      noise_gate --> webrtc_out : peer broadcast
+    }
+
+    state "MESH" as mesh {
+      webrtc_out --> peers : RTCPeerConnection
+      peers --> peer_audio : remote streams
+      peer_audio --> fabric_analyser
+      data_channel --> chat : "konomi" channel
+      data_channel --> queue_sync : CRDT queue updates
+    }
+
+    state "RENDER LOOP" as render {
+      stage_active --> analysis_tick : 60Hz requestAnimationFrame
+      analysis_tick --> update_rings : fabric.analyze()
+      update_rings --> update_viz : Three.js orb + particles
+      update_viz --> update_ui : peer list + lyrics + progress
+      update_ui --> analysis_tick
+    }
+
+    state "MIC RETRY" as mic_retry {
+      [*] --> try_mic
+      try_mic --> acquired : success
+      try_mic --> wait_5s : failed
+      wait_5s --> try_mic : setInterval 5000ms
+      acquired --> [*] : clearInterval
+    }
+  }
+
+  stage --> lobby : btn-leave + leaveDefaultRoom()
+  stage --> ended : close tab
+
+  state "CLEANUP" as ended {
+    [*] --> leave_room : leaveDefaultRoom(pubkey)
+    leave_room --> prune_empty : remove user from _rooms
+    prune_empty --> save_state : fire-and-forget save
+    save_state --> close_peers : mesh.leaveRoom()
+    close_peers --> [*]
+  }
+
+  ended --> [*]
+
+  note right of room_mgr
+    Tracked via GitHub Issue #14 (_rooms tag)
+    Synced to OnlyBrains API (background)
+    beforeunload cleans up on tab close
+    Empty rooms auto-pruned
+  end note
+
+  note right of stage
+    Room code shown: stage-room-code
+    Default: KONOMI
+    Host: first user in room
+    Capacity: 8 per room
+  end note
