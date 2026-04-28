@@ -20,4 +20,3 @@ konomi.boot().catch(err => {
     </div>
   </div>`;
 });
-</script>

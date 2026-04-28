@@ -1,4 +1,4 @@
-export class CRDTQueue {
+class CRDTQueue {
   constructor() {
     this.items = new Map();
   }
@@ -37,3 +37,4 @@ export class CRDTQueue {
 // ─────────────────────────────────────────────────────────
 // p=3  P2P MESH LAYER — WebRTC + WebSocket signaling
 // ─────────────────────────────────────────────────────────
+

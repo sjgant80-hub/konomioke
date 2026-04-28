@@ -1,4 +1,4 @@
-export class KonomiApp {
+class KonomiApp {
   constructor() {
     this.identity = null;
     this.mesh = null;
@@ -106,6 +106,18 @@ export class KonomiApp {
     const savedName = this.identity.displayName;
     if (savedName && savedName !== 'Singer') {
       $('#display-name').value = savedName;
+    }
+
+    // Auto-enter public room — skip lobby, mic optional
+    try {
+      await this.fabric.resume();
+      const code = await this.identity.createRoomCode();
+      this.mesh.roomCode = code;
+      this.mesh.isHost = true;
+      try { await this._getMicrophone(); } catch { console.warn('Mic unavailable — entering without mic'); }
+      this._enterStage(code);
+    } catch (e) {
+      console.warn('Auto-enter failed, showing lobby:', e.message);
     }
   }
 
@@ -584,3 +596,8 @@ export class KonomiApp {
     return new Promise(r => setTimeout(r, ms));
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// IGNITION
+// ─────────────────────────────────────────────────────────
+

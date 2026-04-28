@@ -1,4 +1,4 @@
-export class KonomiMesh {
+class KonomiMesh {
   constructor(identity) {
     this.identity = identity;
     this.ws = null;
@@ -225,3 +225,8 @@ export class KonomiMesh {
     }
   }
 }
+
+// ─────────────────────────────────────────────────────────
+// p=5  AUDIO FABRIC ENGINE — Vagal phoneme detection, 7 rings
+// ─────────────────────────────────────────────────────────
+

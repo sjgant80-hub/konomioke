@@ -1,4 +1,4 @@
-export class KonomiIdentity {
+class KonomiIdentity {
   constructor() {
     this.keyPair = null;
     this.publicKeyHex = '';
@@ -154,3 +154,9 @@ export class KonomiIdentity {
   async saveTrack(hash, data) { await this._dbPut('tracks', hash, data); }
   async loadTrack(hash) { return this._dbGet('tracks', hash); }
 }
+
+// ─────────────────────────────────────────────────────────
+// CRDT Queue — Conflict-free queue for song ordering
+// NOTE: Canonical testable copy in lib/crdt-queue.js — keep in sync
+// ─────────────────────────────────────────────────────────
+

@@ -1,4 +1,4 @@
-export class VocalProcessor {
+class VocalProcessor {
   constructor(audioFabric) {
     this.fabric = audioFabric;
     this.ctx = audioFabric.ctx;
@@ -120,3 +120,4 @@ export class VocalProcessor {
 // ─────────────────────────────────────────────────────────
 // p=11  TRACK + LYRICS ENGINE — Track loading, LRC, queue
 // ─────────────────────────────────────────────────────────
+

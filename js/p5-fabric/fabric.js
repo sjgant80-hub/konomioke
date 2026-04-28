@@ -1,4 +1,4 @@
-export class AudioFabricEngine {
+class AudioFabricEngine {
   constructor() {
     this.ctx = null;
     this.analyser = null;
@@ -293,4 +293,13 @@ export class AudioFabricEngine {
   getF0() {
     return this._detectPitch(this._timeData);
   }
+
+  resume() {
+    if (this.ctx.state === 'suspended') return this.ctx.resume();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// p=7  VOCAL PROCESSING — Pitch display, harmony, mixing
+// ─────────────────────────────────────────────────────────
 
