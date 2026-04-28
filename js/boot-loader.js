@@ -177,9 +177,9 @@
   // concatenated and injected as one script (split-class fragments).
   var PHASES = [
     { label: 'p1-globals',  files: ['js/globals.js'] },
-    { label: 'p2-identity', files: ['js/p2-identity/identity.js'] },
-    { label: 'p3-mesh',     files: ['js/p3-mesh/mesh.js'] },
-    { label: 'p3-poll',     files: ['js/p3-mesh/poll-signal.js'] },
+    { label: 'p2-identity', files: ['p2p/identity.js'] },
+    { label: 'p3-mesh',     files: ['p2p/mesh.js'] },
+    { label: 'p3-poll',     files: ['p2p/poll-signal.js'] },
     { label: 'p11-crdt',    files: ['js/p11-tracks/crdt-queue.js'] },
     { label: 'p5-fabric',   files: [
         'js/p5-fabric/fabric-init.js',
