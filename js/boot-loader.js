@@ -59,7 +59,6 @@
     'html-lobby',
     'html-stage',
     'html-modals',
-    'html-moosic',
   ];
 
   // Phases. Single-file phases load via <script src>. Multi-file phases are
@@ -91,7 +90,6 @@
         'js/p17-app/app-loop.js',
     ]},
     { label: 'p17-boot',    files: ['js/p17-app/boot.js'] },
-    { label: 'p19-moosic',  files: ['js/p19-moosic/moosic.js'] },
   ];
 
   async function loadPhase(phase) {

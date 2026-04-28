@@ -80,9 +80,13 @@
   }
 
   // ── SERVICE WORKER ─────────────────────────────────────
+  // Disabled: SW at repo root would intercept the / picker page; also caused
+  // stale-cache double-loads of modules. Re-enable scoped to /engine/ later.
   _registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      }).catch(() => {});
     }
   }
 

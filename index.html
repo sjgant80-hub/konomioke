@@ -3,24 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>好みオケ KONOMIOKE</title>
-
-<!-- vendor -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<!-- styles -->
-<link rel="stylesheet" href="ui/css-base.css">
-<link rel="stylesheet" href="ui/css-boot.css">
-<link rel="stylesheet" href="ui/css-lobby.css">
-<link rel="stylesheet" href="ui/css-stage.css">
-<link rel="stylesheet" href="ui/css-modals.css">
-<link rel="stylesheet" href="ui/css-chat.css">
-<link rel="stylesheet" href="ui/css-moosic.css">
+<title>好みオケ KONOMIOKE × MOOSIC</title>
+<link rel="stylesheet" href="ui/css-picker.css">
 </head>
 <body>
-<div id="app">Loading...</div>
+<header class="picker-head">
+  <h1>好みオケ <span class="x">×</span> moosic</h1>
+  <p class="sub">pick one</p>
+</header>
 
-<!-- boot loader: fetches ui/html-*.html templates, then loads JS modules in phase order -->
-<script src="js/boot-loader.js"></script>
+<main class="picker">
+  <a class="card card-konomi" href="engine/">
+    <div class="glyph">好</div>
+    <div class="title">KONOMIOKE</div>
+    <div class="desc">P2P karaoke engine — primes, vagal viz, mining</div>
+    <div class="cta">enter →</div>
+  </a>
+
+  <a class="card card-moosic" href="https://teslasolar.github.io/moosic/" target="_top">
+    <div class="glyph">♪</div>
+    <div class="title">MOOSIC</div>
+    <div class="desc">Live tag-driven music grid</div>
+    <div class="cta">enter →</div>
+  </a>
+</main>
+
+<footer class="picker-foot">
+  <a href="https://github.com/teslasolar/konomioke" target="_blank" rel="noopener">github / konomioke</a>
+  · <a href="https://github.com/teslasolar/moosic" target="_blank" rel="noopener">github / moosic</a>
+</footer>
 </body>
 </html>

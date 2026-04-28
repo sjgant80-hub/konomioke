@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好みオケ KONOMIOKE — engine</title>
+
+<!-- Resolve all relative paths from repo root so we can keep js/, ui/, _kcc/
+     at root while the engine entry point lives in /engine/. -->
+<base href="../">
+
+<!-- vendor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- styles -->
+<link rel="stylesheet" href="ui/css-base.css">
+<link rel="stylesheet" href="ui/css-boot.css">
+<link rel="stylesheet" href="ui/css-lobby.css">
+<link rel="stylesheet" href="ui/css-stage.css">
+<link rel="stylesheet" href="ui/css-modals.css">
+<link rel="stylesheet" href="ui/css-chat.css">
+</head>
+<body>
+<div id="app">Loading…</div>
+
+<!-- boot loader: fetches ui/html-*.html templates, then loads JS modules in phase order -->
+<script src="js/boot-loader.js"></script>
+</body>
+</html>

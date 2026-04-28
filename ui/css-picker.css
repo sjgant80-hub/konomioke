@@ -1,0 +1,125 @@
+/* picker — root chooser between konomioke engine and moosic */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: radial-gradient(ellipse at top, #14141f 0%, #050508 70%);
+  color: #e6e6f0;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-head {
+  text-align: center;
+  padding: 3rem 1rem 1rem;
+}
+
+.picker-head h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.picker-head .x {
+  color: #6a6a80;
+  font-weight: 200;
+  margin: 0 0.4em;
+}
+
+.picker-head .sub {
+  margin-top: 0.5rem;
+  color: #6a6a80;
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.picker {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem clamp(1rem, 5vw, 4rem) 2rem;
+  align-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .picker {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2.5rem 2rem;
+  border: 1px solid #2a2a3a;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.02), rgba(255,255,255,0.005));
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  min-height: 320px;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.card-konomi:hover { border-color: #ff2d75; box-shadow: 0 10px 40px rgba(255,45,117,0.2); }
+.card-moosic:hover { border-color: #2dd4ff; box-shadow: 0 10px 40px rgba(45,212,255,0.2); }
+
+.card .glyph {
+  font-size: clamp(4rem, 10vw, 6rem);
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.card-konomi .glyph { color: #ff2d75; font-family: serif; }
+.card-moosic .glyph { color: #2dd4ff; }
+
+.card .title {
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-top: 1.5rem;
+}
+
+.card .desc {
+  margin-top: 0.6rem;
+  color: #9a9ab0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.card .cta {
+  margin-top: 2rem;
+  color: #6a6a80;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.picker-foot {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: #4a4a60;
+}
+
+.picker-foot a {
+  color: #6a6a80;
+  text-decoration: none;
+}
+
+.picker-foot a:hover {
+  color: #9a9ab0;
+}
