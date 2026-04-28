@@ -2,92 +2,69 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>好みオケ KONOMIOKE × MOOSIC</title>
-<link rel="stylesheet" href="ui/css-picker.css?v=3">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>⚙ 好みオケ KONOMIOKE × MOOSIC — SCADA</title>
+<link rel="stylesheet" href="ui/css-picker.css?v=4">
 </head>
 <body>
-<header class="picker-head">
-  <h1>好みオケ <span class="x">×</span> moosic</h1>
-  <p class="sub">pick one</p>
-</header>
+<div class="hdr">
+  <span style="color:var(--gd);font-weight:700;font-size:11px">⚙ SCADA</span>
+  <span style="color:var(--b)">│</span>
+  <span style="color:var(--kon)">好</span>
+  <span>KONOMIOKE</span>
+  <span style="color:var(--t2)">×</span>
+  <span style="color:var(--mus)">♪</span>
+  <span>MOOSIC</span>
+  <span style="flex:1"></span>
+  <span id="kon-status"><span class="dot off"></span> engine</span>
+  <span id="mus-status"><span class="dot off"></span> grid</span>
+  <span style="color:var(--b)">│</span>
+  <a href="scada.html" class="btn">⚙ tags</a>
+  <span id="clock" style="color:var(--t2)"></span>
+</div>
 
-<main class="picker">
-  <section class="card card-konomi card-iframe">
-    <iframe
-      class="konomi-frame"
-      src="engine/"
-      title="KONOMIOKE engine"
+<div class="dock">
+  <div class="pane">
+    <div class="pane-bar kon">
+      <span style="font-family:serif;font-size:11px">好</span>
+      <span style="font-weight:600;letter-spacing:.1em">KONOMIOKE</span>
+      <span style="flex:1"></span>
+      <span class="stat-pill" style="background:rgba(255,45,117,.1);color:var(--kon)" id="kon-state">init</span>
+      <a href="engine/" target="_top" class="btn kon">open ↗</a>
+      <a href="scada.html" class="btn kon">scada</a>
+    </div>
+    <iframe id="frame-kon" src="engine/"
       allow="autoplay *; microphone *; camera *; display-capture *; clipboard-read; clipboard-write; fullscreen *"
       allowfullscreen></iframe>
-    <header class="konomi-bar">
-      <span class="glyph">好</span>
-      <span class="title">KONOMIOKE</span>
-      <a class="open" href="engine/" target="_top">open ↗</a>
-    </header>
-  </section>
+  </div>
 
-  <section class="card card-moosic card-iframe">
-    <iframe
-      class="moosic-frame"
-      src="https://teslasolar.github.io/moosic/grid/"
-      title="MOOSIC grid"
-      loading="lazy"
-      referrerpolicy="no-referrer"
+  <div class="pane">
+    <div class="pane-bar mus">
+      <span style="font-size:11px">♪</span>
+      <span style="font-weight:600;letter-spacing:.1em">MOOSIC</span>
+      <span style="flex:1"></span>
+      <span class="stat-pill" style="background:rgba(45,212,255,.1);color:var(--mus)" id="mus-tags">—</span>
+      <a href="https://teslasolar.github.io/moosic/grid/" target="_top" class="btn mus">open ↗</a>
+      <a href="https://teslasolar.github.io/moosic/scada.html" class="btn mus">scada</a>
+    </div>
+    <iframe id="frame-mus" src="https://teslasolar.github.io/moosic/grid/"
+      loading="lazy" referrerpolicy="no-referrer"
       allow="autoplay *; microphone *; camera *; display-capture *; clipboard-read; clipboard-write; fullscreen *"></iframe>
-    <header class="moosic-bar">
-      <span class="glyph">♪</span>
-      <span class="title">MOOSIC</span>
-      <a class="open" href="https://teslasolar.github.io/moosic/grid/" target="_top">open ↗</a>
-    </header>
-  </section>
-</main>
+  </div>
+</div>
 
-<footer class="picker-foot">
-  <a href="https://github.com/teslasolar/konomioke" target="_blank" rel="noopener">github / konomioke</a>
-  · <a href="https://github.com/teslasolar/moosic" target="_blank" rel="noopener">github / moosic</a>
-</footer>
+<div class="ftr">
+  <span style="color:var(--gd)">🏷</span>
+  <span>tag.db</span>
+  <span style="color:var(--b)">│</span>
+  <span id="ftr-kon">konomioke: —</span>
+  <span style="color:var(--b)">│</span>
+  <span id="ftr-mus">moosic: —</span>
+  <span style="flex:1"></span>
+  <a href="https://github.com/teslasolar/konomioke" target="_blank" class="btn">gh/konomioke</a>
+  <a href="https://github.com/teslasolar/moosic" target="_blank" class="btn">gh/moosic</a>
+</div>
 
-<script>
-// Prime mic permission from the top-level origin so the prompt isn't blocked
-// inside the engine iframe. Fires on first user gesture (click/key) and then
-// retries every 5s until permission is actually granted, since users may
-// dismiss the prompt the first time.
-(function () {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
-  let granted = false;
-  let timer = null;
-
-  async function tryPrime() {
-    if (granted) return;
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Release immediately — the engine iframe will re-acquire its own stream
-      // and inherits the permission grant via allow="microphone *".
-      s.getTracks().forEach(t => t.stop());
-      granted = true;
-      if (timer) { clearInterval(timer); timer = null; }
-    } catch (e) {
-      // user dismissed/denied — keep polling so the next gesture or
-      // re-grant flips it on without a page reload.
-    }
-  }
-
-  function arm() {
-    tryPrime();
-    if (!granted && !timer) timer = setInterval(tryPrime, 5000);
-  }
-  window.addEventListener('pointerdown', arm, { capture: true, once: true });
-  window.addEventListener('keydown', arm, { capture: true, once: true });
-
-  // If the browser already remembers a grant from a previous visit, kick off
-  // priming without waiting for a gesture.
-  if (navigator.permissions && navigator.permissions.query) {
-    navigator.permissions.query({ name: 'microphone' }).then(p => {
-      if (p.state === 'granted') tryPrime();
-    }).catch(() => {});
-  }
-})();
-</script>
+<script src="js/scada-dash.js"></script>
 </body>
 </html>
