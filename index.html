@@ -18,9 +18,8 @@
       class="konomi-frame"
       src="engine/"
       title="KONOMIOKE engine"
-      loading="lazy"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox allow-modals allow-downloads"
-      allow="autoplay; microphone; camera; clipboard-read; clipboard-write; fullscreen; display-capture"></iframe>
+      allow="autoplay *; microphone *; camera *; display-capture *; clipboard-read; clipboard-write; fullscreen *"
+      allowfullscreen></iframe>
     <header class="konomi-bar">
       <span class="glyph">好</span>
       <span class="title">KONOMIOKE</span>
@@ -49,5 +48,31 @@
   <a href="https://github.com/teslasolar/konomioke" target="_blank" rel="noopener">github / konomioke</a>
   · <a href="https://github.com/teslasolar/moosic" target="_blank" rel="noopener">github / moosic</a>
 </footer>
+
+<script>
+// Prime mic permission from the top-level origin so the prompt isn't blocked
+// inside the engine iframe. Fires once on first user gesture (click/key) on
+// the picker page. The granted permission is then inherited by the iframe
+// thanks to allow="microphone *".
+(function () {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  let armed = true;
+  const prime = async () => {
+    if (!armed) return;
+    armed = false;
+    window.removeEventListener('pointerdown', prime, true);
+    window.removeEventListener('keydown', prime, true);
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Release immediately — we just wanted the permission grant.
+      s.getTracks().forEach(t => t.stop());
+    } catch (e) {
+      // user denied or no device — engine will fall back to lobby
+    }
+  };
+  window.addEventListener('pointerdown', prime, true);
+  window.addEventListener('keydown', prime, true);
+})();
+</script>
 </body>
 </html>
