@@ -11,6 +11,7 @@ function initEngine(){
     trace('info','sprite spawned: '+CHAT.myId.slice(0,8),'engine');
     traceState('scene','spawn','engine');
   }
+  if(typeof initZooBG==='function')initZooBG();
   trace('info','starting render loop','engine');
   running=true;animate();
   traceState('spawn','loop','engine');

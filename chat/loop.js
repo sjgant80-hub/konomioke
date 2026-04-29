@@ -5,6 +5,7 @@ function animate(){if(!running)return;requestAnimationFrame(animate);
   var t=clock.elapsedTime;
   analyzeV();updateCharge();updateBlasts();updateExplosions();updateVortex(t);
   if(typeof animateSprites==='function')animateSprites(t);
+  if(typeof animateZooBG==='function')animateZooBG(t);
   camAngle+=.003;camera.position.x=Math.sin(camAngle)*1.5;camera.position.y=3.5+Math.sin(camAngle*.7)*.3;camera.lookAt(0,2.5,-4);
   if(screenShake>.1){camera.position.x+=(Math.random()-.5)*screenShake*.3;camera.position.y+=(Math.random()-.5)*screenShake*.3;screenShake*=.9}
   target.rotation.y=t*.3;target.rotation.x=Math.sin(t*.5)*.2;
