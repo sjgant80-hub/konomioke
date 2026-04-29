@@ -19,27 +19,21 @@
 <div id="dmgLayer"></div>
 <div id="chat">
   <div id="chat-tabs">
-    <span class="chat-tab active" data-tab="msgs" onclick="switchChatTab('msgs')">msg</span>
-    <span class="chat-tab" data-tab="logs" onclick="switchChatTab('logs')">log</span>
-    <span class="chat-tab" data-tab="errors" onclick="switchChatTab('errors')">err<span id="err-count">0</span></span>
-    <span class="chat-tab" data-tab="state" onclick="switchChatTab('state')">sm</span>
+    <span class="chat-tab active" data-tab="msgs" onclick="switchChatTab('msgs')">MSG</span>
+    <span class="chat-tab" data-tab="logs" onclick="switchChatTab('logs')">LOG</span>
+    <span class="chat-tab" data-tab="errors" onclick="switchChatTab('errors')">ERR<span id="err-count">0</span></span>
+    <span class="chat-tab" data-tab="state" onclick="switchChatTab('state')">SM</span>
   </div>
-  <div id="msgs" class="chat-pane active"></div>
-  <div id="logs" class="chat-pane"></div>
-  <div id="errors" class="chat-pane"></div>
-  <div id="state" class="chat-pane"></div>
+  <div id="msgs" class="chat-pane" style="display:block"></div>
+  <div id="logs" class="chat-pane" style="display:none"></div>
+  <div id="errors" class="chat-pane" style="display:none"></div>
+  <div id="state" class="chat-pane" style="display:none"></div>
   <div id="chat-row">
     <input id="chat-in" placeholder="chat..." maxlength="300" autocomplete="off">
     <button onclick="sendChat()">▶</button>
   </div>
 </div>
-
-<script>
-function switchChatTab(t){
-  document.querySelectorAll('.chat-tab').forEach(function(e){e.classList.toggle('active',e.dataset.tab===t)});
-  document.querySelectorAll('.chat-pane').forEach(function(e){e.classList.toggle('active',e.id===t)});
-}
-</script>
+<script src="ui/tabs.js"></script>
 <!-- log layer -->
 <script src="log/trace.js"></script>
 <script src="log/error-log.js"></script>
