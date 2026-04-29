@@ -4,7 +4,11 @@ var BOT={enabled:false,thinking:false,lastReply:0,cooldownMs:5000};
 function enableBot(){
   BOT.enabled=true;
   trace('info','bot brain enabled — loading LLM','bot');
+  var statusEl=document.getElementById('llm-status');
+  var chatEl=document.getElementById('llm-chat');
   initLLM(function(status){
+    if(statusEl){statusEl.textContent=status.slice(0,30);statusEl.style.color=status.includes('ready')?'#42e898':'#888'}
+    if(chatEl){chatEl.innerHTML+='<div style="color:#555;font-size:7px">'+status+'</div>';chatEl.scrollTop=chatEl.scrollHeight}
     addMsg(null,'🤖 '+status,null,true);
   });
   initTTS();
