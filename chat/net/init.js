@@ -12,6 +12,11 @@ function initNet(){
     mqttConnect('KONOMI',CHAT.myId,getNick());
     trace('info','MQTT: connecting to hivemq','net');
   }
+  // Voice: WebRTC audio via MQTT signaling
+  if(typeof initVoiceChat==='function'){
+    setTimeout(function(){initVoiceChat()},3000);
+    trace('info','voice: will init in 3s','net');
+  }
   traceState('joining','connected','net');
 
   // Peer events (fired by both BC and MQTT)

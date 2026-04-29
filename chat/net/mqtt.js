@@ -1,5 +1,5 @@
 // mqtt.js — global P2P via public MQTT broker (cross-device)
-var MQTT_SIG={client:null,topic:'konomi/chat/KONOMI/',connected:false,myId:null};
+var MQTT_SIG={client:null,topic:'konomi/chat/KONOMI/',connected:false,myId:null,knownPeers:{}};
 
 function mqttConnect(room,peerId,displayName){
   MQTT_SIG.myId=peerId;
@@ -11,15 +11,15 @@ function mqttConnect(room,peerId,displayName){
     MQTT_SIG.client.on('connect',function(){
       MQTT_SIG.connected=true;
       MQTT_SIG.client.subscribe(MQTT_SIG.topic+'#');
-      mqttPublish('join',{peerId:peerId,displayName:displayName});
-      trace('info','mqtt connected to hivemq','mqtt');
+      mqttPublish('join',{displayName:displayName});
+      trace('info','mqtt connected','mqtt');
     });
     MQTT_SIG.client.on('message',function(topic,msg){
       try{var d=JSON.parse(msg.toString());_mqttHandle(topic,d)}catch(e){}
     });
-    MQTT_SIG.client.on('error',function(e){trace('warn','mqtt error: '+e.message,'mqtt')});
+    MQTT_SIG.client.on('error',function(e){trace('warn','mqtt: '+e.message,'mqtt')});
     MQTT_SIG.client.on('close',function(){MQTT_SIG.connected=false});
-  }catch(e){trace('warn','mqtt connect fail: '+e.message,'mqtt')}
+  }catch(e){trace('warn','mqtt fail: '+e.message,'mqtt')}
 }
 
 function mqttPublish(subTopic,data){
@@ -30,23 +30,34 @@ function mqttPublish(subTopic,data){
 
 function mqttDisconnect(){
   if(MQTT_SIG.client&&MQTT_SIG.connected){
-    mqttPublish('leave',{peerId:MQTT_SIG.myId});
+    mqttPublish('leave',{});
     MQTT_SIG.client.end();MQTT_SIG.connected=false}
 }
 
 function _mqttHandle(topic,d){
   if(!d.peerId||d.peerId===MQTT_SIG.myId)return;
   var sub=topic.replace(MQTT_SIG.topic,'');
+  var isNew=!MQTT_SIG.knownPeers[d.peerId];
+
   if(sub==='join'){
+    if(isNew){
+      MQTT_SIG.knownPeers[d.peerId]={name:d.displayName,ts:Date.now()};
+      if(typeof window._onPollPeerJoin==='function')window._onPollPeerJoin(d.peerId,d.displayName);
+      // Reply with 'present' so they see us (not 'join' to avoid loop)
+      mqttPublish('present',{displayName:POLL_SIG?.displayName||'?'});
+    }
+  }
+  if(sub==='present'&&isNew){
+    MQTT_SIG.knownPeers[d.peerId]={name:d.displayName,ts:Date.now()};
     if(typeof window._onPollPeerJoin==='function')window._onPollPeerJoin(d.peerId,d.displayName);
-    // Reply so they see us
-    mqttPublish('join',{peerId:MQTT_SIG.myId,displayName:POLL_SIG?.displayName||'?'})}
+  }
   if(sub==='leave'){
+    delete MQTT_SIG.knownPeers[d.peerId];
     if(typeof window._onPollPeerLeave==='function')window._onPollPeerLeave(d.peerId)}
   if(sub==='chat'){
     if(typeof window._onPollChat==='function')window._onPollChat(d)}
   if(sub==='blast'){
     if(typeof _handleRemoteBlast==='function')_handleRemoteBlast(d)}
   if(sub==='score'){
-    trace('debug',d.peerId?.slice(0,8)+' score:'+d.score,'mqtt')}
+    trace('debug',(d.peerId?.slice(0,8)||'?')+' score:'+d.score,'mqtt')}
 }
