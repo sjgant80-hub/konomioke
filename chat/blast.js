@@ -13,6 +13,12 @@ function updateCharge(){
     voice.chargeLevel*=.95;if(voice.chargeLevel<.01)voice.chargeLevel=0}
   prevSounding=voice.sounding;var cl=voice.chargeLevel,bt=BLAST_TYPES[chargeType]||BLAST_TYPES.kiball;
   aura.material.color.setHex(bt.color);aura.material.opacity=cl*.25;aura.scale.setScalar(1+cl*2);auraGlow.material.opacity=cl*.12;
+  // Grow the charging kanji above the aura
+  var ks=aura.kanjiSprite;
+  if(ks){var vk=bt.vowel||'mm';
+    if(cl>.05&&kanjiTex[vk]){ks.material.map=kanjiTex[vk];ks.material.opacity=Math.min(.9,cl*1.2);ks.material.needsUpdate=true;
+      var sz=1+cl*4;ks.scale.set(sz,sz,1);ks.position.y=2+cl*1.5;ks.material.rotation=(ks.material.rotation||0)+.02}
+    else{ks.material.opacity=0}}
   spawnChargeVFX(cl,bt);updateParticles();updateKanjiSprites();
   var el=document.getElementById('charge-type');if(el)el.textContent=cl>.05?bt.name+' '+Math.round(cl*100)+'%':'';
 }

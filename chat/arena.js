@@ -26,11 +26,15 @@ function initScene(){
   aura=new THREE.Mesh(new THREE.SphereGeometry(1,16,16),new THREE.MeshBasicMaterial({color:0x4488ff,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
   aura.position.set(0,2.5,5);scene.add(aura);
   auraGlow=new THREE.Mesh(new THREE.SphereGeometry(1.5,12,12),new THREE.MeshBasicMaterial({color:0x2244aa,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-  aura.add(auraGlow);initVortex();scene.add(new THREE.AmbientLight(0x222244,0.5));}
+  aura.add(auraGlow);
+  // charging kanji billboard — shows what you're about to fire, grows with charge
+  aura.kanjiSprite=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  aura.kanjiSprite.position.set(0,2,0);aura.add(aura.kanjiSprite);
+  initVortex();scene.add(new THREE.AmbientLight(0x222244,0.5));}
 function initVortex(){vortexGroup=new THREE.Group();scene.add(vortexGroup);
   var geo=new THREE.BufferGeometry();vortexPos=new Float32Array(VORTEX_N*3);vortexCol=new Float32Array(VORTEX_N*3);
   for(var i=0;i<VORTEX_N;i++){var a=i*.15,r=3+i*.025;vortexPos[i*3]=Math.cos(a)*r;vortexPos[i*3+1]=(i/VORTEX_N-.5)*6;vortexPos[i*3+2]=Math.sin(a)*r;vortexCol[i*3]=.2;vortexCol[i*3+1]=.4;vortexCol[i*3+2]=.8;}
   geo.setAttribute('position',new THREE.BufferAttribute(vortexPos,3));geo.setAttribute('color',new THREE.BufferAttribute(vortexCol,3));
-  vortexGroup.add(new THREE.Points(geo,new THREE.PointsMaterial({size:.15,vertexColors:true,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false})));vortexGroup.position.set(0,2.5,-1.5);}
+  vortexGroup.add(new THREE.Points(geo,new THREE.PointsMaterial({size:.15,vertexColors:true,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false})));vortexGroup.position.set(0,6,-1.5);vortexGroup.rotation.x=Math.PI*.3;}
 function hslRgb(h,s,l){var r,g,b;if(!s){r=g=b=l}else{function h2r(p,q,t){if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<.5)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p}
   var q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;r=h2r(p,q,h+1/3);g=h2r(p,q,h);b=h2r(p,q,h-1/3)}return[r,g,b]}
