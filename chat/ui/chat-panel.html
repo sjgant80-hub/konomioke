@@ -10,7 +10,8 @@
   <div id="errors" class="chat-pane" style="display:none"></div>
   <div id="state" class="chat-pane" style="display:none"></div>
   <div id="chat-row">
-    <input id="chat-in" placeholder="chat..." maxlength="300" autocomplete="off">
+    <button id="stt-btn" onclick="toggleSTT()" style="background:transparent;border:1px solid #333;color:#333;padding:3px 6px;font-size:10px;cursor:pointer;border-radius:3px">🎙</button>
+    <input id="chat-in" placeholder="chat or speak..." maxlength="300" autocomplete="off">
     <button onclick="sendChat()">▶</button>
   </div>
 </div>
