@@ -1,0 +1,17 @@
+{
+  "_udt":"FormantVoice",
+  "f0":185,
+  "breathiness":0.15,
+  "clarity":0.7,
+  "warmth":0.6,
+  "speed":80,
+  "volume":0.35,
+  "presets":{
+    "cassandra":{"f0":220,"breathiness":0.25,"clarity":0.9,"warmth":0.4,"speed":70},
+    "gerald":{"f0":140,"breathiness":0.08,"clarity":0.5,"warmth":0.8,"speed":90},
+    "thomas":{"f0":110,"breathiness":0.12,"clarity":0.6,"warmth":0.7,"speed":85},
+    "konomi":{"f0":260,"breathiness":0.2,"clarity":0.8,"warmth":0.5,"speed":65},
+    "buzz":{"f0":350,"breathiness":0.05,"clarity":0.95,"warmth":0.3,"speed":50},
+    "teresa":{"f0":170,"breathiness":0.18,"clarity":0.65,"warmth":0.9,"speed":95}
+  }
+}

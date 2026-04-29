@@ -27,8 +27,9 @@ function onBotChat(from,text){
     // Send via MQTT so other peers see it
     if(typeof pollSignalSend==='function')pollSignalSend({type:'chat',from:'🤖 Bot',text:reply,color:'#42e898'});
     if(typeof mqttPublish==='function')mqttPublish('chat',{from:'🤖 Bot',text:reply,color:'#42e898'});
-    // Speak it via TTS
-    if(typeof speak==='function')speak(reply);
+    // Speak via formant synth (custom voice) or fallback to Web Speech
+    if(typeof formantSpeak==='function'&&FSYNTH.ctx)formantSpeak(reply);
+    else if(typeof speak==='function')speak(reply);
   }).catch(function(e){
     BOT.thinking=false;
     trace('warn','bot error: '+e.message,'bot');

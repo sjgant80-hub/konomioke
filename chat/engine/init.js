@@ -16,6 +16,7 @@ function initEngine(){
   traceState('spawn','loop','engine');
   initAudio(function(){
     trace('info','mic acquired — voice analysis active','engine');
+    if(typeof initFormant==='function')initFormant();
     traceState('loop','live','engine');
   });
 }
