@@ -52,3 +52,20 @@ body{display:grid;grid-template:32px 1fr 22px/1fr;gap:0}
   .mob-tab.kon.active{color:var(--kon);border-color:rgba(255,45,117,.3);background:rgba(255,45,117,.07)}
   .mob-tab.mus.active{color:var(--mus);border-color:rgba(45,212,255,.3);background:rgba(45,212,255,.07)}
 }
+/* ── Landscape phone (short viewport, wide) ─────────────────────── */
+@media(max-width:900px) and (orientation:landscape) and (max-height:500px){
+  /* keep the whole thing on-screen without scrolling */
+  html,body{overflow:hidden;height:100%}
+  body{grid-template:28px 1fr 18px/1fr}
+  .hdr{min-height:28px;padding:2px 8px;gap:6px;flex-wrap:nowrap;overflow-x:auto}
+  .hdr>a,.hdr>button,.hdr>.btn{min-height:24px;padding:2px 8px;font-size:7px}
+  /* dock is a row; panes sit side-by-side so both are visible */
+  .dock{flex-direction:row;height:100%;overflow:hidden}
+  /* on landscape: show all panes again (tab-switching off) */
+  .pane{display:flex;min-height:0;min-width:0}
+  .pane-bar{height:24px;padding:0 8px}
+  .pane iframe{min-height:0}
+  .ftr{height:18px;flex-wrap:nowrap;padding:0 8px;overflow:hidden}
+  /* hide the tab bar — not needed when both panes are visible */
+  .mob-tabs{display:none !important}
+}

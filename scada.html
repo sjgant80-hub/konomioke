@@ -54,6 +54,20 @@ body{background:var(--bg);color:var(--t);height:100vh;overflow:hidden;display:gr
   .stats-row{grid-template-columns:repeat(2,1fr)}
   .stat .v{font-size:14px}
 }
+/* ── Landscape phone ──────────────────────────────────────────── */
+@media(max-width:900px) and (orientation:landscape) and (max-height:500px){
+  body{
+    height:100vh;overflow:hidden;
+    grid-template:28px 1fr 20px / 180px 1fr
+  }
+  .hdr{height:28px;flex-wrap:nowrap;overflow-x:auto;padding:0 8px;gap:6px}
+  #sidebar-toggle{display:none}
+  /* sidebar always visible in landscape */
+  .side{max-height:none !important;overflow-y:auto;padding:4px}
+  .main{grid-column:unset;padding:6px;overflow-y:auto}
+  .ftr{height:20px;flex-wrap:nowrap}
+  .stat .v{font-size:13px}
+}
 </style>
 </head>
 <body>
