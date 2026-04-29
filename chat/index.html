@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>💬 KONOMI CHAT — Ki Arena</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="ui/style.css">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -25,36 +25,65 @@
   </div>
 </div>
 
-<script src="error-log.js"></script>
+<!-- log layer — loads first, captures everything -->
+<script src="log/trace.js"></script>
+<script src="log/error-log.js"></script>
+<script src="log/config.js"></script>
+
+<!-- vendor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- signaling -->
 <script src="../p2p/poll-signal.js"></script>
-<script src="config.js"></script>
-<script src="kanji.js"></script>
-<script src="voice.js"></script>
-<script src="arena.js"></script>
-<script src="charge.js"></script>
-<script src="projectile.js"></script>
-<script src="vfx.js"></script>
-<script src="chat.js"></script>
-<script src="sprite.js"></script>
+
+<!-- engine modules -->
+<script src="engine/kanji.js"></script>
+<script src="engine/voice.js"></script>
+<script src="engine/arena.js"></script>
+<script src="engine/charge.js"></script>
+<script src="engine/projectile.js"></script>
+<script src="engine/vfx.js"></script>
+<script src="engine/sprite.js"></script>
+<script src="engine/init.js"></script>
+
+<!-- net + chat -->
+<script src="net/chat.js"></script>
+<script src="net/init.js"></script>
+
+<!-- render loop -->
 <script src="loop.js"></script>
+
+<!-- state machine -->
 <script src="../js/state-widget.js"></script>
+
 <script>
 (async function(){
+  trace('info','boot start','main');
+  traceState('init','config','main');
   await loadChatConfig();
-  // Build phoneme UI from tags
+  trace('info','config loaded: '+Object.keys(CFG).join(','),'main');
+
+  // phoneme UI
   var c=document.getElementById('phonemes');PH_KEYS.forEach(function(k){var ph=PHONEMES[k],kj=KANJI[k];
     var d=document.createElement('div');d.className='ph';d.id='ph-'+k;
     d.innerHTML='<div class="ph-kanji" style="color:'+ph.color+'">'+kj.char+'</div><div class="ph-label" style="color:'+ph.color+'">'+ph.label+'</div><div class="ph-bar"><div class="ph-fill" style="background:'+ph.color+';height:0%"></div></div>';
     c.appendChild(d)});
+
   document.getElementById('chat-in').onkeydown=function(e){if(e.key==='Enter'){sendChat();e.stopPropagation()}};
+  document.getElementById('nick').onchange=function(){
+    if(POLL_SIG)POLL_SIG.displayName=getNick();
+    if(SPRITES.local){scene.remove(SPRITES.local);spawnLocalSprite(CHAT.myId,getNick())}
+    trace('info','nick changed: '+getNick(),'main')};
+
   if(typeof stateWidgetInit==='function')stateWidgetInit(
-    'stateDiagram-v2\n[*]-->config\nconfig-->mic : loadChatConfig\nmic-->scene : initAudio\nscene-->spawn : initScene\nspawn-->joined : spawnLocalSprite\njoined-->loop : animate 60Hz\nloop-->charging : voice sounding\ncharging-->fire : release vowel\nfire-->hit : projectile→target\nhit-->loop : score + combo',
-    'config');
-  pollSignalJoin('KONOMI',CHAT.myId,getNick());
-  addMsg(null,'joined KONOMI arena',null,true);
-  if(typeof highlightState==='function')highlightState('joined');
-  startArena();
+    'stateDiagram-v2\n[*]-->init\ninit-->config : loadChatConfig\nconfig-->scene : initEngine\nscene-->spawn : spawnLocalSprite\nspawn-->loop : animate 60Hz\nloop-->joining : pollSignalJoin\njoining-->connected : BroadcastChannel\nconnected-->live : mic acquired\nlive-->charging : voice sounding\ncharging-->fire : release vowel\nfire-->hit : projectile\nhit-->live : score++',
+    'init');
+
+  traceState('config','engine','main');
+  initEngine();
+  traceState('engine','net','main');
+  initNet();
+  trace('info','boot complete','main');
 })();
 </script>
 </body></html>
