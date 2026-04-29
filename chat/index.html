@@ -6,86 +6,26 @@
 <link rel="stylesheet" href="ui/style.css">
 </head>
 <body>
+
+<!-- 3D canvas -->
 <canvas id="c"></canvas>
-<div id="hud">
-  <div><div id="score">0</div><div id="charge-type"></div></div>
-  <div style="text-align:right">
-    <input id="nick" value="" placeholder="nickname" style="background:transparent;border:1px solid #333;color:#0f0;padding:2px 6px;font-size:10px;font-family:inherit;width:90px;border-radius:3px">
-    <div id="room" style="color:#0ff;font-size:10px;margin-top:2px">KONOMI</div>
-    <div id="peers" style="color:#088;font-size:10px">👥 1</div>
-  </div>
+
+<!-- mount points for composed components -->
+<div id="mount-hud"></div>
+<div id="dock-left">
+  <div id="mount-left-top"></div>
+  <div id="mount-left-bot" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
 </div>
-<div id="phonemes"></div>
-<div id="dmgLayer"></div>
-<div id="llm-panel">
-  <div id="llm-header" style="display:flex;align-items:center;gap:4px;padding:4px 6px;border-bottom:1px solid #222">
-    <span style="font-size:8px;color:#42e898;font-weight:600">🧠 LLM</span>
-    <span id="llm-status" style="font-size:7px;color:#333;flex:1">off</span>
-    <select id="llm-model" style="background:#111;border:1px solid #222;color:#888;font-size:6px;padding:1px 3px;border-radius:2px;font-family:inherit;max-width:90px">
-      <option value="SmolLM2-1.7B-Instruct-q4f16_1-MLC">SmolLM2 1.7B</option>
-      <option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi 3.5</option>
-      <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen 1.5B</option>
-      <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 1B</option>
-    </select>
-    <div id="bot-toggle" onclick="toggleBot()" style="color:#333;font-size:7px;cursor:pointer;border:1px solid #333;padding:1px 5px;border-radius:3px">OFF</div>
-  </div>
-  <div id="llm-voice" style="display:flex;gap:3px;padding:3px 6px;border-bottom:1px solid #181818;font-size:6px">
-    <span style="color:#444">voice</span>
-    <label style="color:#555">f0<input id="v-f0" type="range" min="80" max="400" value="185" style="width:40px;height:3px;accent-color:#42e898" oninput="FSYNTH.f0=+this.value"></label>
-    <label style="color:#555">spd<input id="v-speed" type="range" min="30" max="120" value="80" style="width:35px;height:3px;accent-color:#42e898" oninput="FSYNTH.speed=+this.value"></label>
-    <label style="color:#555">warm<input id="v-warm" type="range" min="0" max="100" value="60" style="width:30px;height:3px;accent-color:#42e898" oninput="FSYNTH.warmth=this.value/100"></label>
-  </div>
-  <div id="llm-chat" style="height:80px;overflow-y:auto;padding:4px 6px;font-size:8px;scrollbar-width:thin;scrollbar-color:#222 transparent"></div>
-  <div style="display:flex;border-top:1px solid #222">
-    <input id="llm-in" placeholder="ask the LLM..." maxlength="300" autocomplete="off" style="flex:1;background:#0a0a0a;border:none;color:#42e898;padding:4px 6px;font-size:8px;font-family:inherit;outline:none">
-    <button onclick="askLLM()" style="background:#42e898;border:none;color:#000;padding:3px 8px;font-size:8px;cursor:pointer;font-family:inherit">▶</button>
-  </div>
+<div id="dock-right">
+  <div id="mount-right" style="height:100%"></div>
 </div>
-<div id="chat">
-  <div id="chat-tabs">
-    <span class="chat-tab active" data-tab="msgs" onclick="switchChatTab('msgs')">MSG</span>
-    <span class="chat-tab" data-tab="logs" onclick="switchChatTab('logs')">LOG</span>
-    <span class="chat-tab" data-tab="errors" onclick="switchChatTab('errors')">ERR<span id="err-count">0</span></span>
-    <span class="chat-tab" data-tab="state" onclick="switchChatTab('state')">SM</span>
-  </div>
-  <div id="msgs" class="chat-pane" style="display:block"></div>
-  <div id="logs" class="chat-pane" style="display:none"></div>
-  <div id="errors" class="chat-pane" style="display:none"></div>
-  <div id="state" class="chat-pane" style="display:none"></div>
-  <div id="chat-row">
-    <input id="chat-in" placeholder="chat..." maxlength="300" autocomplete="off">
-    <button onclick="sendChat()">▶</button>
-  </div>
-</div>
+
+<!-- ui logic -->
 <script src="ui/tabs.js"></script>
-<script>
-function toggleBot(){
-  var el=document.getElementById('bot-toggle');
-  if(typeof BOT==='undefined')return;
-  if(BOT.enabled){BOT.enabled=false;el.textContent='OFF';el.style.color='#333';el.style.borderColor='#333';
-    document.getElementById('llm-status').textContent='off';document.getElementById('llm-status').style.color='#333'}
-  else{
-    var sel=document.getElementById('llm-model');if(sel&&typeof LLM!=='undefined')LLM.model=sel.value;
-    enableBot();el.textContent='ON';el.style.color='#42e898';el.style.borderColor='#42e898'}
-}
-function askLLM(){
-  var input=document.getElementById('llm-in');var text=input.value.trim();if(!text)return;
-  var llmChat=document.getElementById('llm-chat');
-  llmChat.innerHTML+='<div style="color:#888">you: '+text+'</div>';
-  input.value='';
-  if(!LLM||!LLM.ready){llmChat.innerHTML+='<div style="color:#ff4466">enable bot first</div>';llmChat.scrollTop=llmChat.scrollHeight;return}
-  llmChat.innerHTML+='<div style="color:#333">thinking...</div>';llmChat.scrollTop=llmChat.scrollHeight;
-  llmRespond(text).then(function(reply){
-    if(!reply)reply='(no response)';
-    llmChat.innerHTML+='<div style="color:#42e898">🧠 '+reply+'</div>';llmChat.scrollTop=llmChat.scrollHeight;
-    if(typeof formantSpeak==='function'&&FSYNTH.ctx)formantSpeak(reply);
-    else if(typeof speak==='function')speak(reply);
-    addMsg('🧠 LLM',reply,'#42e898');
-    if(typeof mqttPublish==='function')mqttPublish('chat',{from:'🧠 LLM',text:reply,color:'#42e898'});
-  });
-}
-document.getElementById('llm-in').onkeydown=function(e){if(e.key==='Enter'){askLLM();e.stopPropagation()}};
-</script>
+<script src="ui/compose.js"></script>
+<script src="ui/sidebar.js"></script>
+<script src="ui/llm-ui.js"></script>
+
 <!-- log layer -->
 <script src="log/trace.js"></script>
 <script src="log/error-log.js"></script>
@@ -93,11 +33,12 @@ document.getElementById('llm-in').onkeydown=function(e){if(e.key==='Enter'){askL
 
 <!-- vendor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <!-- signaling -->
 <script src="../p2p/poll-signal.js"></script>
 
-<!-- engine modules -->
+<!-- engine -->
 <script src="engine/kanji.js"></script>
 <script src="engine/voice.js"></script>
 <script src="engine/arena.js"></script>
@@ -111,15 +52,11 @@ document.getElementById('llm-in').onkeydown=function(e){if(e.key==='Enter'){askL
 <script src="engine/bot.js"></script>
 <script src="engine/init.js"></script>
 
-<!-- net + chat -->
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<!-- net -->
 <script src="net/chat.js"></script>
 <script src="net/mqtt.js"></script>
 <script src="net/voice.js"></script>
 <script src="net/init.js"></script>
-
-<!-- sidebar -->
-<script src="ui/sidebar.js"></script>
 
 <!-- render loop -->
 <script src="loop.js"></script>
@@ -127,46 +64,6 @@ document.getElementById('llm-in').onkeydown=function(e){if(e.key==='Enter'){askL
 <!-- state machine -->
 <script src="../js/state-widget.js"></script>
 
-<script>
-(async function(){
-  trace('info','boot start','main');
-  traceState('init','config','main');
-  await loadChatConfig();
-  trace('info','config loaded: '+Object.keys(CFG).join(','),'main');
-
-  // phoneme UI
-  var c=document.getElementById('phonemes');PH_KEYS.forEach(function(k){var ph=PHONEMES[k],kj=KANJI[k];
-    var d=document.createElement('div');d.className='ph';d.id='ph-'+k;
-    d.innerHTML='<div class="ph-kanji" style="color:'+ph.color+'">'+kj.char+'</div><div class="ph-label" style="color:'+ph.color+'">'+ph.label+'</div><div class="ph-bar"><div class="ph-fill" style="background:'+ph.color+';height:0%"></div></div>';
-    c.appendChild(d)});
-
-  document.getElementById('chat-in').onkeydown=function(e){if(e.key==='Enter'){sendChat();e.stopPropagation()}};
-  document.getElementById('nick').onchange=function(){
-    if(POLL_SIG)POLL_SIG.displayName=getNick();
-    if(SPRITES.local){scene.remove(SPRITES.local);spawnLocalSprite(CHAT.myId,getNick())}
-    trace('info','nick changed: '+getNick(),'main')};
-
-  if(typeof stateWidgetInit==='function')stateWidgetInit(
-    'stateDiagram-v2\n[*]-->init\ninit-->config : loadChatConfig\nconfig-->scene : initEngine\nscene-->spawn : spawnLocalSprite\nspawn-->loop : animate 60Hz\nloop-->joining : pollSignalJoin\njoining-->connected : BroadcastChannel\nconnected-->live : mic acquired\nlive-->charging : voice sounding\ncharging-->fire : release vowel\nfire-->hit : projectile\nhit-->live : score++',
-    'init');
-
-  traceState('config','engine','main');
-  initEngine();
-  traceState('engine','net','main');
-  initNet();
-  if(typeof initSidebar==='function')initSidebar();
-  // Hook incoming chat to bot brain
-  var _origOnChat=window._onPollChat;
-  window._onPollChat=function(d){
-    if(_origOnChat)_origOnChat(d);
-    else addMsg(d.from||'?',d.text,d.color);
-    if(typeof onBotChat==='function')onBotChat(d.from,d.text);
-  };
-
-  trace('info','boot complete','main');
-  window.addEventListener('beforeunload',function(){
-    if(typeof pollSignalLeave==='function')pollSignalLeave();
-    if(typeof mqttDisconnect==='function')mqttDisconnect()});
-})();
-</script>
+<!-- boot -->
+<script src="boot.js"></script>
 </body></html>
