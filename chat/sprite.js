@@ -14,9 +14,12 @@ function createSprite(id,nick){
   if(nick){var nh=0;for(var i=0;i<nick.length;i++)nh+=nick.charCodeAt(i);
     bodyH+=((nh%20)-10)*0.02;headR+=((nh%10)-5)*0.01}
   var group=new THREE.Group();
-  // Body
-  var body=new THREE.Mesh(new THREE.CapsuleGeometry(0.2,bodyH,4,8),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.85}));
+  // Body (cylinder + sphere caps — CapsuleGeometry needs r142+)
+  var bodyMat=new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.85});
+  var body=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,bodyH,8),bodyMat);
   body.position.y=bodyH/2+0.3;group.add(body);
+  var topCap=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,4),bodyMat);topCap.position.y=bodyH+0.3;group.add(topCap);
+  var botCap=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,4),bodyMat);botCap.position.y=0.3;group.add(botCap);
   // Head
   var head=new THREE.Mesh(new THREE.SphereGeometry(headR,8,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.9}));
   head.position.y=bodyH+0.3+headR;group.add(head);
@@ -25,9 +28,9 @@ function createSprite(id,nick){
   [-0.08,0.08].forEach(function(ex){
     var eye=new THREE.Mesh(new THREE.SphereGeometry(0.04,6,6),new THREE.MeshBasicMaterial({color:eyeColor}));
     eye.position.set(ex,bodyH+0.3+headR+0.02,-headR*0.8);group.add(eye)});
-  // Arms
+  // Arms (cylinders)
   [-0.3,0.3].forEach(function(ax){
-    var arm=new THREE.Mesh(new THREE.CapsuleGeometry(limbW,0.4,3,4),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.7}));
+    var arm=new THREE.Mesh(new THREE.CylinderGeometry(limbW,limbW,0.5,4),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.7}));
     arm.position.set(ax,bodyH*0.6+0.3,0);arm.rotation.z=ax>0?-0.3:0.3;group.add(arm)});
   // Aura glow ring
   var ring=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.03,8,24),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false}));

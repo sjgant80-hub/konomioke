@@ -25,5 +25,5 @@ function updateCharge(){
       var sz=1+cl*4;ks.scale.set(sz,sz,1);ks.position.y=2+cl*1.5}
     else{ks.material.opacity=0}}
   spawnChargeVFX(cl,bt);updateParticles();updateKanjiSprites();
-  var el=document.getElementById('charge-type');if(el)el.textContent=cl>.05?bt.name+' '+Math.round(cl*100)+'%':'';
+  try{var el=document.getElementById('charge-type');if(el)el.textContent=cl>.05?bt.name+' '+Math.round(cl*100)+'%':''}catch(e){}
 }
