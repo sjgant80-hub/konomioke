@@ -7,8 +7,8 @@
 // UTILITIES
 // ─────────────────────────────────────────────────────────
 
-const $ = (sel) => document.querySelector(sel);
-const $$ = (sel) => document.querySelectorAll(sel);
+const $ = (sel) => { try { return typeof sel === 'string' ? document.querySelector(sel) : null } catch(e) { return null } };
+const $$ = (sel) => { try { return typeof sel === 'string' ? document.querySelectorAll(sel) : [] } catch(e) { return [] } };
 
 function bufToHex(buf) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
