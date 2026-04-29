@@ -9,7 +9,8 @@ function fireBlast(type,power){var bt=BLAST_TYPES[type],sz=bt.size*(.5+power);
   scene.add(mesh);var dmg=voice.energy*100*bt.dmgMul*(1+voice.coherence*CFG.arena.damage.coherenceBonus);
   blasts.push({mesh:mesh,vz:-bt.speed,type:type,dmg:dmg,power:power,life:1});
   voice.chargeLevel=0;
-  pollSignalSend({type:'blast',blastType:type,power:power})}
+  pollSignalSend({type:'blast',blastType:type,power:power});
+  if(typeof mqttPublish==='function')mqttPublish('blast',{blastType:type,power:power})}
 
 function updateBlasts(){for(var i=blasts.length-1;i>=0;i--){var b=blasts[i];b.mesh.position.z+=b.vz;b.life-=.005;b.mesh.rotation.y+=.12;
   if(Math.abs(b.mesh.position.z-target.position.z)<1.5){hitTarget(b);spawnExplosion(target.position,b.type);scene.remove(b.mesh);blasts.splice(i,1);continue}

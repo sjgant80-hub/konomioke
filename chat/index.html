@@ -47,7 +47,9 @@
 <script src="engine/init.js"></script>
 
 <!-- net + chat -->
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <script src="net/chat.js"></script>
+<script src="net/mqtt.js"></script>
 <script src="net/init.js"></script>
 
 <!-- render loop -->
@@ -84,6 +86,9 @@
   traceState('engine','net','main');
   initNet();
   trace('info','boot complete','main');
+  window.addEventListener('beforeunload',function(){
+    if(typeof pollSignalLeave==='function')pollSignalLeave();
+    if(typeof mqttDisconnect==='function')mqttDisconnect()});
 })();
 </script>
 </body></html>
