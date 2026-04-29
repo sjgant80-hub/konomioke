@@ -37,10 +37,12 @@ function initSidebar(){
       updateScoreboard(id,name,score);
     },3000);
     setInterval(publishRoomState,10000);
-    setInterval(function(){if(CURRENT_VID)_publishYT(CURRENT_VID)},5000);
-    // Flush pending + auto-sync
-    if(typeof flushPending==='function')flushPending();
-    var _sa=0;var _st=setInterval(function(){_sa++;if(CURRENT_VID||_sa>12){clearInterval(_st);return}
+    setInterval(function(){if(CURRENT_VID&&typeof _ytPublish==='function')_ytPublish()},5000);
+    // Flush pending + retry sync every 5s until video loads (max 60s)
+    if(typeof ytFlushPending==='function')ytFlushPending();
+    var _sa=0;var _st=setInterval(function(){_sa++;
+      if(typeof ytFlushPending==='function')ytFlushPending();
+      if(CURRENT_VID||_sa>12){clearInterval(_st);return}
       if(typeof ytRefresh==='function')ytRefresh()},5000);
   }).catch(function(){});
 }
