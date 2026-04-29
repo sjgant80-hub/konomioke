@@ -31,9 +31,11 @@ function onBotChat(from,text){
     // Send via MQTT so other peers see it
     if(typeof pollSignalSend==='function')pollSignalSend({type:'chat',from:'🤖 Bot',text:reply,color:'#42e898'});
     if(typeof mqttPublish==='function')mqttPublish('chat',{from:'🤖 Bot',text:reply,color:'#42e898'});
-    // Speak via formant synth (custom voice) or fallback to Web Speech
-    if(typeof formantSpeak==='function'&&FSYNTH.ctx)formantSpeak(reply);
-    else if(typeof speak==='function')speak(reply);
+    // Speak — Web Speech primary, formant fallback
+    if(window.speechSynthesis){
+      var utt=new SpeechSynthesisUtterance(reply);utt.rate=1.0;utt.pitch=1.0;
+      window.speechSynthesis.speak(utt);
+    }else if(typeof formantSpeak==='function'&&FSYNTH&&FSYNTH.ctx)formantSpeak(reply);
   }).catch(function(e){
     BOT.thinking=false;
     trace('warn','bot error: '+e.message,'bot');

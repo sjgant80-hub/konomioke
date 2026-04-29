@@ -41,9 +41,15 @@ function _doAsk(text,lc){
   llmRespond(text).then(function(reply){
     if(!reply)reply='(no response)';
     if(lc){lc.innerHTML+='<div style="color:#42e898">🧠 '+reply+'</div>';lc.scrollTop=lc.scrollHeight}
-    // Speak via formant synth
-    if(typeof formantSpeak==='function'&&typeof FSYNTH!=='undefined'&&FSYNTH.ctx)formantSpeak(reply);
-    else if(typeof speak==='function')speak(reply);
+    // Speak — Web Speech primary (natural voice), formant fallback
+    if(window.speechSynthesis){
+      var utt=new SpeechSynthesisUtterance(reply);
+      var voices=window.speechSynthesis.getVoices();
+      var v=voices.find(function(v){return v.lang.startsWith('en')&&v.name.includes('Google')})||voices.find(function(v){return v.lang.startsWith('en')})||voices[0];
+      if(v)utt.voice=v;
+      utt.rate=1.0;utt.pitch=1.0;
+      window.speechSynthesis.speak(utt);
+    }else if(typeof formantSpeak==='function'&&typeof FSYNTH!=='undefined'&&FSYNTH.ctx)formantSpeak(reply);
     if(typeof addMsg==='function')addMsg('🧠 LLM',reply,'#42e898');
     if(typeof mqttPublish==='function')mqttPublish('chat',{from:'🧠 LLM',text:reply,color:'#42e898'});
   });
