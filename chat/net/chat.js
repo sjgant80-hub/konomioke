@@ -5,16 +5,22 @@ function getNick() { return document.getElementById('nick').value.trim() || CHAT
 function ts() { return new Date().toLocaleTimeString() }
 
 function addMsg(author, text, color, system) {
+  if (system) {
+    var lp = document.getElementById('logs');
+    if (!lp) return;
+    var ld = document.createElement('div');
+    ld.className = 'log-entry';
+    ld.style.color = color || '#555';
+    ld.textContent = ts() + ' ' + text;
+    lp.appendChild(ld); lp.scrollTop = lp.scrollHeight;
+    while (lp.children.length > 100) lp.removeChild(lp.firstChild);
+    return;
+  }
   var el = document.getElementById('msgs');
   if (!el) return;
   var div = document.createElement('div');
-  if (system) {
-    div.className = 'msg sys';
-    div.innerHTML = '<span style="color:' + (color || '#555') + '">' + esc(text) + '</span>';
-  } else {
-    div.className = 'msg';
-    div.innerHTML = '<span class="author" style="color:' + (color || '#8898b4') + '">' + esc(author) + ':</span>' + esc(text);
-  }
+  div.className = 'msg';
+  div.innerHTML = '<span class="author" style="color:' + (color || '#8898b4') + '">' + esc(author) + ':</span>' + esc(text);
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
   while (el.children.length > 200) el.removeChild(el.firstChild);
