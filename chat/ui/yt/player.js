@@ -33,10 +33,13 @@ function _ytpBuild(){
 }
 
 function ytpPlay(vid,seek){
-  trace('info','yt: PLAY '+vid+' @'+Math.floor(seek||0)+'s ready='+YTP.ready,'yt');
-  if(!YTP.ready){YTP.pending={vid:vid,seek:seek||0};trace('info','yt: queued (not ready)','yt');return}
+  // Cap seek to 5 min max — if older than that, play from start
+  var s=Math.max(0,seek||0);
+  if(s>300){trace('info','yt: seek '+Math.floor(s)+'s > 5min, playing from start','yt');s=0}
+  trace('info','yt: PLAY '+vid+' @'+Math.floor(s)+'s ready='+YTP.ready,'yt');
+  if(!YTP.ready){YTP.pending={vid:vid,seek:s};trace('info','yt: queued (not ready)','yt');return}
   YTP.vid=vid;
-  YTP.player.loadVideoById({videoId:vid,startSeconds:Math.max(0,seek||0)});
+  YTP.player.loadVideoById({videoId:vid,startSeconds:s});
   try{YTP.player.unMute();YTP.player.setVolume(80)}catch(e){}
 }
 
