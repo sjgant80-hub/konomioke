@@ -1,6 +1,5 @@
 // trace.js — structured logging to log pane + state pane + BroadcastChannel
 var TRACE={entries:[],max:50,bc:null,states:[]};
-var _activeTab='msgs';
 
 (function(){
   TRACE.bc=new BroadcastChannel('konomi-trace');
@@ -8,12 +7,6 @@ var _activeTab='msgs';
   console.warn=function(){origWarn.apply(console,arguments);
     trace('warn',Array.from(arguments).map(String).join(' ').slice(0,200))};
 })();
-
-function switchChatTab(tab){
-  _activeTab=tab;
-  document.querySelectorAll('.chat-tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab)});
-  document.querySelectorAll('.chat-pane').forEach(function(p){p.classList.toggle('active',p.id===tab)});
-}
 
 function trace(level,msg,module){
   var entry={level:level||'info',msg:msg,module:module||'chat',ts:new Date().toISOString().slice(11,23)};
