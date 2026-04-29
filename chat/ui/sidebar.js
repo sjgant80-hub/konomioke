@@ -8,7 +8,10 @@ function ytLoad(){
   var vid=m?m[1]:null;
   if(!vid){document.getElementById('yt-embed').innerHTML='<div style="color:#555;font-size:8px;padding:8px">paste a youtube URL</div>';return}
   _playVid(vid);
-  if(typeof mqttPublish==='function')mqttPublish('youtube',{vid:vid});
+  // Retained message so late joiners get it immediately on subscribe
+  if(typeof MQTT_SIG!=='undefined'&&MQTT_SIG.client&&MQTT_SIG.connected)
+    MQTT_SIG.client.publish(MQTT_SIG.topic+'youtube',JSON.stringify({peerId:MQTT_SIG.myId,vid:vid,ts:Date.now()}),{qos:1,retain:true});
+  else if(typeof mqttPublish==='function')mqttPublish('youtube',{vid:vid});
   if(typeof pollSignalSend==='function')pollSignalSend({type:'youtube',vid:vid});
   trace('info','yt: playing '+vid,'sidebar');
 }
@@ -41,13 +44,11 @@ function renderScores(){
 
 // Publish full state so late joiners can sync
 function publishRoomState(){
-  if(typeof mqttPublish!=='function')return;
-  mqttPublish('state',{
-    vid:CURRENT_VID,
-    scores:SCORES,
+  if(typeof MQTT_SIG==='undefined'||!MQTT_SIG.client||!MQTT_SIG.connected)return;
+  var data={peerId:MQTT_SIG.myId,vid:CURRENT_VID,scores:SCORES,
     nick:typeof getNick==='function'?getNick():'?',
-    score:typeof myScore!=='undefined'?myScore:0
-  });
+    score:typeof myScore!=='undefined'?myScore:0,ts:Date.now()};
+  MQTT_SIG.client.publish(MQTT_SIG.topic+'state',JSON.stringify(data),{qos:0,retain:true});
 }
 
 // Handle incoming state from existing peers
