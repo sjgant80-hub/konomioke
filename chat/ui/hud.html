@@ -1,10 +1,9 @@
 <div id="hud">
   <div><div id="score">0</div><div id="charge-type"></div></div>
-  <div style="text-align:right">
-    <input id="nick" value="" placeholder="nickname" style="background:transparent;border:1px solid #333;color:#0f0;padding:2px 6px;font-size:10px;font-family:inherit;width:90px;border-radius:3px">
-    <div id="room" style="color:#0ff;font-size:10px;margin-top:2px">KONOMI</div>
-    <div id="peers" style="color:#088;font-size:10px">👥 1</div>
-    <button id="audio-cap-btn" onclick="toggleAudioCapture()" style="background:rgba(255,255,255,.06);border:1px solid #555;color:#aaa;padding:3px 8px;font-size:11px;cursor:pointer;border-radius:4px;margin-top:3px">🔊 audio</button>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span id="peers" style="color:#0ff;font-size:9px">👥 1</span>
+    <span id="room" style="color:#088;font-size:8px">KONOMI</span>
+    <input id="nick" value="" placeholder="nick" style="background:transparent;border:1px solid #333;color:#0f0;padding:2px 4px;font-size:9px;font-family:inherit;width:70px;border-radius:3px">
   </div>
 </div>
 <div id="phonemes"></div>

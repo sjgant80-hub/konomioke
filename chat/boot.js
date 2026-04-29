@@ -27,10 +27,6 @@
     d.innerHTML='<div class="ph-kanji" style="color:'+ph.color+'">'+kj.char+'</div><div class="ph-label" style="color:'+ph.color+'">'+ph.label+'</div><div class="ph-bar"><div class="ph-fill" style="background:'+ph.color+';height:0%"></div></div>';
     c.appendChild(d)});
 
-  if(typeof stateWidgetInit==='function')stateWidgetInit(
-    'stateDiagram-v2\n[*]-->init\ninit-->config\nconfig-->engine\nengine-->net\nnet-->live\nlive-->charging\ncharging-->fire\nfire-->live',
-    'init');
-
   traceState('config','engine','main');
   initEngine();
   traceState('engine','net','main');
