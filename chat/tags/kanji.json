@@ -1,0 +1,11 @@
+{
+  "_udt":"KanjiMap",
+  "phonemes":{
+    "ah":{"char":"火","name":"Fire","reading":"HI","color":"#ff4444","hex":"0xff4444","blast":"kamehameha","label":"AH"},
+    "ee":{"char":"雷","name":"Lightning","reading":"RAI","color":"#ffdd00","hex":"0xffdd00","blast":"finalflash","label":"EE"},
+    "oh":{"char":"気","name":"Spirit","reading":"KI","color":"#ffffff","hex":"0xffffff","blast":"spiritbomb","label":"OH"},
+    "oo":{"char":"水","name":"Water","reading":"SUI","color":"#aa44ff","hex":"0xaa44ff","blast":"galickgun","label":"OO"},
+    "eh":{"char":"風","name":"Wind","reading":"FŪ","color":"#ff8844","hex":"0xff8844","blast":"barrage","label":"EH"},
+    "mm":{"char":"土","name":"Earth","reading":"DO","color":"#44ffaa","hex":"0x44ffaa","blast":"kiball","label":"MM"}
+  }
+}

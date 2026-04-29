@@ -1,0 +1,25 @@
+{
+  "_udt":"VoiceConfig",
+  "sampleRate":44100,
+  "fftSize":2048,
+  "smoothing":0.8,
+  "noiseFloorMul":1.5,
+  "noiseFloorBase":0.005,
+  "chargeRate":0.08,
+  "chargeDecay":0.95,
+  "chargeMin":0.01,
+  "fireThreshold":0.2,
+  "barrageThreshold":0.15,
+  "barragePulseRate":3,
+  "coherenceGrowth":0.01,
+  "coherenceDecay":0.97,
+  "sustainThreshold":0.3,
+  "vowelRanges":{
+    "ee":{"f1Max":400,"f2Min":2000},
+    "eh":{"f1Min":400,"f1Max":650,"f2Min":1600},
+    "ah":{"f1Min":600,"f2Min":900,"f2Max":1500},
+    "oh":{"f1Min":350,"f1Max":600,"f2Max":1100},
+    "oo":{"f1Max":400,"f2Max":1000},
+    "mm":{"f1Max":350,"f2Max":1200}
+  }
+}

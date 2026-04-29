@@ -1,0 +1,10 @@
+{
+  "_udt":"ArenaConfig",
+  "scene":{"fogDensity":0.012,"starCount":3000,"floorRadius":18,"gridSize":36},
+  "camera":{"fov":60,"posY":3.5,"posZ":9,"lookY":2,"lookZ":-4,"orbitSpeed":0.003,"orbitRadius":1.5},
+  "target":{"radius":1.8,"posY":2.5,"posZ":-8,"startHP":1000,"hpScaleFactor":1.3},
+  "aura":{"radius":1,"posY":2.5,"posZ":5,"glowRadius":1.5},
+  "vortex":{"count":600,"posY":6,"posZ":-1.5,"tiltX":0.3,"spinBase":0.008,"spinVoiceMul":0.03},
+  "damage":{"comboWindow":2000,"comboMaxMul":20,"comboMulStep":0.1,"coherenceBonus":0.5},
+  "screenShake":{"dmgMul":0.02,"decay":0.9}
+}

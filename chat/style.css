@@ -1,0 +1,24 @@
+*{margin:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:'Courier New',monospace;overflow:hidden}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%}
+#hud{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;padding:8px 12px;background:linear-gradient(180deg,rgba(0,0,0,.7),transparent);pointer-events:none;font-size:10px}
+#hud>*{pointer-events:auto}
+#score{font-size:24px;color:#ff0;text-shadow:0 0 10px #f80}
+#charge-type{font-size:11px;color:#4af}
+#phonemes{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:55;display:flex;gap:6px;pointer-events:none}
+.ph{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px}
+.ph-label{font-size:9px;font-weight:bold;opacity:.5;transition:opacity .15s}
+.ph.active .ph-label{opacity:1}
+.ph-bar{width:8px;height:50px;background:#111;border:1px solid #fff1;border-radius:5px;position:relative;overflow:hidden}
+.ph-fill{position:absolute;bottom:0;left:0;right:0;border-radius:4px;transition:height .08s}
+.ph-kanji{font-size:12px;opacity:.3;transition:opacity .2s}
+.ph.active .ph-kanji{opacity:1}
+#dmgLayer{position:fixed;inset:0;z-index:60;pointer-events:none}
+.dmg{position:absolute;font-weight:bold;text-shadow:0 0 8px currentColor;animation:dmgUp 1.2s ease-out forwards;pointer-events:none}
+@keyframes dmgUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(1.8)}}
+#chat{position:fixed;left:8px;bottom:70px;z-index:56;width:260px;background:rgba(0,0,0,.75);border:1px solid #333;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+#msgs{height:140px;overflow-y:auto;padding:6px;font-size:10px;scrollbar-width:thin;scrollbar-color:#333 transparent;line-height:1.4}
+.msg{padding:1px 0;word-break:break-word}.msg .author{font-weight:bold;margin-right:4px}
+.sys{color:#555;font-style:italic}
+#chat-row{display:flex;border-top:1px solid #333}
+#chat-row input{flex:1;background:#0a0a0a;border:none;color:#fff;padding:6px 8px;font-size:10px;font-family:inherit;outline:none}
+#chat-row button{background:#ff2d75;border:none;color:#fff;padding:4px 10px;font-size:10px;cursor:pointer;font-family:inherit}

@@ -1,0 +1,11 @@
+{
+  "_udt":"BlastTypes",
+  "types":{
+    "kiball":{"color":"0x44ffaa","name":"土 Earth","dmgMul":1,"speed":0.8,"size":0.25,"vowel":"mm"},
+    "kamehameha":{"color":"0xff4444","name":"火 KAME","dmgMul":3,"speed":0.5,"size":0.4,"vowel":"ah"},
+    "finalflash":{"color":"0xffdd00","name":"雷 FLASH","dmgMul":2.5,"speed":0.6,"size":0.35,"vowel":"ee"},
+    "spiritbomb":{"color":"0xffffff","name":"気 SPIRIT","dmgMul":5,"speed":0.2,"size":0.8,"vowel":"oh"},
+    "galickgun":{"color":"0xaa44ff","name":"水 GALICK","dmgMul":2,"speed":0.55,"size":0.35,"vowel":"oo"},
+    "barrage":{"color":"0xff8844","name":"風 BARRAGE","dmgMul":0.4,"speed":1.2,"size":0.15,"vowel":"eh"}
+  }
+}

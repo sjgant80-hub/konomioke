@@ -1,34 +1,12 @@
-// blast.js — charge system, projectiles, explosions, kanji sprites
-var blasts=[],explosions=[],chargeParticles=[],kanjiSprites=[];
-var prevSounding=false,chargeType='kiball';
-var myScore=0,combo=0,lastHitTime=0,targetHP=1000,maxHP=1000;
-
-function updateCharge(){
-  if(voice.sounding){voice.chargeLevel=Math.min(1,voice.chargeLevel+voice.rms*.08);
-    if(voice.pulseRate>3)chargeType='barrage';else if(voice.vowel==='ah'&&voice.pn<.4)chargeType='kamehameha';
-    else if(voice.vowel==='ee'&&voice.pn>.6)chargeType='finalflash';else if(voice.vowel==='oh')chargeType='spiritbomb';
-    else if(voice.vowel==='oo')chargeType='galickgun';else if(!voice.vowel)chargeType='kiball';
-    if(chargeType==='barrage'&&voice.chargeLevel>.15&&Math.random()<.3)fireBlast('barrage',voice.chargeLevel*.3);
-  }else{if(prevSounding&&voice.chargeLevel>.2&&chargeType!=='barrage')fireBlast(chargeType,voice.chargeLevel);
-    voice.chargeLevel*=.95;if(voice.chargeLevel<.01)voice.chargeLevel=0}
-  prevSounding=voice.sounding;var cl=voice.chargeLevel,bt=BLAST_TYPES[chargeType]||BLAST_TYPES.kiball;
-  aura.material.color.setHex(bt.color);aura.material.opacity=cl*.25;aura.scale.setScalar(1+cl*2);auraGlow.material.opacity=cl*.12;
-  // Grow the charging kanji above the aura
-  var ks=aura.kanjiSprite;
-  if(ks){var vk=bt.vowel||'mm';
-    if(cl>.05&&kanjiTex[vk]){ks.material.map=kanjiTex[vk];ks.material.opacity=Math.min(.9,cl*1.2);ks.material.needsUpdate=true;
-      var sz=1+cl*4;ks.scale.set(sz,sz,1);ks.position.y=2+cl*1.5;ks.material.rotation=(ks.material.rotation||0)+.02}
-    else{ks.material.opacity=0}}
-  spawnChargeVFX(cl,bt);updateParticles();updateKanjiSprites();
-  var el=document.getElementById('charge-type');if(el)el.textContent=cl>.05?bt.name+' '+Math.round(cl*100)+'%':'';
-}
+// projectile.js — fire blasts, update flight, hit target, explosions, damage
+var blasts=[],explosions=[];
 
 function fireBlast(type,power){var bt=BLAST_TYPES[type],sz=bt.size*(.5+power);
   var mesh=new THREE.Mesh(new THREE.SphereGeometry(sz,12,12),new THREE.MeshBasicMaterial({color:bt.color,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false}));
   mesh.position.copy(aura.position);
   mesh.add(new THREE.Mesh(new THREE.SphereGeometry(sz*2.5,8,8),new THREE.MeshBasicMaterial({color:bt.color,transparent:true,opacity:.12,blending:THREE.AdditiveBlending,depthWrite:false})));
   var vk=bt.vowel||'mm';if(kanjiTex[vk]){var ks=new THREE.Sprite(new THREE.SpriteMaterial({map:kanjiTex[vk],blending:THREE.AdditiveBlending,transparent:true,opacity:.8,depthWrite:false}));ks.scale.set(sz*3,sz*3,1);mesh.add(ks)}
-  scene.add(mesh);var dmg=voice.energy*100*bt.dmgMul*(1+voice.coherence*.5);
+  scene.add(mesh);var dmg=voice.energy*100*bt.dmgMul*(1+voice.coherence*CFG.arena.damage.coherenceBonus);
   blasts.push({mesh:mesh,vz:-bt.speed,type:type,dmg:dmg,power:power,life:1});
   voice.chargeLevel=0;
   pollSignalSend({type:'blast',blastType:type,power:power})}
@@ -38,10 +16,12 @@ function updateBlasts(){for(var i=blasts.length-1;i>=0;i--){var b=blasts[i];b.me
   if(b.life<=0||b.mesh.position.z<-20){scene.remove(b.mesh);blasts.splice(i,1)}}}
 
 function hitTarget(b){var dmg=b.dmg*(.8+b.power*.5);var now=performance.now();
-  if(now-lastHitTime<2000)combo++;else combo=1;lastHitTime=now;dmg*=1+Math.min(combo,20)*.1;
-  targetHP=Math.max(0,targetHP-dmg);myScore+=Math.round(dmg);screenShake=Math.max(screenShake,dmg*.02);
+  if(now-lastHitTime<CFG.arena.damage.comboWindow)combo++;else combo=1;lastHitTime=now;
+  dmg*=1+Math.min(combo,CFG.arena.damage.comboMaxMul)*CFG.arena.damage.comboMulStep;
+  targetHP=Math.max(0,targetHP-dmg);myScore+=Math.round(dmg);
+  screenShake=Math.max(screenShake,dmg*CFG.arena.screenShake.dmgMul);
   var el=document.getElementById('score');if(el)el.textContent=myScore.toLocaleString();
-  if(targetHP<=0){targetHP=maxHP;maxHP=Math.round(maxHP*1.3)}
+  if(targetHP<=0){targetHP=maxHP;maxHP=Math.round(maxHP*CFG.arena.target.hpScaleFactor)}
   var hp=targetHP/maxHP;target.hpRing.material.color.setHSL(hp*.33,1,.5);target.material.opacity=.3+hp*.5;
   showDmg(dmg,b.type);pollSignalSend({type:'score',score:myScore})}
 

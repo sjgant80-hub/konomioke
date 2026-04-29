@@ -1,0 +1,10 @@
+{
+  "_udt":"ChatConfig",
+  "room":"KONOMI",
+  "maxMessages":200,
+  "maxLength":300,
+  "persistLast":10,
+  "peerHeartbeatMs":4000,
+  "peerTimeoutMs":12000,
+  "api":"https://onlybrains.onrender.com/api/chat"
+}
