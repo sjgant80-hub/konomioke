@@ -61,7 +61,7 @@ nav a:hover { background: rgba(212, 175, 55, 0.1); }
 .channel-embed { max-width: 1200px; margin: 0.5rem auto 1.5rem; padding: 0 1rem; }
 
 .video-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.2rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.2rem;
 }
 
 .video-card {
@@ -192,6 +192,21 @@ nav a:hover { background: rgba(212, 175, 55, 0.1); }
 footer {
   text-align: center; padding: 2rem 1rem; color: var(--text-dim);
   font-size: 0.7rem; border-top: 1px solid var(--border); margin-top: 2rem;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  header { padding: 1.2rem 0.8rem 0.8rem; }
+  header h1 { font-size: 1.2rem; }
+  .channel-embed { padding: 0 0.5rem; }
+  .video-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+  .video-card .caption { font-size: 0.75rem; }
+  .video-pip { width: 100%; right: 0; bottom: 200px; border-radius: 0; }
+  .ring-bars { gap: 4px; padding: 0 0.5rem 0.5rem; }
+  .ring-bar .bar-track { width: 14px; height: 60px; }
+  .metrics-row { gap: 0.8rem; font-size: 0.65rem; }
+  .orb-top-bar { padding: 0.6rem 0.8rem; }
+  .orb-top-bar .track-title { font-size: 0.75rem; }
 }
 </style>
 </head>
@@ -894,5 +909,7 @@ async function loadAllVideos() {
 
 loadAllVideos();
 </script>
+<script src="js/update-checker.js"></script>
+<script>window.addEventListener('load', () => updateChecker.init());</script>
 </body>
 </html>

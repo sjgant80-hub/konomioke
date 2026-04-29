@@ -28,7 +28,7 @@
 </div>
 
 <div class="dock">
-  <div class="pane">
+  <div class="pane mob-active" id="pane-kon">
     <div class="pane-bar kon">
       <span style="font-family:serif;font-size:11px">好</span>
       <span style="font-weight:600;letter-spacing:.1em">KONOMIOKE</span>
@@ -43,7 +43,7 @@
       allowfullscreen></iframe>
   </div>
 
-  <div class="pane">
+  <div class="pane" id="pane-mus">
     <div class="pane-bar mus">
       <span style="font-size:11px">♪</span>
       <span style="font-weight:600;letter-spacing:.1em">MOOSIC</span>
@@ -55,6 +55,18 @@
     <iframe id="frame-mus" src="https://teslasolar.github.io/moosic/grid/"
       loading="lazy" referrerpolicy="no-referrer"
       allow="autoplay *; microphone *; camera *; display-capture *; clipboard-read; clipboard-write; fullscreen *"></iframe>
+  </div>
+</div>
+
+<!-- Mobile tab bar (hidden on desktop via CSS) -->
+<div class="mob-tabs">
+  <div class="mob-tab kon active" id="tab-kon" onclick="mobSwitch('kon')">
+    <span class="tab-icon">好</span>
+    <span>KONOMIOKE</span>
+  </div>
+  <div class="mob-tab mus" id="tab-mus" onclick="mobSwitch('mus')">
+    <span class="tab-icon">♪</span>
+    <span>MOOSIC</span>
   </div>
 </div>
 
@@ -81,5 +93,17 @@ stateWidgetInit(
 );
 </script>
 <script src="js/scada-dash.js"></script>
+<script src="js/update-checker.js"></script>
+<script>
+// Mobile pane switcher
+function mobSwitch(id) {
+  ['kon','mus'].forEach(k => {
+    document.getElementById('pane-' + k).classList.toggle('mob-active', k === id);
+    document.getElementById('tab-'  + k).classList.toggle('active',     k === id);
+  });
+}
+// Init update checker after page settles
+window.addEventListener('load', () => updateChecker.init());
+</script>
 </body>
 </html>
