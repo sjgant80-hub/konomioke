@@ -1,43 +1,35 @@
-// tts.js — text-to-speech via Web Speech API, pipes audio to WebRTC
-var TTS={speaking:false,voice:null,rate:1.0,pitch:1.0};
+// tts.js — single TTS entry point, consistent voice selection
+var TTS={voice:null,ready:false,queue:[],speaking:false,rate:1.0,pitch:1.0,lang:'en-US'};
 
 function initTTS(){
-  var synth=window.speechSynthesis;
-  if(!synth){trace('warn','no speechSynthesis','tts');return}
-  // Pick a voice after they load
-  function pickVoice(){
-    var voices=synth.getVoices();
-    TTS.voice=voices.find(function(v){return v.lang.startsWith('en')&&v.name.includes('Google')})||
-      voices.find(function(v){return v.lang.startsWith('en')})||voices[0];
-    if(TTS.voice)trace('info','tts voice: '+TTS.voice.name,'tts');
+  if(!window.speechSynthesis)return;
+  function pick(){
+    var v=speechSynthesis.getVoices();
+    TTS.voice=v.find(function(x){return x.name.includes('Google')&&x.lang.startsWith('en')})||
+      v.find(function(x){return x.lang.startsWith('en')})||v[0]||null;
+    if(TTS.voice){TTS.ready=true;trace('info','tts voice: '+TTS.voice.name,'tts');_flushQueue()}
   }
-  if(synth.getVoices().length)pickVoice();
-  else synth.onvoiceschanged=pickVoice;
+  if(speechSynthesis.getVoices().length)pick();
+  speechSynthesis.onvoiceschanged=pick;
 }
 
-function speak(text,cb){
-  if(!window.speechSynthesis||TTS.speaking)return;
+function sayTTS(text,cb){
+  if(!window.speechSynthesis)return;
+  if(!TTS.ready){TTS.queue.push({text:text,cb:cb});return}
+  if(TTS.speaking){TTS.queue.push({text:text,cb:cb});return}
+  _speak(text,cb);
+}
+
+function _speak(text,cb){
+  TTS.speaking=true;
   var utt=new SpeechSynthesisUtterance(text);
   if(TTS.voice)utt.voice=TTS.voice;
-  utt.rate=TTS.rate;utt.pitch=TTS.pitch;
-  TTS.speaking=true;
-  utt.onend=function(){TTS.speaking=false;if(cb)cb()};
-  utt.onerror=function(){TTS.speaking=false};
-  window.speechSynthesis.speak(utt);
-  trace('debug','speaking: '+text.slice(0,40),'tts');
+  utt.lang=TTS.lang;utt.rate=TTS.rate;utt.pitch=TTS.pitch;
+  utt.onend=function(){TTS.speaking=false;if(cb)cb();_flushQueue()};
+  utt.onerror=function(){TTS.speaking=false;_flushQueue()};
+  speechSynthesis.speak(utt);
 }
 
-function speakToStream(text){
-  speak(text);
-  // SpeechSynthesis audio goes to default output — peers hear it
-  // via getDisplayMedia tab capture or system audio loopback.
-  // For direct WebRTC: capture destination and route.
-  if(typeof audioCtx!=='undefined'&&audioCtx){
-    try{
-      var dest=audioCtx.createMediaStreamDestination();
-      // Connect TTS to the voice analyser so blasts react to bot speech
-      var src=audioCtx.createMediaStreamSource(dest.stream);
-      src.connect(analyser);
-    }catch(e){}
-  }
+function _flushQueue(){
+  if(TTS.queue.length&&!TTS.speaking){var next=TTS.queue.shift();_speak(next.text,next.cb)}
 }
