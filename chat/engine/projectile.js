@@ -24,7 +24,8 @@ function hitTarget(b){var dmg=b.dmg*(.8+b.power*.5);var now=performance.now();
   var el=document.getElementById('score');if(el)el.textContent=myScore.toLocaleString();
   if(targetHP<=0){targetHP=maxHP;maxHP=Math.round(maxHP*CFG.arena.target.hpScaleFactor)}
   var hp=targetHP/maxHP;target.hpRing.material.color.setHSL(hp*.33,1,.5);target.material.opacity=.3+hp*.5;
-  showDmg(dmg,b.type);pollSignalSend({type:'score',score:myScore})}
+  showDmg(dmg,b.type);pollSignalSend({type:'score',score:myScore});
+  if(typeof mqttPublish==='function')mqttPublish('score',{score:myScore,from:typeof getNick==='function'?getNick():'?'})}
 
 function showDmg(amt,type){var el=document.createElement('div');el.className='dmg';
   var kj=KANJI[BLAST_TYPES[type]?.vowel||'mm'];el.textContent=(kj?kj.char+' ':'')+Math.round(amt);

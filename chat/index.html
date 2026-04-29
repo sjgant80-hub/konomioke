@@ -75,6 +75,9 @@ function toggleBot(){
 <script src="net/voice.js"></script>
 <script src="net/init.js"></script>
 
+<!-- sidebar -->
+<script src="ui/sidebar.js"></script>
+
 <!-- render loop -->
 <script src="loop.js"></script>
 
@@ -108,6 +111,7 @@ function toggleBot(){
   initEngine();
   traceState('engine','net','main');
   initNet();
+  if(typeof initSidebar==='function')initSidebar();
   // Hook incoming chat to bot brain
   var _origOnChat=window._onPollChat;
   window._onPollChat=function(d){

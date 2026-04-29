@@ -59,5 +59,9 @@ function _mqttHandle(topic,d){
   if(sub==='blast'){
     if(typeof _handleRemoteBlast==='function')_handleRemoteBlast(d)}
   if(sub==='score'){
-    trace('debug',(d.peerId?.slice(0,8)||'?')+' score:'+d.score,'mqtt')}
+    if(typeof updateScoreboard==='function')updateScoreboard(d.peerId,d.from||d.displayName,d.score);
+  }
+  if(sub==='youtube'){
+    if(typeof onRemoteYT==='function'&&d.vid)onRemoteYT(d.vid);
+  }
 }

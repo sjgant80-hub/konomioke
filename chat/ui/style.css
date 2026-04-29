@@ -32,3 +32,7 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 #chat-row{display:flex;border-top:1px solid #333}
 #chat-row input{flex:1;background:#0a0a0a;border:none;color:#fff;padding:6px 8px;font-size:10px;font-family:inherit;outline:none}
 #chat-row button{background:#ff2d75;border:none;color:#fff;padding:4px 10px;font-size:10px;cursor:pointer;font-family:inherit}
+#sidebar{position:fixed;right:8px;top:40px;bottom:70px;width:200px;z-index:56;display:flex;flex-direction:column;gap:4px}
+#yt-panel,#scoreboard,#room-info{background:rgba(0,0,0,.8);border:1px solid #222;border-radius:6px;padding:6px;overflow:hidden}
+#yt-panel{flex-shrink:0}#scoreboard{flex:1;overflow-y:auto;scrollbar-width:thin}#room-info{flex-shrink:0}
+.sb-head{font-size:7px;color:#555;font-weight:600;letter-spacing:1px;margin-bottom:3px;border-bottom:1px solid #111;padding-bottom:2px}
