@@ -20,6 +20,22 @@ function _playVid(vid){
   CURRENT_VID=vid;
   var el=document.getElementById('yt-embed');
   if(el)el.innerHTML='<iframe src="https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0" allow="autoplay" style="width:100%;height:100%;border:none"></iframe>';
+  var now=document.getElementById('yt-now');
+  if(now)now.textContent='▶ youtube.com/watch?v='+vid;
+}
+
+function ytRefresh(){
+  trace('info','yt: requesting current stream','sidebar');
+  // Ask peers what they're playing
+  if(typeof mqttPublish==='function')mqttPublish('request-state',{});
+  if(typeof pollSignalSend==='function')pollSignalSend({type:'request-state'});
+  // Also re-subscribe to get retained message
+  if(typeof MQTT_SIG!=='undefined'&&MQTT_SIG.client&&MQTT_SIG.connected){
+    MQTT_SIG.client.unsubscribe(MQTT_SIG.topic+'youtube');
+    setTimeout(function(){MQTT_SIG.client.subscribe(MQTT_SIG.topic+'youtube')},500);
+  }
+  var now=document.getElementById('yt-now');
+  if(now&&!CURRENT_VID)now.textContent='syncing...';
 }
 
 function onRemoteYT(vid){
@@ -69,7 +85,8 @@ function initSidebar(){
       updateScoreboard(id,name,score);
     },3000);
     setInterval(publishRoomState,10000);
-    // Request state from existing peers on join
-    if(typeof mqttPublish==='function')setTimeout(function(){mqttPublish('request-state',{})},2000);
+    // Auto-sync on join — pull current stream + scores
+    setTimeout(function(){ytRefresh()},3000);
+    setTimeout(function(){ytRefresh()},8000);
   }).catch(function(){});
 }

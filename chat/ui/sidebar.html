@@ -1,10 +1,16 @@
 <div id="sidebar">
   <div id="yt-panel">
-    <div class="sb-head">YT</div>
-    <div id="yt-embed" style="background:#000;aspect-ratio:16/9;border-radius:4px;overflow:hidden"></div>
-    <div id="yt-controls" style="display:flex;gap:3px;margin-top:3px">
-      <input id="yt-url" placeholder="youtube url or search..." style="flex:1;background:#111;border:1px solid #222;color:#aaa;padding:3px 6px;font-size:7px;border-radius:3px;font-family:inherit">
-      <button onclick="ytLoad()" style="background:#ff2d75;border:none;color:#fff;padding:3px 6px;font-size:7px;border-radius:3px;cursor:pointer">▶</button>
+    <div class="sb-head" style="display:flex;justify-content:space-between;align-items:center">
+      <span>YT</span>
+      <button onclick="ytRefresh()" style="background:transparent;border:1px solid #333;color:#888;padding:1px 5px;font-size:6px;cursor:pointer;border-radius:2px" title="pull current stream">↻ sync</button>
+    </div>
+    <div id="yt-embed" style="background:#000;aspect-ratio:16/9;border-radius:4px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+      <span style="color:#333;font-size:7px">no stream</span>
+    </div>
+    <div id="yt-now" style="font-size:6px;color:#444;padding:2px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis"></div>
+    <div style="display:flex;gap:2px;margin-top:2px">
+      <input id="yt-url" placeholder="paste youtube url..." style="flex:1;background:#111;border:1px solid #222;color:#aaa;padding:3px 6px;font-size:7px;border-radius:3px;font-family:inherit">
+      <button onclick="ytLoad()" style="background:#ff2d75;border:none;color:#fff;padding:3px 8px;font-size:8px;border-radius:3px;cursor:pointer" title="stream to room">📡</button>
     </div>
   </div>
   <div id="scoreboard">
