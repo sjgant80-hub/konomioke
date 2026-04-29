@@ -1,139 +1,131 @@
 stateDiagram-v2
   [*] --> init
 
-  state "BOOT SEQUENCE" as boot_seq {
-    init --> booting : page load
-
-    state "booting" as booting {
-      [*] --> p2_identity
-      p2_identity --> p3_mesh : Ed25519 keypair + IndexedDB
-      p3_mesh --> p5_fabric : WebRTC + signaling
-      p5_fabric --> p7_vocal : AudioContext + FFT + 7 rings
-      p7_vocal --> p11_tracks : pitch + harmony + noise gate
-      p11_tracks --> p13_viz : CRDT queue + LRC lyrics
-      p13_viz --> p17_rooms : Three.js orb + ring particles
-      p17_rooms --> p17_app : room-manager.js loaded
-      p17_app --> p17_boot : UI bindings + gh-config
-      p17_boot --> [*] : KCC mining layer
-    }
+  state "ENGINE BOOT" as engine_boot {
+    init --> load_templates : boot-loader.js
+    load_templates --> load_phases : 5 html templates
+    load_phases --> p2_identity : globals → identity
+    p2_identity --> p3_mesh : Ed25519 + IndexedDB
+    p3_mesh --> p5_fabric : WebRTC mesh
+    p5_fabric --> p7_vocal : AudioContext + FFT
+    p7_vocal --> p11_tracks : pitch + harmony
+    p11_tracks --> p13_viz : CRDT queue + LRC
+    p13_viz --> p17_rooms : Three.js orb
+    p17_rooms --> p17_chat : room-manager
+    p17_chat --> p17_app : chat-history
+    p17_app --> p17_boot : UI bindings
+    p17_boot --> arm_start : gh-config + KCC mining
   }
 
-  booting --> arm_start : all phases done
-
-  state "TAP TO START" as arm_start {
-    [*] --> waiting_gesture : "tap anywhere to start"
-    waiting_gesture --> auto_enter : pointerdown / keydown
-  }
+  arm_start --> tap_to_start : "tap anywhere"
+  tap_to_start --> auto_enter : pointerdown/keydown
 
   state "AUTO ENTER" as auto_enter {
-    [*] --> fabric_resume : AudioContext.resume()
-    fabric_resume --> fetch_rooms : fetchRoomTags() ≤4s
-    fetch_rooms --> find_room : parse _rooms tag from GH Issues
+    [*] --> fabric_resume
+    fabric_resume --> fetch_rooms : fetchRoomTags (3s max)
+    fetch_rooms --> pick_room
 
-    state find_room <<choice>>
-    find_room --> join_existing : room.users < 8
-    find_room --> create_overflow : all rooms full
+    state pick_room <<choice>>
+    pick_room --> join_konomi : room has space
+    pick_room --> create_overflow : all full (FIFO)
 
-    join_existing --> set_code : add user to room
-    create_overflow --> set_code : KONOMI-N (FIFO)
-    set_code --> save_tags : fire-and-forget (3s timeout)
-    save_tags --> enter_stage
+    join_konomi --> enter_stage
+    create_overflow --> enter_stage
   }
 
-  state "ROOM MANAGER" as room_mgr {
-    state "KONOMI" as r1
-    state "KONOMI-2" as r2
-    state "KONOMI-3" as r3
-
-    r1 : max 8 users
-    r1 : first user = host
-    r2 : overflow room
-    r3 : overflow room
-
-    r1 --> r2 : 8/8 full → FIFO create
-    r2 --> r3 : 8/8 full → FIFO create
-    r3 --> r1 : empty → pruned
-    r2 --> r1 : empty → pruned
+  state "ROOM SYSTEM" as rooms {
+    state "KONOMI" as r1 : max 8 users
+    state "KONOMI-2" as r2 : overflow
+    r1 --> r2 : 8/8 full
   }
 
-  auto_enter --> stage : _enterStage(code)
-  booting --> lobby : auto-enter failed
-
-  state "LOBBY" as lobby {
-    [*] --> lobby_idle
-    lobby_idle --> create_room : btn-create-room
-    lobby_idle --> join_room : btn-join-room / ?room=CODE
-    create_room --> signal_connect : signalUrl provided
-    create_room --> solo_mode : no signalUrl
-    join_room --> signal_connect
-    signal_connect --> get_mic
-    solo_mode --> get_mic
-    get_mic --> [*]
-  }
-
-  lobby --> stage : create/join room
+  auto_enter --> stage
 
   state "STAGE" as stage {
-    [*] --> stage_active
+    [*] --> render_loop
 
-    state "AUDIO PIPELINE" as audio {
-      mic_input --> noise_gate : getUserMedia
-      noise_gate --> fabric_analyser : gated signal
-      mic_input --> fabric_analyser : raw (viz always sees raw)
-      fabric_analyser --> ring_analysis : 7 vagal frequency bands
-      noise_gate --> vocal_processor : harmony + pitch
-      vocal_processor --> self_monitor : optional local playback
-      noise_gate --> webrtc_out : peer broadcast
+    state "RENDER (60Hz)" as render_loop {
+      [*] --> analyze_voice
+      analyze_voice --> update_charge
+      update_charge --> update_blasts
+      update_blasts --> update_vfx
+      update_vfx --> animate_sprites
+      animate_sprites --> render_scene
+      render_scene --> analyze_voice
     }
 
-    state "MESH" as mesh {
-      webrtc_out --> peers : RTCPeerConnection
-      peers --> peer_audio : remote streams
-      peer_audio --> fabric_analyser
-      data_channel --> chat : "konomi" channel
-      data_channel --> queue_sync : CRDT queue updates
+    state "VOICE" as voice_pipe {
+      mic_input --> fft_analyze : getUserMedia
+      fft_analyze --> f0_detect : autocorrelation
+      f0_detect --> vowel_classify : formant peaks
+      vowel_classify --> phoneme_map : ah=火 ee=雷 oh=気 oo=水 eh=風 mm=土
     }
 
-    state "RENDER LOOP" as render {
-      stage_active --> analysis_tick : 60Hz requestAnimationFrame
-      analysis_tick --> update_rings : fabric.analyze()
-      update_rings --> update_viz : Three.js orb + particles
-      update_viz --> update_ui : peer list + lyrics + progress
-      update_ui --> analysis_tick
+    state "BLAST" as blast_pipe {
+      phoneme_map --> charge : hold vowel
+      charge --> fire : release
+      fire --> projectile : Three.js sphere + kanji
+      projectile --> hit_target : collision
+      hit_target --> score : damage + combo
+      hit_target --> explosion : 12 particles
     }
 
-    state "MIC RETRY" as mic_retry {
-      [*] --> try_mic
-      try_mic --> acquired : success
-      try_mic --> wait_5s : failed
-      wait_5s --> try_mic : setInterval 5000ms
-      acquired --> [*] : clearInterval
+    state "P2P NET" as net {
+      state "LOCAL" as local : BroadcastChannel
+      state "GLOBAL" as global : MQTT wss://hivemq
+      local --> peer_join : same browser
+      global --> peer_join : cross device
+      peer_join --> spawn_sprite : createSprite(id)
+      peer_join --> chat_msg : addMsg
     }
   }
 
-  stage --> lobby : btn-leave + leaveDefaultRoom()
-  stage --> ended : close tab
+  stage --> lobby : leave
+  stage --> cleanup : tab close
 
-  state "CLEANUP" as ended {
-    [*] --> leave_room : leaveDefaultRoom(pubkey)
-    leave_room --> prune_empty : remove user from _rooms
-    prune_empty --> save_state : fire-and-forget save
-    save_state --> close_peers : mesh.leaveRoom()
-    close_peers --> [*]
+  state "CLEANUP" as cleanup {
+    [*] --> leave_room : leaveDefaultRoom
+    leave_room --> mqtt_disconnect
+    mqtt_disconnect --> bc_leave : pollSignalLeave
+    bc_leave --> [*]
   }
 
-  ended --> [*]
+  state "CHAT PANEL" as chat_panel {
+    state "MSG" as tab_msg : user messages
+    state "LOG" as tab_log : trace() entries
+    state "ERR" as tab_err : console.error capture
+    state "SM" as tab_sm : state transitions
+  }
 
-  note right of room_mgr
-    Tracked via GitHub Issue #14 (_rooms tag)
-    Synced to OnlyBrains API (background)
-    beforeunload cleans up on tab close
-    Empty rooms auto-pruned
+  state "TAG.DB" as tagdb {
+    state "konomi-config" as kc {
+      _platform --> _state_machine
+      _phases --> _rings
+      _theme --> _mining
+      _audio --> _viz
+      _mesh --> _identity
+      _tracks --> _emojis
+      _views --> _rooms
+      _chat --> _errors
+      _arena --> _sprites
+    }
+    state "engine-config" as ec {
+      _settings : pitch harmony drones viz aec noiseGate selfMonitor
+    }
+  }
+
+  cleanup --> [*]
+
+  note right of net
+    BroadcastChannel: instant same-origin
+    MQTT: wss://broker.hivemq.com:8884
+    Topic: konomi/chat/KONOMI/*
+    join/leave/chat/blast/score
   end note
 
-  note right of stage
-    Room code shown: stage-room-code
-    Default: KONOMI
-    Host: first user in room
-    Capacity: 8 per room
+  note right of rooms
+    Tracked via GH Issue #14
+    Max 8 users per room
+    FIFO overflow naming
+    Empty rooms auto-pruned
   end note
