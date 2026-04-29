@@ -31,8 +31,11 @@ function _playVid(vid,seekTo){
   if(now)now.textContent='▶ '+vid+(s>0?' @'+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'');
 }
 
+var _pendingYT=null;
 function onRemoteYT(d){
   var vid=d.vid;if(!vid)return;
+  // If sidebar not mounted yet, queue it
+  if(!document.getElementById('yt-embed')){_pendingYT=d;return}
   var seekTo=0;
   if(d.startedAt){seekTo=(Date.now()-d.startedAt)/1000}
   VID_START=d.startedAt||Date.now();
@@ -75,7 +78,9 @@ function publishRoomState(){
   MQTT_SIG.client.publish(MQTT_SIG.topic+'state',JSON.stringify(data),{qos:0,retain:true});
 }
 
+var _pendingState=null;
 function onRoomState(d){
+  if(!document.getElementById('yt-embed')){_pendingState=d;return}
   if(d.vid&&!CURRENT_VID){
     var seekTo=d.startedAt?(Date.now()-d.startedAt)/1000:0;
     VID_START=d.startedAt||Date.now();
@@ -97,6 +102,9 @@ function initSidebar(){
     setInterval(publishRoomState,10000);
     // Re-publish YT every 5s so retained msg has fresh timestamp
     setInterval(function(){if(CURRENT_VID)_publishYT(CURRENT_VID)},5000);
+    // Flush any YT that arrived before sidebar mounted
+    if(_pendingYT){onRemoteYT(_pendingYT);_pendingYT=null}
+    if(_pendingState){onRoomState(_pendingState);_pendingState=null}
     setTimeout(function(){ytRefresh()},3000);
     setTimeout(function(){ytRefresh()},8000);
   }).catch(function(){});
