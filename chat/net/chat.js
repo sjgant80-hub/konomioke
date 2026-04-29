@@ -6,13 +6,22 @@ function ts() { return new Date().toLocaleTimeString() }
 
 function addMsg(author, text, color, system) {
   var el = document.getElementById('msgs');
-  var div = document.createElement('div');
-  div.className = 'msg' + (system ? ' sys' : '');
+  if (!el) return;
   if (system) {
-    div.innerHTML = '<span class="ts">' + ts() + '</span>' + text;
-  } else {
-    div.innerHTML = '<span class="ts">' + ts() + '</span><span class="author" style="color:' + (color || '#8898b4') + '">' + esc(author) + ':</span>' + esc(text);
+    // System messages go to log pane instead
+    var logPane = document.getElementById('logs');
+    if (logPane) {
+      var ld = document.createElement('div');
+      ld.className = 'log-entry';ld.style.color = color || '#555';
+      ld.textContent = ts() + ' ' + text;
+      logPane.appendChild(ld);logPane.scrollTop = logPane.scrollHeight;
+      while (logPane.children.length > 100) logPane.removeChild(logPane.firstChild);
+    }
+    return;
   }
+  var div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = '<span class="author" style="color:' + (color || '#8898b4') + '">' + esc(author) + ':</span>' + esc(text);
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
   while (el.children.length > 200) el.removeChild(el.firstChild);

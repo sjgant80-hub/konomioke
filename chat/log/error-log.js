@@ -1,11 +1,10 @@
-// error-log.js — captures console errors, writes to _errors tag via BroadcastChannel
+// error-log.js — captures errors → errors pane + badge count
 var ERR_LOG={errors:[],maxErrors:20,bc:null};
 
 (function(){
   ERR_LOG.bc=new BroadcastChannel('konomi-errors');
   var origError=console.error;
-  console.error=function(){
-    origError.apply(console,arguments);
+  console.error=function(){origError.apply(console,arguments);
     var msg=Array.from(arguments).map(function(a){return String(a)}).join(' ').slice(0,200);
     pushError('error',msg)};
   window.addEventListener('error',function(e){
@@ -15,12 +14,17 @@ var ERR_LOG={errors:[],maxErrors:20,bc:null};
 })();
 
 function pushError(type,msg){
-  var entry={type:type,msg:msg,ts:new Date().toISOString(),page:'chat'};
+  var entry={type:type,msg:msg,ts:new Date().toISOString().slice(11,23),page:'chat'};
   ERR_LOG.errors.push(entry);
   if(ERR_LOG.errors.length>ERR_LOG.maxErrors)ERR_LOG.errors=ERR_LOG.errors.slice(-ERR_LOG.maxErrors);
-  // Show in chat
-  if(typeof addMsg==='function')addMsg(null,'⚠ '+type+': '+msg.slice(0,80),null,true);
-  // Broadcast to other tabs
+  var errPane=document.getElementById('errors');
+  if(errPane){
+    var div=document.createElement('div');div.className='err-entry';
+    div.textContent=entry.ts+' ['+entry.type+'] '+entry.msg;
+    errPane.appendChild(div);errPane.scrollTop=errPane.scrollHeight;
+    while(errPane.children.length>50)errPane.removeChild(errPane.firstChild)}
+  var badge=document.getElementById('err-count');
+  if(badge)badge.textContent=ERR_LOG.errors.length;
   if(ERR_LOG.bc)try{ERR_LOG.bc.postMessage({type:'error-log',errors:ERR_LOG.errors})}catch(e){}
 }
 
