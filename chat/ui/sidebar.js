@@ -29,11 +29,13 @@ function _playVid(vid,seekTo){
   if(el)el.innerHTML='<iframe id="yt-iframe" src="https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=1&rel=0&start='+s+'" allow="autoplay;encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
   var now=document.getElementById('yt-now');
   if(now)now.textContent='▶ '+vid+(s>0?' @'+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'');
-  // Unmute after 2s (autoplay policy requires muted start)
+  // Check if actually playing, retry if not
   setTimeout(function(){
     var iframe=document.getElementById('yt-iframe');
-    if(iframe)iframe.src=iframe.src.replace('mute=1','mute=0');
-  },2000);
+    if(!iframe)return;
+    // Reload without mute to try unmuted
+    iframe.src=iframe.src.replace('mute=1','mute=0');
+  },3000);
 }
 
 var _pendingYT=null;
@@ -110,7 +112,12 @@ function initSidebar(){
     // Flush any YT that arrived before sidebar mounted
     if(_pendingYT){onRemoteYT(_pendingYT);_pendingYT=null}
     if(_pendingState){onRoomState(_pendingState);_pendingState=null}
-    setTimeout(function(){ytRefresh()},3000);
-    setTimeout(function(){ytRefresh()},8000);
+    // Keep retrying sync until video loads
+    var _syncAttempt=0;
+    var _syncTimer=setInterval(function(){
+      _syncAttempt++;
+      if(CURRENT_VID||_syncAttempt>12){clearInterval(_syncTimer);return}
+      ytRefresh();
+    },5000);
   }).catch(function(){});
 }
