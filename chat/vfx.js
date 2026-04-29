@@ -1,4 +1,5 @@
 // vfx.js — charge particles, kanji sprites, vortex update
+var chargeParticles=[],kanjiSprites=[];
 function spawnChargeVFX(cl,bt){
   if(cl<.1||!voice.sounding)return;var pp=aura.position;
   for(var i=0;i<Math.floor(cl*4);i++){var a=Math.random()*Math.PI*2,r2=2+Math.random()*3;

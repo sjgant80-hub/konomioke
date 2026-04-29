@@ -57,17 +57,8 @@ function pollSignalSend(data) {
 }
 
 function _broadcast(data) {
-  // BroadcastChannel (same-origin tabs — instant)
+  // BroadcastChannel (same-origin tabs — instant, primary)
   if (POLL_SIG.bc) try { POLL_SIG.bc.postMessage(data) } catch (e) {}
-  // API fallback (cross-device — async)
-  try {
-    var ctrl = new AbortController();
-    setTimeout(function() { ctrl.abort() }, 3000);
-    fetch(POLL_SIG.api, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
-      body: JSON.stringify({ key: 'sig-' + POLL_SIG.room, message: JSON.stringify(data), role: 'system' })
-    }).catch(function() {});
-  } catch (e) {}
 }
 
 function _handleMsg(d) {
