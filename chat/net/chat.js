@@ -47,17 +47,7 @@ window._onPollChat = function(d) {
 
 function updatePeers() {
   var n = typeof getPollPeerCount === 'function' ? getPollPeerCount() : 0;
-  document.getElementById('peers').textContent = '👥 ' + (n + 1);
+  var el = document.getElementById('peers');
+  if (el) el.textContent = '👥 ' + (n + 1);
 }
-
-// Enter key sends
-document.getElementById('chat-in').onkeydown = function(e) { if (e.key === 'Enter') sendChat() };
-
-// Join room
-pollSignalJoin(CHAT.room, CHAT.myId, getNick());
-document.getElementById('status').textContent = '● connected';
-addMsg(null, 'joined room ' + CHAT.room, null, true);
 setInterval(updatePeers, 2000);
-
-// Update nick on poll-signal when changed
-document.getElementById('nick').onchange = function() { POLL_SIG.displayName = getNick() };
