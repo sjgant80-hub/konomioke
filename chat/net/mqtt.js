@@ -64,4 +64,10 @@ function _mqttHandle(topic,d){
   if(sub==='youtube'){
     if(typeof onRemoteYT==='function'&&d.vid)onRemoteYT(d.vid);
   }
+  if(sub==='state'){
+    if(typeof onRoomState==='function')onRoomState(d);
+  }
+  if(sub==='request-state'){
+    if(typeof publishRoomState==='function')publishRoomState();
+  }
 }

@@ -82,6 +82,15 @@ function _handleMsg(d) {
   if (d.type === 'chat') {
     if (typeof window._onPollChat === 'function') window._onPollChat(d);
   }
+  if (d.type === 'youtube') {
+    if (typeof onRemoteYT === 'function' && d.vid) onRemoteYT(d.vid);
+  }
+  if (d.type === 'state') {
+    if (typeof onRoomState === 'function') onRoomState(d);
+  }
+  if (d.type === 'request-state') {
+    if (typeof publishRoomState === 'function') publishRoomState();
+  }
 }
 
 function getPollPeerCount() { return Object.keys(POLL_SIG.peers).length }
