@@ -59,22 +59,16 @@ class KonomiApp {
     ];
 
     for (const phase of phases) {
-      const el = $(`.boot-phase[data-phase="${phase.prime}"]`);
-      el.classList.add('active');
-      el.querySelector('.phase-status').textContent = 'booting...';
+      const el = typeof $ === 'function' ? $(`.boot-phase[data-phase="${phase.prime}"]`) : null;
+      if (el) { el.classList.add('active'); var ps = el.querySelector('.phase-status'); if (ps) ps.textContent = 'booting...'; }
 
       try {
         await phase.fn();
-        el.classList.remove('active');
-        el.classList.add('done');
-        el.querySelector('.phase-status').textContent = 'ok';
+        if (el) { el.classList.remove('active'); el.classList.add('done'); var ps2 = el.querySelector('.phase-status'); if (ps2) ps2.textContent = 'ok'; }
         await this._delay(200);
       } catch (err) {
         console.error(`Phase p=${phase.prime} failed:`, err);
-        el.classList.remove('active');
-        el.classList.add('fail');
-        el.querySelector('.phase-status').textContent = err.message || 'failed';
-        // Continue booting — degrade gracefully
+        if (el) { el.classList.remove('active'); el.classList.add('fail'); var ps3 = el.querySelector('.phase-status'); if (ps3) ps3.textContent = err.message || 'failed'; }
         await this._delay(300);
       }
     }
