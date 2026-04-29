@@ -35,13 +35,13 @@ async function applyKonomiTags(){
       applied++;continue;
     }
     // Element tags: target by id or selector
-    var el=tag.target?document.querySelector(tag.target):document.getElementById(tag.tag_id);
+    var el=typeof tag.target==='string'?document.querySelector(tag.target):document.getElementById(tag.tag_id);
     if(!el)continue;
     if(tag.content)el.innerHTML=tag.content;
     if(tag.script){
       try{new Function('el',tag.script)(el)}catch(e){console.warn('tag '+tag.tag_id+':',e.message)}
     }
-    if(tag.style)Object.assign(el.style,tag.style);
+    if(tag.style&&typeof tag.style==='object')Object.assign(el.style,tag.style);
     applied++;
   }
   return applied;
