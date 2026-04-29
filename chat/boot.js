@@ -4,6 +4,19 @@
   await composeUI();
   trace('info','boot start','main');
   traceState('init','config','main');
+  // Load from tag.db (GitHub Issues) first, then local tags/ as fallback
+  if(typeof loadTagDB==='function'){
+    var tags=await loadTagDB();
+    var arena=getTag('_chat_arena');
+    if(arena){
+      if(arena.formant)Object.assign(CFG,{voice:arena.formant||{}});
+      if(arena.bot)Object.assign(CFG,{bot:arena.bot||{}});
+      if(arena.blasts)CFG.blasts=arena.blasts;
+      trace('info','tag.db: loaded _chat_arena from issue #'+(arena._issue||'?'),'main');
+    }
+    var sprites=getTag('_sprites');if(sprites)CFG.zoo=sprites;
+    trace('info','tag.db: '+Object.keys(tags).length+' tags loaded','main');
+  }
   await loadChatConfig();
   trace('info','config loaded: '+Object.keys(CFG).join(','),'main');
 
