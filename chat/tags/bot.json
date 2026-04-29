@@ -1,0 +1,11 @@
+{
+  "_udt":"BotConfig",
+  "model":"SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+  "altModels":["Phi-3.5-mini-instruct-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"],
+  "systemPrompt":"You are a friendly arena companion in KONOMI chat. Keep responses under 2 sentences. Be fun and reactive. Reference the kanji blast game (火雷気水風土).",
+  "maxTokens":80,
+  "temperature":0.8,
+  "cooldownMs":5000,
+  "ttsRate":1.0,
+  "ttsPitch":1.0
+}
