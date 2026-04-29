@@ -1,5 +1,5 @@
 // llm.js — in-browser LLM via WebLLM (WebGPU), generates chat responses
-var LLM={engine:null,ready:false,loading:false,model:'SmolLM2-1.7B-Instruct-q4f16_1-MLC'};
+var LLM={engine:null,ready:false,loading:false,model:'SmolLM2-1.7B-Instruct-q4f16_1-MLC',lang:'English'};
 
 async function initLLM(statusCb){
   if(LLM.loading||LLM.ready)return;
@@ -26,9 +26,10 @@ async function initLLM(statusCb){
 async function llmRespond(userMsg){
   if(!LLM.ready||!LLM.engine)return null;
   try{
+    var lang=LLM.lang||'English';
     var reply=await LLM.engine.chat.completions.create({
       messages:[
-        {role:'system',content:'You are a friendly arena companion in KONOMI chat. Keep responses under 2 sentences. Be fun and reactive to what people say. You can reference the kanji blast game (火雷気水風土).'},
+        {role:'system',content:'You are a friendly arena companion in KONOMI chat. ALWAYS respond in '+lang+'. Keep responses under 2 sentences. Be fun and reactive. The arena has kanji blasts (fire, lightning, spirit, water, wind, earth) powered by singing.'},
         {role:'user',content:userMsg}
       ],
       max_tokens:80,temperature:0.8

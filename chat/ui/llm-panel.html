@@ -8,6 +8,13 @@
       <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen 1.5B</option>
       <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 1B</option>
     </select>
+    <select id="llm-lang" onchange="if(typeof LLM!=='undefined')LLM.lang=this.value" style="background:#111;border:1px solid #222;color:#888;font-size:6px;padding:1px 2px;border-radius:2px;font-family:inherit;max-width:50px">
+      <option value="English">EN</option>
+      <option value="Japanese">JP</option>
+      <option value="Spanish">ES</option>
+      <option value="French">FR</option>
+      <option value="Korean">KR</option>
+    </select>
     <div id="bot-toggle" onclick="toggleBot()">OFF</div>
   </div>
   <div id="llm-voice">
