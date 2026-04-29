@@ -1,67 +1,5 @@
-// sidebar.js — YouTube player + scoreboard synced via MQTT
+// sidebar.js — scoreboard + sidebar init (YouTube moved to ui/yt/)
 var SCORES={};
-var CURRENT_VID=null;
-var VID_START=0;
-
-function ytLoad(){
-  var url=document.getElementById('yt-url').value.trim();if(!url)return;
-  var m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  var vid=m?m[1]:null;
-  if(!vid){document.getElementById('yt-embed').innerHTML='<div style="color:#555;font-size:8px;padding:8px">paste a youtube URL</div>';return}
-  VID_START=Date.now();
-  _playVid(vid,0);
-  _publishYT(vid);
-  trace('info','yt: streaming '+vid,'sidebar');
-}
-
-function _publishYT(vid){
-  var data={peerId:typeof MQTT_SIG!=='undefined'?MQTT_SIG.myId:'?',vid:vid,startedAt:VID_START,ts:Date.now()};
-  if(typeof MQTT_SIG!=='undefined'&&MQTT_SIG.client&&MQTT_SIG.connected)
-    MQTT_SIG.client.publish(MQTT_SIG.topic+'youtube',JSON.stringify(data),{qos:1,retain:true});
-  else if(typeof mqttPublish==='function')mqttPublish('youtube',data);
-  if(typeof pollSignalSend==='function')pollSignalSend(Object.assign({type:'youtube'},data));
-}
-
-function _playVid(vid,seekTo){
-  CURRENT_VID=vid;
-  var s=Math.max(0,Math.floor(seekTo||0));
-  var el=document.getElementById('yt-embed');
-  if(el)el.innerHTML='<iframe id="yt-iframe" src="https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=1&rel=0&start='+s+'" allow="autoplay;encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
-  var now=document.getElementById('yt-now');
-  if(now)now.textContent='▶ '+vid+(s>0?' @'+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'');
-  // Check if actually playing, retry if not
-  setTimeout(function(){
-    var iframe=document.getElementById('yt-iframe');
-    if(!iframe)return;
-    // Reload without mute to try unmuted
-    iframe.src=iframe.src.replace('mute=1','mute=0');
-  },3000);
-}
-
-var _pendingYT=null;
-function onRemoteYT(d){
-  var vid=d.vid;if(!vid)return;
-  // If sidebar not mounted yet, queue it
-  if(!document.getElementById('yt-embed')){_pendingYT=d;return}
-  var seekTo=0;
-  if(d.startedAt){seekTo=(Date.now()-d.startedAt)/1000}
-  VID_START=d.startedAt||Date.now();
-  _playVid(vid,seekTo);
-  var u=document.getElementById('yt-url');if(u)u.value='';
-  trace('info','yt: synced '+vid+' @'+Math.floor(seekTo)+'s','sidebar');
-}
-
-function ytRefresh(){
-  trace('info','yt: syncing...','sidebar');
-  if(typeof mqttPublish==='function')mqttPublish('request-state',{});
-  if(typeof pollSignalSend==='function')pollSignalSend({type:'request-state'});
-  if(typeof MQTT_SIG!=='undefined'&&MQTT_SIG.client&&MQTT_SIG.connected){
-    MQTT_SIG.client.unsubscribe(MQTT_SIG.topic+'youtube');
-    setTimeout(function(){MQTT_SIG.client.subscribe(MQTT_SIG.topic+'youtube')},500);
-  }
-  var now=document.getElementById('yt-now');
-  if(now&&!CURRENT_VID)now.textContent='syncing...';
-}
 
 function updateScoreboard(peerId,name,score){
   SCORES[peerId]={name:name||peerId.slice(0,8),score:score||0,ts:Date.now()};
@@ -85,21 +23,13 @@ function publishRoomState(){
   MQTT_SIG.client.publish(MQTT_SIG.topic+'state',JSON.stringify(data),{qos:0,retain:true});
 }
 
-var _pendingState=null;
-function onRoomState(d){
-  if(!document.getElementById('yt-embed')){_pendingState=d;return}
-  if(d.vid&&!CURRENT_VID){
-    var seekTo=d.startedAt?(Date.now()-d.startedAt)/1000:0;
-    VID_START=d.startedAt||Date.now();
-    _playVid(d.vid,seekTo);
-  }
-  if(d.scores){for(var k in d.scores)if(!SCORES[k])SCORES[k]=d.scores[k];renderScores()}
-}
-
 function initSidebar(){
   fetch('ui/sidebar.html?v='+Date.now()).then(function(r){return r.text()}).then(function(h){
     var mount=document.getElementById('mount-right');
     if(mount)mount.innerHTML=h;
+    // Init YT IFrame Player API
+    if(typeof ytpInit==='function')ytpInit();
+    // Score loop
     setInterval(function(){
       var id=typeof CHAT!=='undefined'?CHAT.myId:'?';
       var name=typeof getNick==='function'?getNick():id.slice(0,8);
@@ -107,17 +37,10 @@ function initSidebar(){
       updateScoreboard(id,name,score);
     },3000);
     setInterval(publishRoomState,10000);
-    // Re-publish YT every 5s so retained msg has fresh timestamp
     setInterval(function(){if(CURRENT_VID)_publishYT(CURRENT_VID)},5000);
-    // Flush any YT that arrived before sidebar mounted
-    if(_pendingYT){onRemoteYT(_pendingYT);_pendingYT=null}
-    if(_pendingState){onRoomState(_pendingState);_pendingState=null}
-    // Keep retrying sync until video loads
-    var _syncAttempt=0;
-    var _syncTimer=setInterval(function(){
-      _syncAttempt++;
-      if(CURRENT_VID||_syncAttempt>12){clearInterval(_syncTimer);return}
-      ytRefresh();
-    },5000);
+    // Flush pending + auto-sync
+    if(typeof flushPending==='function')flushPending();
+    var _sa=0;var _st=setInterval(function(){_sa++;if(CURRENT_VID||_sa>12){clearInterval(_st);return}
+      if(typeof ytRefresh==='function')ytRefresh()},5000);
   }).catch(function(){});
 }
