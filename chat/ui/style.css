@@ -20,20 +20,6 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 #dmgLayer{position:fixed;inset:0;z-index:60;pointer-events:none}
 .dmg{position:absolute;font-weight:bold;text-shadow:0 0 8px currentColor;animation:dmgUp 1.2s ease-out forwards;pointer-events:none}
 @keyframes dmgUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(1.8)}}
-/* LLM Panel */
-#llm-panel{background:rgba(0,0,0,.85);border:1px solid #1a3a1a;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;flex-shrink:0}
-#llm-header{display:flex;align-items:center;gap:4px;padding:3px 6px;border-bottom:1px solid #1a2a1a;font-size:7px}
-.llm-title{color:#42e898;font-weight:600;font-size:8px}
-#llm-status{color:#333;flex:1;font-size:6px}
-#llm-model{background:#111;border:1px solid #222;color:#888;font-size:6px;padding:1px 2px;border-radius:2px;font-family:inherit;max-width:80px}
-#bot-toggle{color:#333;font-size:7px;cursor:pointer;border:1px solid #333;padding:1px 4px;border-radius:3px}
-#llm-voice{display:flex;gap:3px;padding:2px 6px;border-bottom:1px solid #111;font-size:6px;color:#444;align-items:center}
-#llm-voice input[type=range]{width:32px;height:3px;accent-color:#42e898;vertical-align:middle}
-#llm-voice label{color:#555;display:flex;align-items:center;gap:2px}
-#llm-chat{height:70px;overflow-y:auto;padding:3px 6px;font-size:7px;scrollbar-width:thin;scrollbar-color:#1a2a1a transparent}
-.llm-input-row{display:flex;border-top:1px solid #1a2a1a}
-.llm-input-row input{flex:1;background:#060806;border:none;color:#42e898;padding:3px 6px;font-size:7px;font-family:inherit;outline:none}
-.llm-input-row button{background:#42e898;border:none;color:#000;padding:2px 6px;font-size:7px;cursor:pointer;font-family:inherit}
 /* Chat Panel */
 #chat{background:rgba(0,0,0,.85);border:1px solid #222;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0}
 #chat-tabs{display:flex;border-bottom:1px solid #181818;flex-shrink:0}
@@ -48,6 +34,14 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1}
 .err-entry{padding:1px 0;color:#ff4466;font-size:7px;border-bottom:1px solid #1a0010}
 .state-entry{padding:1px 0;font-size:7px;display:flex;gap:3px}
 .state-entry .from{color:#555}.state-entry .arrow{color:#222}.state-entry .to{color:#42e898;font-weight:600}.state-entry .mod{color:#38b5f9}
+#llm-controls{display:flex;gap:3px;padding:3px 4px;border-bottom:1px solid #181818;align-items:center;flex-shrink:0}
+#llm-controls select{background:#111;border:1px solid #222;color:#888;font-size:7px;padding:1px 2px;border-radius:2px;font-family:inherit}
+#llm-status{font-size:6px;color:#333;flex:1;text-align:right}
+#llm-chat{flex:1;overflow-y:auto;padding:3px 6px;font-size:8px;scrollbar-width:thin;scrollbar-color:#1a2a1a transparent}
+#llm-input-row{display:flex;border-top:1px solid #1a2a1a;flex-shrink:0}
+#llm-input-row input{flex:1;background:#060806;border:none;color:#42e898;padding:3px 6px;font-size:8px;font-family:inherit;outline:none}
+#llm-input-row button{background:#42e898;border:none;color:#000;padding:2px 6px;font-size:8px;cursor:pointer;font-family:inherit}
+#llm-pane{display:flex;flex-direction:column}
 #chat-row{display:flex;border-top:1px solid #222;flex-shrink:0}
 #chat-row input{flex:1;background:#060606;border:none;color:#fff;padding:4px 6px;font-size:8px;font-family:inherit;outline:none}
 #chat-row button{background:#ff2d75;border:none;color:#fff;padding:3px 8px;font-size:8px;cursor:pointer;font-family:inherit}

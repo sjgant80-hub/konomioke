@@ -10,7 +10,6 @@ async function loadComponent(url,mountId){
 async function composeUI(){
   await Promise.all([
     loadComponent('ui/hud.html','mount-hud'),
-    loadComponent('ui/llm-panel.html','mount-left-top'),
     loadComponent('ui/chat-panel.html','mount-left-bot'),
     loadComponent('ui/sidebar.html','mount-right')
   ]);
