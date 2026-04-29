@@ -17,9 +17,10 @@ function animate(){if(!running)return;requestAnimationFrame(animate);
 
 function startArena(){
   initKanjiTex();initScene();
-  // Spawn local sprite
   if(typeof spawnLocalSprite==='function')spawnLocalSprite(CHAT.myId,getNick());
-  initAudio(function(){running=true;animate()});
+  // Start render loop immediately — mic is optional
+  running=true;animate();
+  initAudio(function(){console.log('mic ready')});
   // Peer events
   window._onPollChat=function(d){addMsg(d.from||'?',d.text,d.color)};
   window._onPollPeerJoin=function(pid,name){
