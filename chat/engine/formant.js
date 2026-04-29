@@ -18,8 +18,6 @@ function initFormant(){
   FSYNTH.dest=audioCtx.createMediaStreamDestination();
   FSYNTH.master.connect(audioCtx.destination);
   FSYNTH.master.connect(FSYNTH.dest);
-  // Connect to analyser so voice rings react to bot speech
-  FSYNTH.master.connect(analyser);
   trace('info','formant synth ready f0='+FSYNTH.f0+'Hz','tts');
 }
 

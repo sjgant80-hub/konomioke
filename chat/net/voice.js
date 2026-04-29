@@ -61,5 +61,9 @@ function onRemoteAudio(peerId,stream){
   trace('info','voice: audio from '+peerId.slice(0,8),'voice');
   var audio=document.createElement('audio');
   audio.srcObject=stream;audio.autoplay=true;audio.id='audio-'+peerId;
+  audio.volume=0;
   document.body.appendChild(audio);
+  // Only unmute when user clicks unmute or when TTS is detected
+  // Keeps beeps/noise from auto-playing
+  trace('info','voice: remote audio muted (use unmute to hear peer)','voice');
 }
