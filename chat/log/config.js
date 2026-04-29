@@ -1,8 +1,8 @@
 // config.js — loads tags/*.json into CFG object, used by all modules
-var CFG={voice:{},arena:{},chat:{},kanji:{},blasts:{}};
+var CFG={voice:{},arena:{},chat:{},kanji:{},blasts:{},zoo:{}};
 
 async function loadChatConfig(){
-  var files=['voice','arena','chat','kanji','blasts'];
+  var files=['voice','arena','chat','kanji','blasts','zoo'];
   for(var f of files){
     try{var r=await fetch('tags/'+f+'.json');CFG[f]=await r.json()}catch(e){}}
   // Apply voice config
