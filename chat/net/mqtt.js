@@ -70,4 +70,9 @@ function _mqttHandle(topic,d){
   if(sub==='request-state'){
     if(typeof publishRoomState==='function')publishRoomState();
   }
+  if(sub==='cmd'){
+    if(d.type==='reload')location.reload(true);
+    if(d.type==='clear-cache'){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})}).catch(function(){});location.reload(true)}
+    if(d.type==='play'&&d.vid&&typeof onRemoteYT==='function')onRemoteYT(d);
+  }
 }
