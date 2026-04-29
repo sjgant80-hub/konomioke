@@ -1,7 +1,7 @@
 // compose.js — loads HTML components into mount points
 async function loadComponent(url,mountId){
   try{
-    var r=await fetch(url+'?v=4');if(!r.ok)return;
+    var r=await fetch(url+'?v='+Date.now());if(!r.ok)return;
     var el=document.getElementById(mountId);
     if(el)el.innerHTML=await r.text();
   }catch(e){}
