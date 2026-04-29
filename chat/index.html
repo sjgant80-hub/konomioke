@@ -35,7 +35,9 @@
 <script src="projectile.js"></script>
 <script src="vfx.js"></script>
 <script src="chat.js"></script>
+<script src="sprite.js"></script>
 <script src="loop.js"></script>
+<script src="../js/state-widget.js"></script>
 <script>
 (async function(){
   await loadChatConfig();
@@ -45,8 +47,12 @@
     d.innerHTML='<div class="ph-kanji" style="color:'+ph.color+'">'+kj.char+'</div><div class="ph-label" style="color:'+ph.color+'">'+ph.label+'</div><div class="ph-bar"><div class="ph-fill" style="background:'+ph.color+';height:0%"></div></div>';
     c.appendChild(d)});
   document.getElementById('chat-in').onkeydown=function(e){if(e.key==='Enter'){sendChat();e.stopPropagation()}};
+  if(typeof stateWidgetInit==='function')stateWidgetInit(
+    'stateDiagram-v2\n[*]-->config\nconfig-->mic : loadChatConfig\nmic-->scene : initAudio\nscene-->spawn : initScene\nspawn-->joined : spawnLocalSprite\njoined-->loop : animate 60Hz\nloop-->charging : voice sounding\ncharging-->fire : release vowel\nfire-->hit : projectile→target\nhit-->loop : score + combo',
+    'config');
   pollSignalJoin('KONOMI',CHAT.myId,getNick());
   addMsg(null,'joined KONOMI arena',null,true);
+  if(typeof highlightState==='function')highlightState('joined');
   startArena();
 })();
 </script>

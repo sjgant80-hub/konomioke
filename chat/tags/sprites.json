@@ -1,0 +1,16 @@
+{
+  "_udt":"SpriteConfig",
+  "bodyH":[0.8,1.4],
+  "headR":[0.25,0.4],
+  "limbW":[0.08,0.14],
+  "auraRing":0.5,
+  "labelScale":[1.5,0.4],
+  "breathRate":2,
+  "breathAmp":0.02,
+  "armSwing":0.8,
+  "spots":[
+    {"x":0,"z":5},{"x":-3,"z":4},{"x":3,"z":4},{"x":-5,"z":3},
+    {"x":5,"z":3},{"x":-2,"z":7},{"x":2,"z":7},{"x":0,"z":8}
+  ],
+  "zoo":"https://teslasolar.github.io/AudioFabric/zoo/"
+}
