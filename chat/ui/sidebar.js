@@ -26,9 +26,14 @@ function _playVid(vid,seekTo){
   CURRENT_VID=vid;
   var s=Math.max(0,Math.floor(seekTo||0));
   var el=document.getElementById('yt-embed');
-  if(el)el.innerHTML='<iframe src="https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0&start='+s+'" allow="autoplay" style="width:100%;height:100%;border:none"></iframe>';
+  if(el)el.innerHTML='<iframe id="yt-iframe" src="https://www.youtube.com/embed/'+vid+'?autoplay=1&mute=1&rel=0&start='+s+'" allow="autoplay;encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>';
   var now=document.getElementById('yt-now');
   if(now)now.textContent='▶ '+vid+(s>0?' @'+Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'');
+  // Unmute after 2s (autoplay policy requires muted start)
+  setTimeout(function(){
+    var iframe=document.getElementById('yt-iframe');
+    if(iframe)iframe.src=iframe.src.replace('mute=1','mute=0');
+  },2000);
 }
 
 var _pendingYT=null;
